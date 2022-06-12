@@ -4,12 +4,15 @@
   "description": "",
   "main": "_dist/main.js",
   "scripts": {
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "devDependencies": {
     "esbuild": "^0.14.43",
-    "esbuild-plugin-path-alias": "^1.0.6"
+    "esbuild-jest": "^0.5.0",
+    "esbuild-plugin-path-alias": "^1.0.6",
+    "jest": "^28.1.1"
   }
 }
