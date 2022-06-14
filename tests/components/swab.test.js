@@ -51,3 +51,17 @@ test('it can inject a void component', async () => {
 
     expect(result).toBe(expected)
 })
+
+test('it fails if the component is not defined', async () => {
+    const input = `
+<div>
+    <Card />
+</div>
+`
+
+    await expect(
+        compile(input, {
+            components: {},
+        }),
+    ).rejects.toThrow(CompilationError)
+})

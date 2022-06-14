@@ -4,6 +4,7 @@ import { visit } from 'unist-util-visit'
 import { select } from 'hast-util-select'
 
 import isUppercase from '@/helpers/isUppercase'
+import CompilationError from '@/errors/CompilationError'
 
 const defaultOptions = {
     components: {},
@@ -20,6 +21,12 @@ const components = (options = defaultOptions) => {
 
             if (!isUppercase(node.tagName.charAt(0))) {
                 return node
+            }
+
+            if (!(node.tagName in components)) {
+                throw new CompilationError(
+                    `Componenent '${node.tagName}' is not defined.`,
+                )
             }
 
             const definition = components[node.tagName]
