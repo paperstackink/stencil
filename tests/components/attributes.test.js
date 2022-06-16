@@ -1,48 +1,20 @@
 import { compile } from '@/index'
-import CompilationError from '@/errors/CompilationError'
 
-test('it can output a global value', async () => {
+test('an attribute can be outputted inside a component', async () => {
     const input = `
 <div>
-    <Card />
+    <Card text="Yo" />
 </div>
 `
     const componentDefiniton = `
 <section class="card">
-    <div>This is a {{ value }}</div>
+    <div>{{text}}</div>
 </section>
 `
     const expected = `
 <div>
     <section class="card">
-        <div>This is a card</div>
-    </section>
-</div>
-`
-
-    const result = await compile(input, {
-        components: { Card: componentDefiniton },
-        environment: { value: 'card' },
-    })
-
-    expect(result).toBe(expected)
-})
-
-test('it can output a local value', async () => {
-    const input = `
-<div>
-    <Card value="card" />
-</div>
-`
-    const componentDefiniton = `
-<section class="card">
-    <div>This is a {{ value }}</div>
-</section>
-`
-    const expected = `
-<div>
-    <section class="card">
-        <div>This is a card</div>
+        <div>Yo</div>
     </section>
 </div>
 `
@@ -55,122 +27,21 @@ test('it can output a local value', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a value in a text child', async () => {
+test('it adds an attribute to the root element if it is not outputted', async () => {
     const input = `
 <div>
-    <Card />
+    <Card class="card" />
 </div>
 `
     const componentDefiniton = `
-<section class="card">
-    <div>This is a {{ value }}</div>
+<section>
+    <div>Yo</div>
 </section>
 `
     const expected = `
 <div>
     <section class="card">
-        <div>This is a card</div>
-    </section>
-</div>
-`
-
-    const result = await compile(input, {
-        components: { Card: componentDefiniton },
-        environment: { value: 'card' },
-    })
-
-    expect(result).toBe(expected)
-})
-
-test('it can output a value in an attribute', async () => {
-    const input = `
-<div>
-    <Card />
-</div>
-`
-    const componentDefiniton = `
-<section id="{{ id }}">
-    <div>This is a card</div>
-</section>
-`
-    const expected = `
-<div>
-    <section id="card">
-        <div>This is a card</div>
-    </section>
-</div>
-`
-
-    const result = await compile(input, {
-        components: { Card: componentDefiniton },
-        environment: { id: 'card' },
-    })
-
-    expect(result).toBe(expected)
-})
-
-test('a global value can be overriden by a local value', async () => {
-    const input = `
-<div>
-    <Card value="local" />
-</div>
-`
-    const componentDefiniton = `
-<section class="card">
-    <div>{{ value }}</div>
-</section>
-`
-    const expected = `
-<div>
-    <section class="card">
-        <div>local</div>
-    </section>
-</div>
-`
-
-    const result = await compile(input, {
-        components: { Card: componentDefiniton },
-        environment: { value: 'global' },
-    })
-
-    expect(result).toBe(expected)
-})
-
-test('it will fail if the value is not defined', async () => {
-    const input = `
-<div>
-    <Card />
-</div>
-`
-    const componentDefiniton = `
-<section class="card">
-    <div>{{ value }}</div>
-</section>
-`
-
-    await expect(
-        compile(input, {
-            components: { Card: componentDefiniton },
-            environment: {},
-        }),
-    ).rejects.toThrow(CompilationError)
-})
-
-test('a multi word attribute is camelcased', async () => {
-    const input = `
-<div>
-    <Card autocorrect="true" />
-</div>
-`
-    const componentDefiniton = `
-<section class="card">
-    <div autocorrect="{{ autoCorrect }}">Text</div>
-</section>
-`
-    const expected = `
-<div>
-    <section class="card">
-        <div autocorrect="true">Text</div>
+        <div>Yo</div>
     </section>
 </div>
 `
@@ -183,21 +54,21 @@ test('a multi word attribute is camelcased', async () => {
     expect(result).toBe(expected)
 })
 
-test('it camelCases attribute names with dashes', async () => {
+test('it does not add the attribute to the root element if it is outputted', async () => {
     const input = `
 <div>
-    <Card data-some-attribute="Output" />
+    <Card class="card" text="Yo" />
 </div>
 `
     const componentDefiniton = `
-<section class="card">
-    <div>{{ dataSomeAttribute }}</div>
+<section>
+    <div>{{ text }}</div>
 </section>
 `
     const expected = `
 <div>
     <section class="card">
-        <div>Output</div>
+        <div>Yo</div>
     </section>
 </div>
 `
@@ -210,27 +81,136 @@ test('it camelCases attribute names with dashes', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a class attribute', async () => {
+test('it preserves default attributes on the root element', async () => {
     const input = `
 <div>
-    <Card />
+    <Card class="card" />
 </div>
 `
     const componentDefiniton = `
-<section class="{{ class }}">
-    <div>This is a card</div>
+<section id="card">
+    <div>Yo</div>
 </section>
 `
     const expected = `
 <div>
-    <section class="card">
-        <div>This is a card</div>
+    <section id="card" class="card">
+        <div>Yo</div>
     </section>
 </div>
 `
+
     const result = await compile(input, {
         components: { Card: componentDefiniton },
-        environment: { className: 'card' },
+        environment: {},
+    })
+
+    expect(result).toBe(expected)
+})
+
+test('it can override default attributes on the root element', async () => {
+    const input = `
+<div>
+    <Card id="new-id" />
+</div>
+`
+    const componentDefiniton = `
+<section id="default-id">
+    <div>Yo</div>
+</section>
+`
+    const expected = `
+<div>
+    <section id="new-id">
+        <div>Yo</div>
+    </section>
+</div>
+`
+
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: {},
+    })
+
+    expect(result).toBe(expected)
+})
+
+test('a user can manually merge attributes on the root element', async () => {
+    const input = `
+<div>
+    <Card class="large" />
+</div>
+`
+    const componentDefiniton = `
+<section class="white {{ class }}">
+    <div>Yo</div>
+</section>
+`
+    const expected = `
+<div>
+    <section class="white large">
+        <div>Yo</div>
+    </section>
+</div>
+`
+
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: {},
+    })
+
+    expect(result).toBe(expected)
+})
+
+test('it can detect whether "class" was used as output', async () => {
+    const input = `
+<div>
+    <Card class="card" />
+</div>
+`
+    const componentDefiniton = `
+<section>
+    <div>{{ class }}</div>
+</section>
+`
+    const expected = `
+<div>
+    <section>
+        <div>card</div>
+    </section>
+</div>
+`
+
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: {},
+    })
+
+    expect(result).toBe(expected)
+})
+
+test('it preserves the attribute on the root element if the attribute is used elsewhere', async () => {
+    const input = `
+<div>
+    <Card id="card" />
+</div>
+`
+    const componentDefiniton = `
+<section id="pre-defined-id">
+    <div>{{ id }}</div>
+</section>
+`
+    const expected = `
+<div>
+    <section id="pre-defined-id">
+        <div>card</div>
+    </section>
+</div>
+`
+
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: {},
     })
 
     expect(result).toBe(expected)

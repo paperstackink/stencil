@@ -7,7 +7,7 @@ const defaultOptions = {
     values: {},
 }
 
-const resolveExpression = (source, values) => {
+const resolveExpression = (source, values, usedValues) => {
     const pattern = /{{(?<name>\w+)?}}/g
 
     const expressions = source.matchAll(pattern)
@@ -24,10 +24,14 @@ const resolveExpression = (source, values) => {
         }
 
         if (!(name in values)) {
-            throw new CompilationError(`Value '${name}' is not defined.`)
+            const identifier = name === 'className' ? 'class' : name
+
+            throw new CompilationError(`Value '${identifier}' is not defined.`)
         }
 
-        output = source.replace(outputExpression, values[name])
+        usedValues.push(name)
+
+        output = source.replaceAll(outputExpression, values[name])
     }
 
     return output
@@ -35,11 +39,12 @@ const resolveExpression = (source, values) => {
 
 const output = (options = defaultOptions) => {
     const { values } = options
+    const usedValues = []
 
     return (tree, vfile) => {
         visit(tree, (node) => {
             if (node.type === 'text') {
-                node.value = resolveExpression(node.value, values)
+                node.value = resolveExpression(node.value, values, usedValues)
             }
 
             if (node.type === 'element') {
@@ -51,10 +56,18 @@ const output = (options = defaultOptions) => {
 
                         if (Array.isArray(value)) {
                             newValue = value.map((value) => {
-                                return resolveExpression(value, values)
+                                return resolveExpression(
+                                    value,
+                                    values,
+                                    usedValues,
+                                )
                             })
                         } else if (typeof value === 'string') {
-                            newValue = resolveExpression(value, values)
+                            newValue = resolveExpression(
+                                value,
+                                values,
+                                usedValues,
+                            )
                         }
 
                         return [name, newValue]
@@ -62,6 +75,13 @@ const output = (options = defaultOptions) => {
                 )
 
                 node.properties = Object.fromEntries(newPropertiesAsArray)
+            }
+
+            if (usedValues.length > 0) {
+                tree.meta = {
+                    ...(tree.meta ? tree.meta : {}),
+                    usedValues,
+                }
             }
         })
     }

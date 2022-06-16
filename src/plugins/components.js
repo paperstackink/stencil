@@ -87,7 +87,25 @@ const components = (options = defaultOptions) => {
             // Get the actual root node
             const component = select(':first-child', transformedComponentTree)
 
-            parent.children.splice(1, 1, component)
+            // Filter out attributes that have been outputted
+            const usedValues =
+                transformedComponentTree.meta &&
+                transformedComponentTree.meta.usedValues
+                    ? transformedComponentTree.meta.usedValues
+                    : []
+
+            const filteredAttributes = Object.fromEntries(
+                Object.entries(attributes).filter(([key]) => {
+                    return !usedValues.includes(key)
+                }),
+            )
+
+            const newComponent = {
+                ...component,
+                properties: { ...component.properties, ...filteredAttributes },
+            }
+
+            parent.children.splice(1, 1, newComponent)
 
             return [SKIP, index]
         })

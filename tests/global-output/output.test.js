@@ -13,11 +13,11 @@ test('it can output values in text elements', async () => {
 })
 
 test('it can output values in attributes', async () => {
-    const input = `<span class="{{ class }}">Text</span>`
-    const expected = `<span class="text-red">Text</span>`
+    const input = `<span id="{{ id }}">Text</span>`
+    const expected = `<span id="headline">Text</span>`
 
     const result = await compile(input, {
-        environment: { class: 'text-red' },
+        environment: { id: 'headline' },
     })
 
     expect(result).toBe(expected)
@@ -39,7 +39,7 @@ test('it can output multiple values in different attributes', async () => {
     const expected = `<span class="text-red" id="text-element">Text</span>`
 
     const result = await compile(input, {
-        environment: { class: 'text-red', id: 'text-element' },
+        environment: { className: 'text-red', id: 'text-element' },
     })
 
     expect(result).toBe(expected)
@@ -147,6 +147,17 @@ test('it ignores attributes with no value', async () => {
 
     const result = await compile(input, {
         environment: {},
+    })
+
+    expect(result).toBe(expected)
+})
+
+test('it replaces multiple instances of a value being outputted in the same element', async () => {
+    const input = `<span>{{ value }} and {{ value }}</span>`
+    const expected = `<span>Yo and Yo</span>`
+
+    const result = await compile(input, {
+        environment: { value: 'Yo' },
     })
 
     expect(result).toBe(expected)

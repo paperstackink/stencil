@@ -8,7 +8,9 @@ const removeWhitespaceInOutputExpressions = (input) => {
         const name = groups.name
         const outputExpression = match[0]
 
-        output = output.replace(outputExpression, `{{${name}}}`)
+        const cleanedName = name === 'class' ? 'className' : name
+
+        output = output.replace(outputExpression, `{{${cleanedName}}}`)
     }
 
     return output
