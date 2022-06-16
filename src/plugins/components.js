@@ -5,6 +5,9 @@ import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
 
+import output from '@/plugins/output'
+
+import conform from '@/helpers/conformer'
 import afterLast from '@/helpers/afterLast'
 import isUppercase from '@/helpers/isUppercase'
 import findDuplicates from '@/helpers/findDuplicates'
@@ -30,7 +33,7 @@ const defaultOptions = {
 }
 
 const components = (options = defaultOptions) => {
-    let { components } = options
+    let { components, environment } = options
 
     const duplicateNames = findDuplicateComponentNames(components)
 
@@ -63,7 +66,7 @@ const components = (options = defaultOptions) => {
             // When parsing the component definition it wraps it's in a `root` element.
             const componentTree = unified()
                 .use(parse, { fragment: true })
-                .parse(definition.trim()) // Trim so that no `text` nodes with whitespace are created
+                .parse(conform(definition.trim())) // Trim so that no `text` nodes with whitespace are created
 
             if (componentTree.children.length > 1) {
                 throw new CompilationError(
@@ -71,8 +74,18 @@ const components = (options = defaultOptions) => {
                 )
             }
 
+            const attributes = node.properties
+
+            // When we run 'parse' above it only executes the 'parse' phase of the lifecycle
+            // We have to explicitly call 'runSync' to get it to run plugins on the tree
+            const transformedComponentTree = unified()
+                .use(output, {
+                    values: { ...environment, ...attributes },
+                })
+                .runSync(componentTree)
+
             // Get the actual root node
-            const component = select(':first-child', componentTree)
+            const component = select(':first-child', transformedComponentTree)
 
             parent.children.splice(1, 1, component)
 

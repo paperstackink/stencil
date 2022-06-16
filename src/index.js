@@ -6,7 +6,7 @@ import format from 'rehype-format'
 import conform from '@/helpers/conformer'
 
 import components from '@/plugins/components'
-import globalOutput from '@/plugins/global-output'
+import output from '@/plugins/output'
 
 const defaultContext = {
     components: {},
@@ -21,11 +21,12 @@ export const compile = async (input, providedContext = defaultContext) => {
 
     const result = await unified()
         .use(parse, { fragment: true })
-        .use(globalOutput, {
+        .use(output, {
             values: context.environment,
         })
         .use(components, {
             components: context.components,
+            environment: context.environment,
         })
         .use(format, {
             indent: 4,

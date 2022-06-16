@@ -33,7 +33,7 @@ const resolveExpression = (source, values) => {
     return output
 }
 
-const globalOutput = (options = defaultOptions) => {
+const output = (options = defaultOptions) => {
     const { values } = options
 
     return (tree, vfile) => {
@@ -67,4 +67,4 @@ const globalOutput = (options = defaultOptions) => {
     }
 }
 
-export default globalOutput
+export default output
