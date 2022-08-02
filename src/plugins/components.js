@@ -5,6 +5,7 @@ import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
 
+import slots from '@/plugins/slots'
 import output from '@/plugins/output'
 
 import conform from '@/helpers/conformer'
@@ -48,11 +49,15 @@ const components = (options = defaultOptions) => {
     return (tree, vfile) => {
         visit(tree, 'element', (node, index, parent) => {
             if (node.type !== 'element') {
-                return node
+                return
             }
 
             if (!isUppercase(node.tagName.charAt(0))) {
-                return node
+                return
+            }
+
+            if (node.tagName === 'Fragment') {
+                return
             }
 
             if (!(node.tagName in components)) {
@@ -81,6 +86,11 @@ const components = (options = defaultOptions) => {
             const transformedComponentTree = unified()
                 .use(output, {
                     values: { ...environment, ...attributes },
+                })
+                .use(slots, {
+                    slots: {
+                        default: node.children,
+                    },
                 })
                 .runSync(componentTree)
 

@@ -5,8 +5,9 @@ import format from 'rehype-format'
 
 import conform from '@/helpers/conformer'
 
-import components from '@/plugins/components'
 import output from '@/plugins/output'
+import fragments from '@/plugins/fragments'
+import components from '@/plugins/components'
 
 const defaultContext = {
     components: {},
@@ -28,6 +29,7 @@ export const compile = async (input, providedContext = defaultContext) => {
             components: context.components,
             environment: context.environment,
         })
+        .use(fragments)
         .use(format, {
             indent: 4,
         })
