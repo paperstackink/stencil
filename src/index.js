@@ -14,14 +14,26 @@ const defaultContext = {
     environment: {},
 }
 
-export const compile = async (input, providedContext = defaultContext) => {
+const defaultOptions = {
+    preserveSkeleton: false,
+}
+
+export const compile = async (
+    input,
+    providedContext = defaultContext,
+    providedOptions = defaultOptions,
+) => {
     const context = {
         ...defaultContext,
         ...providedContext,
     }
 
+    const parseOptions = providedOptions.preserveSkeleton
+        ? {}
+        : { fragment: true }
+
     const result = await unified()
-        .use(parse, { fragment: true })
+        .use(parse, parseOptions)
         .use(output, {
             values: context.environment,
         })

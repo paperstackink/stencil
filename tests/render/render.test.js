@@ -39,3 +39,36 @@ test('it ignores Fragment', async () => {
 
     expect(result).toBe(expected)
 })
+
+test('it can preserve html, head and body tags', async () => {
+    const input = `
+<html>
+    <head>
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <h1>Headline</h1>
+    </body>
+</html>
+`
+    const expected = `
+<html>
+    <head>
+        <meta charset="UTF-8" />
+    </head>
+    <body>
+        <h1>Headline</h1>
+    </body>
+</html>
+`
+
+    const result = await compile(
+        input,
+        {},
+        {
+            preserveSkeleton: true,
+        },
+    )
+
+    expect(result).toBe(expected)
+})
