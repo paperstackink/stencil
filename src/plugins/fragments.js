@@ -1,5 +1,4 @@
-import { SKIP } from 'unified'
-import { visit } from 'unist-util-visit'
+import { visit, SKIP } from 'unist-util-visit'
 
 const fragments = () => {
     return (tree, vfile) => {

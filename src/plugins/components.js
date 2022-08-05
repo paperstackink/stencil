@@ -1,6 +1,6 @@
-import { unified, SKIP } from 'unified'
+import { unified } from 'unified'
 import parse from 'rehype-parse-ns'
-import { visit } from 'unist-util-visit'
+import { visit, SKIP } from 'unist-util-visit'
 import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
