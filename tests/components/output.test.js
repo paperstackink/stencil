@@ -235,3 +235,29 @@ test('it can output a class attribute', async () => {
 
     expect(result).toBe(expected)
 })
+
+test('it can output a class attribute with multiple values', async () => {
+    const input = `
+<div>
+    <Card class="sm:small lg:large" />
+</div>
+`
+    const componentDefiniton = `
+<section class="elevated {{ class }}">
+    <div>This is a card</div>
+</section>
+`
+    const expected = `
+<div>
+    <section class="elevated sm:small lg:large">
+        <div>This is a card</div>
+    </section>
+</div>
+`
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: {},
+    })
+
+    expect(result).toBe(expected)
+})

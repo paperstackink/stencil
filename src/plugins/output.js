@@ -30,7 +30,13 @@ const resolveExpression = (source, values, usedValues) => {
 
         usedValues.push(name)
 
-        output = source.replaceAll(outputExpression, values[name])
+        let value = values[name]
+
+        if (Array.isArray(value)) {
+            value = value.join(' ')
+        }
+
+        output = source.replaceAll(outputExpression, value)
     }
 
     return output
@@ -61,6 +67,8 @@ const output = (options = defaultOptions) => {
                                     usedValues,
                                 )
                             })
+                            // console.log('XXXXXXXXXXXXX Value:', value)
+                            // console.log('XXXXXXXXXXXXX New value:', newValue)
                         } else if (typeof value === 'string') {
                             newValue = resolveExpression(
                                 value,
