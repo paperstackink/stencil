@@ -115,7 +115,7 @@ const components = (options = defaultOptions) => {
                 properties: { ...component.properties, ...filteredAttributes },
             }
 
-            parent.children.splice(1, 1, newComponent)
+            parent.children.splice(index, 1, newComponent)
 
             return [SKIP, index]
         })
