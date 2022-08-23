@@ -162,3 +162,37 @@ test('it replaces multiple instances of a value being outputted in the same elem
 
     expect(result).toBe(expected)
 })
+
+test('it outputs an html string as html', async () => {
+    const input = `<div>Text. {{ content }} Text</div>`
+    const expected = `
+<div>Text.
+    <p>HTML</p>
+    <p>More HTML</p>Text
+</div>
+`
+
+    const result = await compile(input, {
+        environment: { content: '<p>HTML</p><p>More HTML</p>' },
+    })
+
+    expect(result).toBe(expected)
+})
+
+test('it can inject both a regular string and html', async () => {
+    const input = `<div>{{ title }}{{ content }}{{title}}</div>`
+    const expected = `
+<div>Title
+    <p>HTML</p>Title
+</div>
+`
+
+    const result = await compile(input, {
+        environment: {
+            title: 'Title',
+            content: '<p>HTML</p>',
+        },
+    })
+
+    expect(result).toBe(expected)
+})
