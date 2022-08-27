@@ -10,6 +10,7 @@ import output from '@/plugins/output'
 
 import conform from '@/helpers/conformer'
 import afterLast from '@/helpers/afterLast'
+import isDocument from '@/helpers/isDocument'
 import isUppercase from '@/helpers/isUppercase'
 import findDuplicates from '@/helpers/findDuplicates'
 
@@ -67,11 +68,12 @@ const components = (options = defaultOptions) => {
             }
 
             const definition = components[node.tagName]
+            const conformedDefinition = conform(definition.trim()) // Trim so that no `text` nodes with whitespace are created
 
             // When parsing the component definition it wraps it's in a `root` element.
             const componentTree = unified()
-                .use(parse, { fragment: true })
-                .parse(conform(definition.trim())) // Trim so that no `text` nodes with whitespace are created
+                .use(parse, { fragment: !isDocument(conformedDefinition) })
+                .parse(conformedDefinition)
 
             if (componentTree.children.length > 1) {
                 throw new CompilationError(

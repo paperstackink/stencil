@@ -247,3 +247,29 @@ test('it fails if there are more than 1 root element in a component definition',
         }),
     ).rejects.toThrow(CompilationError)
 })
+
+test('it can inject a full html document', async () => {
+    const input = `<Document />`
+    const componentDefiniton = `
+<html>
+    <head>
+        <title>Document</title>
+    </head>
+    <body></body>
+</html>
+`
+    const expected = `
+<html>
+    <head>
+        <title>Document</title>
+    </head>
+    <body></body>
+</html>
+`
+
+    const result = await compile(input, {
+        components: { Document: componentDefiniton },
+    })
+
+    expect(result).toBe(expected)
+})

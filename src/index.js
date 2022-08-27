@@ -4,6 +4,7 @@ import stringify from 'rehype-stringify'
 import format from 'rehype-format'
 
 import conform from '@/helpers/conformer'
+import isDocument from '@/helpers/isDocument'
 
 import output from '@/plugins/output'
 import fragments from '@/plugins/fragments'
@@ -14,26 +15,18 @@ const defaultContext = {
     environment: {},
 }
 
-const defaultOptions = {
-    preserveSkeleton: false,
-}
-
-export const compile = async (
-    input,
-    providedContext = defaultContext,
-    providedOptions = defaultOptions,
-) => {
+export const compile = async (input, providedContext = defaultContext) => {
     const context = {
         ...defaultContext,
         ...providedContext,
     }
 
-    const parseOptions = providedOptions.preserveSkeleton
-        ? {}
-        : { fragment: true }
+    const conformedInput = conform(input)
 
     const result = await unified()
-        .use(parse, parseOptions)
+        .use(parse, {
+            fragment: !isDocument(conformedInput),
+        })
         .use(output, {
             values: context.environment,
         })
@@ -48,7 +41,7 @@ export const compile = async (
         .use(stringify, {
             closeSelfClosing: true,
         })
-        .process(conform(input))
+        .process(conformedInput)
 
     return result.toString()
 }
