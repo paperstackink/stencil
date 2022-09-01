@@ -1,17 +1,6 @@
 import { compile } from '@/index'
 import CompilationError from '@/errors/CompilationError'
 
-test('it can output values in text elements', async () => {
-    const input = `<span>{{ value }}</span>`
-    const expected = `<span>Outputted text</span>`
-
-    const result = await compile(input, {
-        environment: { value: 'Outputted text' },
-    })
-
-    expect(result).toBe(expected)
-})
-
 test('it can output values in attributes', async () => {
     const input = `<span id="{{ id }}">Text</span>`
     const expected = `<span id="headline">Text</span>`
@@ -56,7 +45,7 @@ test('it can output the same value multiple times', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output values concatenated to an existing string', async () => {
+test('it can output values concatenated to an existing attribute', async () => {
     const input = `<span class="text-{{ size }}">Text</span>`
     const expected = `<span class="text-large">Text</span>`
 
@@ -73,26 +62,6 @@ test('it fails if the value has not been defined', async () => {
     await expect(
         compile(input, {
             environment: {},
-        }),
-    ).rejects.toThrow(CompilationError)
-})
-
-test('it fails if the output expression is empty', async () => {
-    const input = `<span class="{{  }}">Text</span>`
-
-    await expect(
-        compile(input, {
-            environment: {},
-        }),
-    ).rejects.toThrow(CompilationError)
-})
-
-test('it fails if there are nested output expressions', async () => {
-    const input = `<span class="{{ {{ value }} }}">Text</span>`
-
-    await expect(
-        compile(input, {
-            environment: { class: 'text' },
         }),
     ).rejects.toThrow(CompilationError)
 })
@@ -147,51 +116,6 @@ test('it ignores attributes with no value', async () => {
 
     const result = await compile(input, {
         environment: {},
-    })
-
-    expect(result).toBe(expected)
-})
-
-test('it replaces multiple instances of a value being outputted in the same element', async () => {
-    const input = `<span>{{ value }} and {{ value }}</span>`
-    const expected = `<span>Yo and Yo</span>`
-
-    const result = await compile(input, {
-        environment: { value: 'Yo' },
-    })
-
-    expect(result).toBe(expected)
-})
-
-test('it outputs an html string as html', async () => {
-    const input = `<div>Text. {{ content }} Text</div>`
-    const expected = `
-<div>Text.
-    <p>HTML</p>
-    <p>More HTML</p>Text
-</div>
-`
-
-    const result = await compile(input, {
-        environment: { content: '<p>HTML</p><p>More HTML</p>' },
-    })
-
-    expect(result).toBe(expected)
-})
-
-test('it can inject both a regular string and html', async () => {
-    const input = `<div>{{ title }}{{ content }}{{title}}</div>`
-    const expected = `
-<div>Title
-    <p>HTML</p>Title
-</div>
-`
-
-    const result = await compile(input, {
-        environment: {
-            title: 'Title',
-            content: '<p>HTML</p>',
-        },
     })
 
     expect(result).toBe(expected)
