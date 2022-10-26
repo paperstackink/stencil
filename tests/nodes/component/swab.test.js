@@ -24,7 +24,7 @@ test('it can inject a normal component', async () => {
         components: { Card: componentDefiniton },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })
 
 test('it can inject a void component', async () => {
@@ -50,7 +50,7 @@ test('it can inject a void component', async () => {
         components: { Card: componentDefiniton },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })
 
 test('it fails if the component is not defined', async () => {
@@ -86,7 +86,7 @@ test('it does not compile an html element with the same name as a component', as
         components: { button: componentDefiniton },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })
 
 test('it does not compile a component with a lowercase name', async () => {
@@ -110,7 +110,7 @@ test('it does not compile a component with a lowercase name', async () => {
         components: { card: componentDefiniton },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })
 
 test('it can compile a nested component', async () => {
@@ -146,7 +146,7 @@ test('it can compile a nested component', async () => {
         },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })
 
 test('it can compile a component in a nested folder', async () => {
@@ -172,7 +172,7 @@ test('it can compile a component in a nested folder', async () => {
         components: { 'Theme/Card': componentDefiniton },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })
 
 test('it can compile a component in deeply a nested folder', async () => {
@@ -198,7 +198,7 @@ test('it can compile a component in deeply a nested folder', async () => {
         components: { 'Deeply/Nested/Card': componentDefiniton },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })
 
 test('it fails if there are multiple components with the same name', async () => {
@@ -271,5 +271,5 @@ test('it can inject a full html document', async () => {
         components: { Document: componentDefiniton },
     })
 
-    expect(result).toBe(expected)
+    expect(result).toEqualIgnoringWhitespace(expected)
 })

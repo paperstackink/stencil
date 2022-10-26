@@ -1,26 +1,21 @@
-import flatMap from 'unist-util-flatmap'
+import compileNode from '@/language/compileNode'
 
-import match from '@/helpers/match'
+const compileRootNode = (node, context) => {
+    const children = node.children.flatMap(childNode =>
+        compileNode(childNode, context),
+    )
 
-import compileTextNode from '@/language/compileTextNode'
-import compileElementOrComponentNode from '@/language/compileElementOrComponentNode'
-
-const defaultOptions = {
-    values: {},
+    return { ...node, children }
 }
 
-export default function (options = defaultOptions) {
-    const { values } = options
-
-    return (tree, vfile) => {
-        flatMap(tree, (node, index, parent) => {
-            const compiler = match(node.type, {
-                text: compileTextNode,
-                element: compileElementOrComponentNode,
-                default: (node) => [node],
-            })
-
-            return compiler(node, values)
-        })
-    }
+const defaultContext = {
+    environment: {},
+    components: {},
+    slots: {},
 }
+
+const plugin = (context = defaultContext) => {
+    return root => compileRootNode(root, context)
+}
+
+export default plugin

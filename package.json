@@ -21,8 +21,6 @@
     "rehype-format": "^4.0.1",
     "rehype-parse-ns": "^8.0.5",
     "rehype-stringify": "^9.0.3",
-    "unified": "^10.1.2",
-    "unist-util-flatmap": "^1.0.0",
-    "unist-util-visit": "^4.1.0"
+    "unified": "^10.1.2"
   }
 }

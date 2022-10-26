@@ -5,7 +5,7 @@ test('it can replace an expression with no whitespace', () => {
     const input = `This is a {{type}}`
     const expected = `This is a string`
 
-    const result = replaceExpressionWithValue(input, {
+    const [result] = replaceExpressionWithValue(input, {
         type: 'string',
     })
 
@@ -16,7 +16,7 @@ test('it can replace an expression with spaces', () => {
     const input = `This is a {{ type }}`
     const expected = `This is a string`
 
-    const result = replaceExpressionWithValue(input, {
+    const [result] = replaceExpressionWithValue(input, {
         type: 'string',
     })
 
@@ -27,18 +27,30 @@ test('it can replace an expression with a lot of whitespace', () => {
     const input = `This is a {{      type   }}`
     const expected = `This is a string`
 
-    const result = replaceExpressionWithValue(input, {
+    const [result] = replaceExpressionWithValue(input, {
         type: 'string',
     })
 
     expect(result).toBe(expected)
 })
 
+test('it returns the values it used', () => {
+    const input = `This is a {{ type }}`
+
+    const [_, unusedValues] = replaceExpressionWithValue(input, {
+        type: 'string',
+        unused: 'value',
+    })
+
+    expect(unusedValues.length).toBe(1)
+    expect(unusedValues).toContain('type')
+})
+
 test('it can output a value multiple times', () => {
     const input = `This is a {{ type }} of type {{ type }}`
     const expected = `This is a string of type string`
 
-    const result = replaceExpressionWithValue(input, {
+    const [result] = replaceExpressionWithValue(input, {
         type: 'string',
     })
 

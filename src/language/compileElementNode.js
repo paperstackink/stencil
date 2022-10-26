@@ -1,23 +1,19 @@
-import replaceExpressionWithValue from '@/helpers/replaceExpressionWithValue'
+import compileNode from '@/language/compileNode'
+import compileAttributes from '@/language/compileAttributes'
 
-export default function (node, values) {
-    const properties = Object.fromEntries(
-        Object.entries(node.properties).map(([name, value]) => {
-            let newValue = value
+export default function (node, context) {
+    const newNode = { ...node }
+    const [properties, usedValues] = compileAttributes(node.properties, context)
 
-            if (Array.isArray(value)) {
-                newValue = value.map(value => {
-                    return replaceExpressionWithValue(value, values)
-                })
-            } else if (typeof value === 'string') {
-                newValue = replaceExpressionWithValue(value, values)
-            }
+    newNode.meta = {
+        usedValues,
+    }
 
-            return [name, newValue]
-        }),
+    newNode.properties = properties
+
+    newNode.children = newNode.children.flatMap(childNode =>
+        compileNode(childNode, context),
     )
 
-    node.properties = properties
-
-    return [node]
+    return [newNode]
 }

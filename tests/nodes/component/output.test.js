@@ -109,6 +109,64 @@ test('it can output a value in an attribute', async () => {
     expect(result).toBe(expected)
 })
 
+test('it can output a value in a default slot', async () => {
+    const input = `
+<div>
+    <Card default="Yo" />
+</div>
+`
+    const componentDefiniton = `
+<section>
+    <slot>
+        <p>{{ default }}</p>
+    </slot>
+</section>
+`
+    const expected = `
+<div>
+    <section>
+        <p>Yo</p>
+    </section>
+</div>
+`
+
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: {},
+    })
+
+    expect(result).toBe(expected)
+})
+
+test('it can output a value in a passed slot', async () => {
+    const input = `
+<div>
+    <Card>
+        <p>{{ value }}</p>
+    </Card>
+</div>
+`
+    const componentDefiniton = `
+<section>
+    <slot />
+</section>
+`
+    const expected = `
+<div>
+    <section>
+        <p>Yo</p>
+    </section>
+</div>
+`
+
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: { value: 'Yo' },
+    })
+
+    expect(result).toBe(expected)
+})
+
 test('a global value can be overriden by a local value', async () => {
     const input = `
 <div>

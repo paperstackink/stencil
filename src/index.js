@@ -6,9 +6,6 @@ import format from 'rehype-format'
 import conform from '@/helpers/conformer'
 import isDocument from '@/helpers/isDocument'
 
-// import output from '@/plugins/output'
-import fragments from '@/plugins/fragments'
-// import components from '@/plugins/components'
 import templates from '@/language/templates'
 
 const defaultContext = {
@@ -29,9 +26,9 @@ export const compile = async (input, providedContext = defaultContext) => {
             fragment: !isDocument(conformedInput),
         })
         .use(templates, {
-            values: context.environment,
+            environment: context.environment,
+            components: context.components,
         })
-        // .use(fragments)
         .use(format, {
             indent: 4,
         })

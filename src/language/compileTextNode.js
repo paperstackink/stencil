@@ -5,29 +5,49 @@ import isHtml from '@/helpers/isHtml'
 import replaceExpressionWithValue from '@/helpers/replaceExpressionWithValue'
 
 const stringToNodesWithResolvedExpressions = (source, values) => {
+    let usedValues = []
     const pattern = /({{\w+}})/g
 
     const parts = source.split(pattern)
-    const resolvedParts = parts.map((part) =>
-        replaceExpressionWithValue(part, values),
-    )
+    const resolvedParts = parts.map(part => {
+        const [result, usedValuesInExpression] = replaceExpressionWithValue(
+            part,
+            values,
+        )
 
-    return resolvedParts
+        usedValues = [...usedValues, ...usedValuesInExpression]
+
+        return result
+    })
+
+    const result = resolvedParts
         .filter(part => part)
         .map(part => {
             if (isHtml(part)) {
-                return unified().use(parse, { fragment: true }).parse(part)
+                const node = unified()
+                    .use(parse, { fragment: true })
+                    .parse(part)
+
+                return { ...node, meta: usedValues }
             }
 
             return {
                 type: 'text',
                 value: part,
+                meta: {
+                    usedValues,
+                },
             }
         })
+
+    return result
 }
 
-export default function (node, values) {
-    const newNodes = stringToNodesWithResolvedExpressions(node.value, values)
+export default function (node, context) {
+    const newNodes = stringToNodesWithResolvedExpressions(
+        node.value,
+        context.environment,
+    )
 
     return newNodes
 }
