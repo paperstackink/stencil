@@ -143,7 +143,7 @@ describe('Default content', () => {
         expect(result).toBe(expected)
     })
 
-    test('default content is overriden by parsed in content', async () => {
+    test('default content is overriden by passed in content', async () => {
         const input = `
 <div>
     <Card>

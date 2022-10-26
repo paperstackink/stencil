@@ -6,4 +6,5 @@ module.exports = {
         '^@/(.*)$': '<rootDir>/src/$1',
     },
     transformIgnorePatterns: [],
+    setupFilesAfterEnv: ["jest-extended/all"]
 }
