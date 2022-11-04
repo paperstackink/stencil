@@ -4,11 +4,11 @@ const esbuild = require('esbuild')
 const alias = require('esbuild-plugin-path-alias')
 
 esbuild.build({
-    entryPoints: ['src/index.js'],
+    entryPoints: ['src/index.js', 'src/temp.js'],
     bundle: true,
     platform: 'node',
     target: ['node10.4'],
-    outfile: '_dist/index.js',
+    outdir: '_dist',
     plugins: [
         alias({
             '@': path.resolve(__dirname, '../src'),
