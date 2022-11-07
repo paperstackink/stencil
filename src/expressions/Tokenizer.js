@@ -7,10 +7,10 @@ const keywords = {
     and: 'AND',
     null: 'NULL',
     equals: 'EQUALS',
-    not: 'NOT',
-    greater: 'GREATER',
-    less: 'LESS',
-    than: 'THAN',
+    // not: 'NOT',
+    // greater: 'GREATER',
+    // less: 'LESS',
+    // than: 'THAN',
 }
 
 function isDigit(character) {
