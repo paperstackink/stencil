@@ -1,5 +1,7 @@
 import Expression from '@/expressions/Expression'
 
+import ParserError from '@/expressions/errors/ParserError'
+
 class Parser {
     constructor(tokens = []) {
         this.tokens = tokens
@@ -7,13 +9,13 @@ class Parser {
     }
 
     parse() {
-        try {
-            return this.expression()
-        } catch (error) {
-            // Handle parser error
-            // Or don't have a try/catch block and catch it higher up?
-            console.error(error)
-        }
+        // try {
+        return this.expression()
+        // } catch (error) {
+        //     // Handle parser error
+        //     // Or don't have a try/catch block and catch it higher up?
+        //     console.error(error)
+        // }
     }
 
     expression() {
@@ -69,7 +71,7 @@ class Parser {
     }
 
     unary() {
-        if (this.match('BANG', 'MINUS')) {
+        if (this.match('NOT', 'MINUS')) {
             const operator = this.previous()
             const expression = this.unary()
 
@@ -104,7 +106,7 @@ class Parser {
             return new Expression.Grouping(expression)
         }
 
-        throw new Error('Expected expression.')
+        throw new ParserError('Expected expression.')
     }
 
     match(...types) {
@@ -132,7 +134,7 @@ class Parser {
             return this.advance()
         }
 
-        throw new Error(message)
+        throw new ParserError(message)
     }
 
     advance() {
