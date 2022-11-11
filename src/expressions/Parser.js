@@ -98,6 +98,10 @@ class Parser {
             return new Expression.Literal(this.previous().literal)
         }
 
+        if (this.match('IDENTIFIER')) {
+            return new Expression.Variable(this.previous().lexeme)
+        }
+
         if (this.match('LEFT_PARENTHESIS')) {
             const expression = this.expression()
 

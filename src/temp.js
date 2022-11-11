@@ -4,7 +4,7 @@ import Interpreter from '@/expressions/Interpreter'
 import OperatorParser from '@/expressions/OperatorParser'
 
 // const input = 'greater than or equals'
-const input = '"two" + "one"'
+const input = 'x'
 const tokenizer = new Tokenizer(input)
 const tokens = tokenizer.scanTokens()
 // console.log(tokens)
@@ -18,7 +18,9 @@ const ast = parser.parse()
 
 // console.log(ast)
 
-const interpreter = new Interpreter(ast)
+const interpreter = new Interpreter(ast, {
+    x: 'Yo this is a variable',
+})
 const output = interpreter.interpret()
 
 console.log(output)

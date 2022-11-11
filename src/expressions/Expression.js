@@ -41,9 +41,20 @@ class Grouping {
     }
 }
 
+class Variable {
+    constructor(name) {
+        this.name = name
+    }
+
+    accept(visitor) {
+        return visitor.visitVariableExpression(this)
+    }
+}
+
 export default {
     Unary,
     Binary,
     Literal,
     Grouping,
+    Variable,
 }

@@ -2,8 +2,9 @@ import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
 
 class Interpreter {
-    constructor(ast) {
+    constructor(ast, scope) {
         this.ast = ast
+        this.scope = scope
     }
 
     interpret() {
@@ -23,6 +24,16 @@ class Interpreter {
 
     visitGroupingExpression(expression) {
         return this.evaluate(expression.expression)
+    }
+
+    visitVariableExpression(expression) {
+        if (expression.name in this.scope) {
+            return this.scope[expression.name]
+        }
+
+        throw new InternalError(
+            `Identifier '${expression.name}' is not defined.`,
+        )
     }
 
     visitUnaryExpression(expression) {
