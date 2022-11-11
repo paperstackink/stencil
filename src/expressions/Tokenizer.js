@@ -1,5 +1,7 @@
 import Token from '@/expressions/Token'
 
+import ParserError from '@/expressions/errors/ParserError'
+
 const keywords = {
     true: 'TRUE',
     false: 'FALSE',
@@ -7,10 +9,11 @@ const keywords = {
     and: 'AND',
     null: 'NULL',
     equals: 'EQUALS',
-    // not: 'NOT',
-    // greater: 'GREATER',
-    // less: 'LESS',
-    // than: 'THAN',
+    'not equals': 'NOT_EQUALS',
+    'less than': 'LESS',
+    'less than or equals': 'LESS_EQUALS',
+    'greater than': 'GREATER',
+    'greater than or equals': 'GREATER_EQUALS',
 }
 
 function isDigit(character) {
@@ -93,10 +96,7 @@ class Tokenizer {
         this.source = source
         this.start = 0
         this.current = 0
-        this.position = {
-            line: 0,
-            character: 0,
-        }
+        this.position = 0
         this.tokens = []
     }
 
@@ -161,7 +161,7 @@ class Tokenizer {
                 } else if (isAlpha(character)) {
                     this.identifier()
                 } else {
-                    throw new Error('Unexpected character.')
+                    throw new ParserError('Unexpected character.')
                 }
             }
         }
@@ -191,13 +191,36 @@ class Tokenizer {
         }
 
         const text = this.source.substring(this.start, this.current)
-        let type = keywords[text]
 
-        if (!type) {
-            type = 'IDENTIFIER'
+        if (['less', 'greater'].includes(text)) {
+            if (this.matchMany(' than or equals')) {
+                this.addToken(
+                    text === 'less' ? 'LESS_EQUALS' : 'GREATER_EQUALS',
+                )
+            } else if (this.matchMany(' than')) {
+                this.addToken(text === 'less' ? 'LESS' : 'GREATER')
+            } else {
+                throw new ParserError(
+                    "Unknown operator. Did you mean 'less than'?",
+                )
+            }
+        } else if (text === 'not') {
+            if (this.matchMany(' equals')) {
+                this.addToken('NOT_EQUALS')
+            } else {
+                throw new ParserError(
+                    "Unknown operator. Did you mean 'not equals'?",
+                )
+            }
+        } else {
+            let type = keywords[text]
+
+            if (!type) {
+                type = 'IDENTIFIER'
+            }
+
+            this.addToken(type)
         }
-
-        this.addToken(type)
     }
 
     string() {
@@ -210,7 +233,7 @@ class Tokenizer {
         }
 
         if (this.isAtEnd()) {
-            throw new Error('Unterminated string.')
+            throw new ParserError('Unterminated string.')
             return
         }
 
@@ -237,12 +260,56 @@ class Tokenizer {
         return this.source.charAt(this.current + 1)
     }
 
+    peekN(n) {
+        if (this.current + n >= this.source.length) {
+            return '\0'
+        }
+
+        return this.source.charAt(this.current + n)
+    }
+
+    matchMany(expected) {
+        if (this.isAtEnd()) {
+            return false
+        }
+
+        const result = expected.split('').every((character, index) => {
+            if (this.isAtEndN(index)) {
+                return false
+            }
+
+            return this.peekN(index) === character
+        })
+
+        if (result) {
+            this.advanceN(expected.length)
+        }
+
+        return result
+    }
+
     isAtEnd() {
         return this.current >= this.source.length
     }
 
+    isAtEndN(n) {
+        return this.current + n >= this.source.length
+    }
+
     advance() {
         const nextCharacter = this.source.charAt(this.current++)
+
+        this.position++
+
+        return nextCharacter
+    }
+
+    advanceN(n) {
+        this.current = this.current + n
+
+        const nextCharacter = this.source.charAt(this.current)
+
+        this.position = this.position + n
 
         return nextCharacter
     }

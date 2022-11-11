@@ -57,13 +57,31 @@ class Interpreter {
         const right = this.evaluate(expression.right)
 
         switch (expression.operator.type) {
-            case 'NOT_EQUAL':
-            case 'GREATER':
-            case 'GREATER_EQUALS':
-            case 'LESS':
-            case 'LESS_EQUALS':
-            case 'IS': {
-                throw new InternalError('Not implemented.')
+            case 'EQUALS': {
+                return left === right
+            }
+            case 'NOT_EQUALS': {
+                return left !== right
+            }
+            case 'GREATER': {
+                this.checkNumberOperands(expression.operator, left, right)
+
+                return Number(left) > Number(right)
+            }
+            case 'GREATER_EQUALS': {
+                this.checkNumberOperands(expression.operator, left, right)
+
+                return Number(left) >= Number(right)
+            }
+            case 'LESS': {
+                this.checkNumberOperands(expression.operator, left, right)
+
+                return Number(left) < Number(right)
+            }
+            case 'LESS_EQUALS': {
+                this.checkNumberOperands(expression.operator, left, right)
+
+                return Number(left) <= Number(right)
             }
             case 'MINUS': {
                 this.checkNumberOperands(expression.operator, left, right)
