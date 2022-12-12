@@ -83,7 +83,24 @@ describe('Groups', () => {
     })
 })
 
-describe('Expressions', () => {
+describe('Logical Expressions', () => {
+    test('it can evaluate an "or" expression', () => {
+        const input = `true or false`
+        const expected = true
+        const output = evaluate(input)
+
+        expect(output).toEqual(expected)
+    })
+    test('it can evaluate an "and" expression', () => {
+        const input = `true and false`
+        const expected = false
+        const output = evaluate(input)
+
+        expect(output).toEqual(expected)
+    })
+})
+
+describe('Binary Expressions', () => {
     test('it can evaluate an equality expression', () => {
         const input = `2 equals 2`
         const expected = true
@@ -115,7 +132,9 @@ describe('Expressions', () => {
 
         expect(output).toEqual(expected)
     })
+})
 
+describe('Unary Expressions', () => {
     test('it can evaluate a unary expression', () => {
         const input = `not true`
         const expected = false

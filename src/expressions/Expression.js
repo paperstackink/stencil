@@ -21,6 +21,18 @@ class Binary {
     }
 }
 
+class Logical {
+    constructor(left, operator, right) {
+        this.left = left
+        this.operator = operator
+        this.right = right
+    }
+
+    accept(visitor) {
+        return visitor.visitLogicalExpression(this)
+    }
+}
+
 class Literal {
     constructor(value) {
         this.value = value
@@ -55,6 +67,7 @@ export default {
     Unary,
     Binary,
     Literal,
+    Logical,
     Grouping,
     Variable,
 }

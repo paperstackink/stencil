@@ -92,6 +92,40 @@ describe('Groups', () => {
     })
 })
 
+describe('Logical Expressions', () => {
+    test('it can parse an "and" expression', () => {
+        const input = `true and false`
+        const expected = new Expression.Logical(
+            new Expression.Literal(true),
+            new Token('AND', 'and', '', 5),
+            new Expression.Literal(false),
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+
+    test('it can parse an "or" expression', () => {
+        const input = `true or false`
+        const expected = new Expression.Logical(
+            new Expression.Literal(true),
+            new Token('OR', 'or', '', 5),
+            new Expression.Literal(false),
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+})
+
 describe('Binary Expressions', () => {
     test('it can parse an "equals" expression', () => {
         const input = `true equals false`

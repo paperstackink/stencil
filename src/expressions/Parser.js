@@ -13,7 +13,31 @@ class Parser {
     }
 
     expression() {
-        return this.equality()
+        return this.or()
+    }
+
+    or() {
+        let expression = this.and()
+
+        while (this.match('OR')) {
+            const operator = this.previous()
+            const right = this.and()
+            expression = new Expression.Logical(expression, operator, right)
+        }
+
+        return expression
+    }
+
+    and() {
+        let expression = this.equality()
+
+        while (this.match('AND')) {
+            const operator = this.previous()
+            const right = this.equality()
+            expression = new Expression.Logical(expression, operator, right)
+        }
+
+        return expression
     }
 
     equality() {

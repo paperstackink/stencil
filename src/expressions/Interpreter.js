@@ -47,6 +47,23 @@ class Interpreter {
         throw new InternalError('Unexpected end of unary expression.')
     }
 
+    visitLogicalExpression(expression) {
+        const left = this.evaluate(expression.left)
+
+        // Short circut if we already have a value after evaluting the left hand side
+        if (expression.operator.type === 'OR') {
+            if (this.isTruthy(left)) {
+                return left
+            }
+        } else {
+            if (!this.isTruthy(left)) {
+                return left
+            }
+        }
+
+        return this.evaluate(expression.right)
+    }
+
     visitBinaryExpression(expression) {
         const left = this.evaluate(expression.left)
         const right = this.evaluate(expression.right)
