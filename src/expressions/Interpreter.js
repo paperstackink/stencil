@@ -8,14 +8,9 @@ class Interpreter {
     }
 
     interpret() {
-        // try {
         const output = this.evaluate(this.ast)
 
         return output
-        // } catch (error) {
-        //     // Runtime error
-        //     throw new Errorr(error)
-        // }
     }
 
     visitLiteralExpression(expression) {

@@ -9,13 +9,7 @@ class Parser {
     }
 
     parse() {
-        // try {
         return this.expression()
-        // } catch (error) {
-        //     // Handle parser error
-        //     // Or don't have a try/catch block and catch it higher up?
-        //     console.error(error)
-        // }
     }
 
     expression() {

@@ -1,6 +1,7 @@
 import Token from '@/expressions/Token'
 
 import ParserError from '@/expressions/errors/ParserError'
+import InternalError from '@/expressions/errors/InternalError'
 
 const keywords = {
     true: 'TRUE',
@@ -9,6 +10,7 @@ const keywords = {
     and: 'AND',
     null: 'NULL',
     equals: 'EQUALS',
+    not: 'NOT',
     'not equals': 'NOT_EQUALS',
     'less than': 'LESS',
     'less than or equals': 'LESS_EQUALS',
@@ -96,7 +98,6 @@ class Tokenizer {
         this.source = source
         this.start = 0
         this.current = 0
-        this.position = 0
         this.tokens = []
     }
 
@@ -106,7 +107,7 @@ class Tokenizer {
             this.scanNextToken()
         }
 
-        this.tokens.push(new Token('EOF', '', null, this.position))
+        this.tokens.push(new Token('EOF', '', null, this.current))
 
         return this.tokens
     }
@@ -123,10 +124,10 @@ class Tokenizer {
                 this.addToken('RIGHT_PARENTHESIS')
                 break
             }
-            case '.': {
-                this.addToken('DOT')
-                break
-            }
+            // case '.': {
+            //     this.addToken('DOT')
+            //     break
+            // }
             case '+': {
                 this.addToken('PLUS')
                 break
@@ -146,12 +147,11 @@ class Tokenizer {
             case ' ':
             case '\r':
             case '\t':
-                break
             case '\n': {
-                // Update position
                 break
             }
-            case '"': {
+            case '"':
+            case "'": {
                 this.string()
                 break
             }
@@ -197,23 +197,27 @@ class Tokenizer {
                 this.addToken(
                     text === 'less' ? 'LESS_EQUALS' : 'GREATER_EQUALS',
                 )
+            } else if (this.matchMany(' than or')) {
+                throw new ParserError(
+                    `Unknown operator. Did you mean '${text} than or equals'?`,
+                )
             } else if (this.matchMany(' than')) {
                 this.addToken(text === 'less' ? 'LESS' : 'GREATER')
             } else {
                 throw new ParserError(
-                    "Unknown operator. Did you mean 'less than'?",
+                    `Unknown operator. Did you mean '${text} than'?`,
                 )
             }
-        } else if (text === 'not') {
-            if (this.matchMany(' equals')) {
-                this.addToken('NOT_EQUALS')
-            } else {
-                throw new ParserError(
-                    "Unknown operator. Did you mean 'not equals'?",
-                )
-            }
+        } else if (text === 'not' && this.matchMany(' equals')) {
+            this.addToken('NOT_EQUALS')
         } else {
             let type = keywords[text]
+
+            if (!type && keywords[text.toLowerCase()]) {
+                throw new ParserError(
+                    `Keywords are case sensitive. Try '${text.toLowerCase()}' instead.`,
+                )
+            }
 
             if (!type) {
                 type = 'IDENTIFIER'
@@ -224,12 +228,15 @@ class Tokenizer {
     }
 
     string() {
-        while (this.peek() !== '"' && !this.isAtEnd()) {
-            if (this.peek() == '\n') {
-                // 'Update position'
+        // Check whether it's a single or double quoted string
+        if (this.previous() === "'") {
+            while (this.peek() !== "'" && !this.isAtEnd()) {
+                this.advance()
             }
-
-            this.advance()
+        } else {
+            while (this.peek() !== '"' && !this.isAtEnd()) {
+                this.advance()
+            }
         }
 
         if (this.isAtEnd()) {
@@ -237,9 +244,9 @@ class Tokenizer {
             return
         }
 
-        this.advance() // The closing "
+        this.advance() // The closing " or '
 
-        const value = this.source.substring(this.start + 1, this.current - 1) // Strip out "'s
+        const value = this.source.substring(this.start + 1, this.current - 1) // Strip out quotes
 
         this.addToken('STRING', value)
     }
@@ -250,6 +257,14 @@ class Tokenizer {
         }
 
         return this.source.charAt(this.current)
+    }
+
+    previous() {
+        if (this.current === 0) {
+            throw new InternalError("Can't read previous on first character")
+        }
+
+        return this.source.charAt(this.current - 1)
     }
 
     peekNext() {
@@ -299,8 +314,6 @@ class Tokenizer {
     advance() {
         const nextCharacter = this.source.charAt(this.current++)
 
-        this.position++
-
         return nextCharacter
     }
 
@@ -309,15 +322,15 @@ class Tokenizer {
 
         const nextCharacter = this.source.charAt(this.current)
 
-        this.position = this.position + n
-
         return nextCharacter
     }
 
     addToken(type, literal = '') {
         const text = this.source.substring(this.start, this.current)
 
-        this.tokens.push(new Token(type, text, literal, this.position))
+        this.tokens.push(
+            new Token(type, text, literal, this.current - text.length),
+        )
     }
 }
 
