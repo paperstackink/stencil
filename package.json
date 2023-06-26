@@ -1,7 +1,6 @@
 {
-  "name": "stencil",
+  "name": "@paperstack/stencil",
   "version": "1.0.0",
-  "description": "",
   "main": "_dist/index.js",
   "scripts": {
     "build": "node scripts/build.js",
@@ -12,6 +11,7 @@
   "devDependencies": {
     "esbuild": "^0.14.43",
     "esbuild-jest": "^0.5.0",
+    "esbuild-plugin-copy": "^2.0.1",
     "esbuild-plugin-path-alias": "^1.0.6",
     "jest": "^28.1.1",
     "jest-extended": "^3.1.0"
@@ -22,5 +22,19 @@
     "rehype-parse-ns": "^8.0.5",
     "rehype-stringify": "^9.0.3",
     "unified": "^10.1.2"
-  }
+  },
+  "types": "./_dist/index.d.ts",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BjornDCode/stencil.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BjornDCode/stencil/issues"
+  },
+  "homepage": "https://github.com/BjornDCode/stencil#readme",
+  "description": ""
 }

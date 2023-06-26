@@ -2,7 +2,7 @@ import Parser from '@/expressions/Parser'
 import Tokenizer from '@/expressions/Tokenizer'
 import Interpreter from '@/expressions/Interpreter'
 
-const input = 'true and false'
+const input = 'if true then "yo" else "not yo"'
 const tokenizer = new Tokenizer(input)
 const tokens = tokenizer.scanTokens()
 // console.log(tokens)
