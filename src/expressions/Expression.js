@@ -21,6 +21,18 @@ class Binary {
     }
 }
 
+class Conditional {
+    constructor(condition, left, right) {
+        this.condition = condition
+        this.left = left
+        this.right = right
+    }
+
+    accept(visitor) {
+        return visitor.visitConditionalExpression(this)
+    }
+}
+
 class Logical {
     constructor(left, operator, right) {
         this.left = left
@@ -70,4 +82,5 @@ export default {
     Logical,
     Grouping,
     Variable,
+    Conditional,
 }

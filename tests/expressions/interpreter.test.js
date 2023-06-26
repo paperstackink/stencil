@@ -83,6 +83,23 @@ describe('Groups', () => {
     })
 })
 
+describe('Conditional Expressions', () => {
+    test('it can evaluate a true conditional', () => {
+        const input = `if true then 2 else 3`
+        const expected = 2
+        const output = evaluate(input)
+
+        expect(output).toEqual(expected)
+    })
+    test('it can evaluate a false conditional', () => {
+        const input = `if false then 2 else 3`
+        const expected = 3
+        const output = evaluate(input)
+
+        expect(output).toEqual(expected)
+    })
+})
+
 describe('Logical Expressions', () => {
     test('it can evaluate an "or" expression', () => {
         const input = `true or false`

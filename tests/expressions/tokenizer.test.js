@@ -33,6 +33,36 @@ test('it can tokenize "false"', () => {
     expect(result).toEqual(expected)
 })
 
+test('it can tokenize "if"', () => {
+    const input = `if`
+    const expected = new Token('IF', 'if', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
+
+test('it can tokenize "then"', () => {
+    const input = `then`
+    const expected = new Token('THEN', 'then', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
+
+test('it can tokenize "else"', () => {
+    const input = `else`
+    const expected = new Token('ELSE', 'else', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
+
 test('it can tokenize "or"', () => {
     const input = `or`
     const expected = new Token('OR', 'or', '', 0)

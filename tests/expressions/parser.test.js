@@ -92,6 +92,24 @@ describe('Groups', () => {
     })
 })
 
+describe('Conditional Expressions', () => {
+    test('it can parse a conditional expression', () => {
+        const input = `if true then "yo" else "not yo"`
+        const expected = new Expression.Conditional(
+            new Expression.Literal(true),
+            new Expression.Literal('yo'),
+            new Expression.Literal('not yo'),
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+})
+
 describe('Logical Expressions', () => {
     test('it can parse an "and" expression', () => {
         const input = `true and false`

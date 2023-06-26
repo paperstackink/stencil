@@ -64,6 +64,16 @@ class Interpreter {
         return this.evaluate(expression.right)
     }
 
+    visitConditionalExpression(expression) {
+        const condition = this.evaluate(expression.condition)
+
+        if (condition) {
+            return this.evaluate(expression.left)
+        } else {
+            return this.evaluate(expression.right)
+        }
+    }
+
     visitBinaryExpression(expression) {
         const left = this.evaluate(expression.left)
         const right = this.evaluate(expression.right)

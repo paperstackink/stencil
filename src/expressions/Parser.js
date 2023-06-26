@@ -13,7 +13,25 @@ class Parser {
     }
 
     expression() {
-        return this.or()
+        return this.conditional()
+    }
+
+    conditional() {
+        if (this.match('IF')) {
+            const condition = this.or()
+
+            this.consume('THEN', "Expect 'then' after expression.")
+
+            const left = this.or()
+
+            this.consume('ELSE', "Expect 'else' after expression.")
+
+            const right = this.or()
+
+            return new Expression.Conditional(condition, left, right)
+        } else {
+            return this.or()
+        }
     }
 
     or() {
