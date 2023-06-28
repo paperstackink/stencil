@@ -1,7 +1,7 @@
 import { compile } from '@/index'
 import CompilationError from '@/errors/CompilationError'
 
-test('it can output values in attributes', async () => {
+test('it can compile expressions in attributes', async () => {
     const input = `<span id="{{ id }}">Text</span>`
     const expected = `<span id="headline">Text</span>`
 
@@ -12,7 +12,7 @@ test('it can output values in attributes', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output multiple values in the same attribute', async () => {
+test('it can compile multiple expressions in the same attribute', async () => {
     const input = `<span class="{{ color }} {{ size }}">Text</span>`
     const expected = `<span class="red large">Text</span>`
 
@@ -23,7 +23,7 @@ test('it can output multiple values in the same attribute', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output multiple values in different attributes', async () => {
+test('it can compile multiple expressions in different attributes', async () => {
     const input = `<span class="{{ class }}" id="{{ id }}">Text</span>`
     const expected = `<span class="text-red" id="text-element">Text</span>`
 
@@ -34,7 +34,7 @@ test('it can output multiple values in different attributes', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output the same value multiple times', async () => {
+test('it can compile the same expression multiple times', async () => {
     const input = `<span class="{{ name }}" id="{{ name }}">Text</span>`
     const expected = `<span class="title" id="title">Text</span>`
 
@@ -45,7 +45,7 @@ test('it can output the same value multiple times', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output values concatenated to an existing attribute', async () => {
+test('it can compile expressions concatenated to an existing attribute', async () => {
     const input = `<span class="text-{{ size }}">Text</span>`
     const expected = `<span class="text-large">Text</span>`
 
@@ -56,7 +56,7 @@ test('it can output values concatenated to an existing attribute', async () => {
     expect(result).toBe(expected)
 })
 
-test('it fails if the value has not been defined', async () => {
+test('it fails if the expression uses an undefined identifier', async () => {
     const input = `<span class="{{ class }}">Text</span>`
 
     await expect(
@@ -119,4 +119,20 @@ test('it ignores attributes with no value', async () => {
     })
 
     expect(result).toBe(expected)
+})
+
+test('it can compile an expression that contains spaces', async () => {
+    const input = `
+    <div class="existing {{ class or '' }}"></div>
+    `
+    const expected = `
+    <div class="existing passed"></div>
+    `
+    const result = await compile(input, {
+        components: {},
+        environment: {
+            class: 'passed',
+        },
+    })
+    expect(result).toEqualIgnoringWhitespace(expected)
 })

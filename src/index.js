@@ -3,7 +3,6 @@ import parse from 'rehype-parse-ns'
 import stringify from 'rehype-stringify'
 import format from 'rehype-format'
 
-import conform from '@/helpers/conformer'
 import isDocument from '@/helpers/isDocument'
 
 import templates from '@/language/templates'
@@ -19,11 +18,9 @@ export const compile = async (input, providedContext = defaultContext) => {
         ...providedContext,
     }
 
-    const conformedInput = conform(input)
-
     const result = await unified()
         .use(parse, {
-            fragment: !isDocument(conformedInput),
+            fragment: !isDocument(input.trim()),
         })
         .use(templates, {
             environment: context.environment,
@@ -35,7 +32,7 @@ export const compile = async (input, providedContext = defaultContext) => {
         .use(stringify, {
             closeSelfClosing: true,
         })
-        .process(conformedInput)
+        .process(input.trim())
 
     return result.toString()
 }

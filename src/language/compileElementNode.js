@@ -1,12 +1,16 @@
 import compileNode from '@/language/compileNode'
 import compileAttributes from '@/language/compileAttributes'
+import normaliseExpressionsInAttributes from '@/helpers/normaliseExpressionsInAttributes'
 
 export default function (node, context) {
     const newNode = { ...node }
-    const [properties, usedValues] = compileAttributes(node.properties, context)
+    const [properties, usedIdentifiers] = compileAttributes(
+        normaliseExpressionsInAttributes(node.properties),
+        context,
+    )
 
     newNode.meta = {
-        usedValues,
+        usedIdentifiers,
     }
 
     newNode.properties = properties

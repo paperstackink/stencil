@@ -1,7 +1,7 @@
 import { compile } from '@/index'
 import CompilationError from '@/errors/CompilationError'
 
-test('it can output a global value', async () => {
+test('it can compile a global identifier expression', async () => {
     const input = `
 <div>
     <Card />
@@ -28,7 +28,7 @@ test('it can output a global value', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a local value', async () => {
+test('it can compile a local identifier expression', async () => {
     const input = `
 <div>
     <Card value="card" />
@@ -55,7 +55,7 @@ test('it can output a local value', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a value in a text child', async () => {
+test('it can compile an expression in a text child node', async () => {
     const input = `
 <div>
     <Card />
@@ -82,7 +82,7 @@ test('it can output a value in a text child', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a value in an attribute', async () => {
+test('it can compile an expression in an attribute', async () => {
     const input = `
 <div>
     <Card />
@@ -109,7 +109,7 @@ test('it can output a value in an attribute', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a value in a default slot', async () => {
+test('it can compile an expression in the default slot', async () => {
     const input = `
 <div>
     <Card default="Yo" />
@@ -138,7 +138,7 @@ test('it can output a value in a default slot', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a value in a passed slot', async () => {
+test('it can compile an expression in a passed slot', async () => {
     const input = `
 <div>
     <Card>
@@ -167,7 +167,7 @@ test('it can output a value in a passed slot', async () => {
     expect(result).toBe(expected)
 })
 
-test('a global value can be overriden by a local value', async () => {
+test('a global identifier can be overriden by a local identifier', async () => {
     const input = `
 <div>
     <Card value="local" />
@@ -194,7 +194,7 @@ test('a global value can be overriden by a local value', async () => {
     expect(result).toBe(expected)
 })
 
-test('it will fail if the value is not defined', async () => {
+test('it will fail if the identifier is not defined', async () => {
     const input = `
 <div>
     <Card />
@@ -268,7 +268,7 @@ test('it camelCases attribute names with dashes', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a class attribute', async () => {
+test('it can print a class attribute', async () => {
     const input = `
 <div>
     <Card />
@@ -294,7 +294,7 @@ test('it can output a class attribute', async () => {
     expect(result).toBe(expected)
 })
 
-test('it can output a class attribute with multiple values', async () => {
+test('it can print a class attribute with multiple values', async () => {
     const input = `
 <div>
     <Card class="sm:small lg:large" />

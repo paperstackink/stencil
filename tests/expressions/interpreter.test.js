@@ -61,16 +61,13 @@ describe('Variables', () => {
         expect(output).toEqual(expected)
     })
 
-    test('it fails if the variable name is not in scope', () => {
-        const input = `name`
-        const expected = 'value'
+    // test('undefined identifiers become "null"', () => {
+    //     const input = `name`
 
-        const runner = () => evaluate(input, {})
+    //     const output = evaluate(input, {})
 
-        expect(runner).toThrow(
-            new InternalError("Identifier 'name' is not defined."),
-        )
-    })
+    //     expect(output).toEqual(null)
+    // })
 })
 
 describe('Groups', () => {

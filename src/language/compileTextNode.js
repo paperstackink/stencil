@@ -2,20 +2,20 @@ import { unified } from 'unified'
 import parse from 'rehype-parse-ns'
 
 import isHtml from '@/helpers/isHtml'
-import replaceExpressionWithValue from '@/helpers/replaceExpressionWithValue'
+import compileExpressions from '@/language/compileExpressions'
 
 const stringToNodesWithResolvedExpressions = (source, values) => {
-    let usedValues = []
+    let usedIdentifiers = []
     const pattern = /({{\w+}})/g
 
     const parts = source.split(pattern)
     const resolvedParts = parts.map(part => {
-        const [result, usedValuesInExpression] = replaceExpressionWithValue(
+        const [result, usedIdentifiersInExpression] = compileExpressions(
             part,
             values,
         )
 
-        usedValues = [...usedValues, ...usedValuesInExpression]
+        usedIdentifiers = [...usedIdentifiers, ...usedIdentifiersInExpression]
 
         return result
     })
@@ -28,14 +28,14 @@ const stringToNodesWithResolvedExpressions = (source, values) => {
                     .use(parse, { fragment: true })
                     .parse(part)
 
-                return { ...node, meta: usedValues }
+                return { ...node, meta: usedIdentifiers }
             }
 
             return {
                 type: 'text',
                 value: part,
                 meta: {
-                    usedValues,
+                    usedIdentifiers,
                 },
             }
         })

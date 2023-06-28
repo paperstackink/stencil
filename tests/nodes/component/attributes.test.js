@@ -2,7 +2,7 @@ import { compile } from '@/index'
 import CompilationError from '@/errors/CompilationError'
 
 describe('Using components', () => {
-    test('it can output values in attributes', async () => {
+    test('it can compile expressions in attributes', async () => {
         const input = `<Text id="{{ id }}" />`
         const definition = `<span></span>`
         const expected = `<span id="headline"></span>`
@@ -15,7 +15,7 @@ describe('Using components', () => {
         expect(result).toBe(expected)
     })
 
-    test('it can output multiple values in the same attribute', async () => {
+    test('it can compile multiple expressions in the same attribute', async () => {
         const input = `<span class="{{ color }} {{ size }}">Text</span>`
         const expected = `<span class="red large">Text</span>`
         const result = await compile(input, {
@@ -24,7 +24,7 @@ describe('Using components', () => {
         expect(result).toBe(expected)
     })
 
-    test('it can output multiple values in different attributes', async () => {
+    test('it can compile multiple expressions in different attributes', async () => {
         const input = `<span class="{{ class }}" id="{{ id }}">Text</span>`
         const expected = `<span class="text-red" id="text-element">Text</span>`
         const result = await compile(input, {
@@ -33,7 +33,7 @@ describe('Using components', () => {
         expect(result).toBe(expected)
     })
 
-    test('it can output the same value multiple times', async () => {
+    test('it can compile the same expression multiple times', async () => {
         const input = `<span class="{{ name }}" id="{{ name }}">Text</span>`
         const expected = `<span class="title" id="title">Text</span>`
         const result = await compile(input, {
@@ -42,7 +42,7 @@ describe('Using components', () => {
         expect(result).toBe(expected)
     })
 
-    test('it can output values concatenated to an existing attribute', async () => {
+    test('it can compile expressions concatenated to an existing attribute', async () => {
         const input = `<span class="text-{{ size }}">Text</span>`
         const expected = `<span class="text-large">Text</span>`
         const result = await compile(input, {
@@ -51,7 +51,7 @@ describe('Using components', () => {
         expect(result).toBe(expected)
     })
 
-    test('it fails if the value has not been defined', async () => {
+    test('it fails if the expression uses an undefined identifier', async () => {
         const input = `<span class="{{ class }}">Text</span>`
         await expect(
             compile(input, {
@@ -107,7 +107,7 @@ describe('Using components', () => {
 })
 
 describe('Component templates', () => {
-    test('an attribute can be outputted inside a component', async () => {
+    test('an attribute can be printed inside a component', async () => {
         const input = `
     <div>
         <Card text="Yo" />
@@ -115,7 +115,7 @@ describe('Component templates', () => {
     `
         const componentDefiniton = `
     <section class="card">
-        <div>{{text}}</div>
+        <div>{{ text }}</div>
     </section>
     `
         const expected = `
@@ -132,7 +132,7 @@ describe('Component templates', () => {
         expect(result).toEqualIgnoringWhitespace(expected)
     })
 
-    test('it adds an attribute to the root element if it is not outputted', async () => {
+    test('it adds an attribute to the root element if it is not used elsewhere', async () => {
         const input = `
     <div>
         <Card class="card" />
@@ -157,7 +157,7 @@ describe('Component templates', () => {
         expect(result).toEqualIgnoringWhitespace(expected)
     })
 
-    test('it does not add the attribute to the root element if it is outputted in text', async () => {
+    test('it does not add the attribute to the root element if it is printed in text', async () => {
         const input = `
     <div>
         <Card class="card" text="Yo" />
@@ -182,7 +182,7 @@ describe('Component templates', () => {
         expect(result).toEqualIgnoringWhitespace(expected)
     })
 
-    test('it does not add the attribute to the root element if it is outputted in an attribute', async () => {
+    test('it does not add the attribute to the root element if it has been used in an expression', async () => {
         const input = `
     <div>
         <Card class="card" id="cool-card" />
@@ -197,6 +197,56 @@ describe('Component templates', () => {
     <div>
         <section id="cool-card">
             <div class="card">Yo</div>
+        </section>
+    </div>
+    `
+        const result = await compile(input, {
+            components: { Card: componentDefiniton },
+            environment: {},
+        })
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('it detects that an attribute has been used inside an expression', async () => {
+        const input = `
+    <div>
+        <Card temp="card" />
+    </div>
+    `
+        const componentDefiniton = `
+    <section class="existing {{ temp or '' }}">
+        <div>Yo</div>
+    </section>
+    `
+        const expected = `
+    <div>
+        <section class="existing card">
+            <div>Yo</div>
+        </section>
+    </div>
+    `
+        const result = await compile(input, {
+            components: { Card: componentDefiniton },
+            environment: {},
+        })
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('it detects that an attribute with the name "class" been used inside an expression', async () => {
+        const input = `
+    <div>
+        <Card class="card" />
+    </div>
+    `
+        const componentDefiniton = `
+    <section class="existing {{ class or '' }}">
+        <div>Yo</div>
+    </section>
+    `
+        const expected = `
+    <div>
+        <section class="existing card">
+            <div>Yo</div>
         </section>
     </div>
     `
@@ -322,6 +372,31 @@ describe('Component templates', () => {
     <div>
         <section id="pre-defined-id">
             <div>card</div>
+        </section>
+    </div>
+    `
+        const result = await compile(input, {
+            components: { Card: componentDefiniton },
+            environment: {},
+        })
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('it can compile an expression that contains spaces', async () => {
+        const input = `
+    <div>
+        <Card temp="card" />
+    </div>
+    `
+        const componentDefiniton = `
+    <section class="existing {{ temp or '' }}">
+        <div>Yo</div>
+    </section>
+    `
+        const expected = `
+    <div>
+        <section class="existing card">
+            <div>Yo</div>
         </section>
     </div>
     `

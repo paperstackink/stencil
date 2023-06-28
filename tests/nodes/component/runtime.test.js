@@ -1,7 +1,7 @@
 import { compile } from '@/index'
 import CompilationError from '@/errors/CompilationError'
 
-test('it can output values in attributes', async () => {
+test('it can print values in attributes', async () => {
     const input = `<Text id="{{ id }}">Text</Text>`
     const definition = `<span><slot /></span>`
     const expected = `<span id="headline">Text</span>`
