@@ -194,7 +194,7 @@ test('a global identifier can be overriden by a local identifier', async () => {
     expect(result).toBe(expected)
 })
 
-test('it will fail if the identifier is not defined', async () => {
+test('an undefined identifier outputs nothing', async () => {
     const input = `
 <div>
     <Card />
@@ -206,12 +206,20 @@ test('it will fail if the identifier is not defined', async () => {
 </section>
 `
 
-    await expect(
-        compile(input, {
-            components: { Card: componentDefiniton },
-            environment: {},
-        }),
-    ).rejects.toThrow(CompilationError)
+    const expected = `
+<div>
+    <section class="card">
+        <div></div>
+    </section>
+</div>
+`
+
+    const result = await compile(input, {
+        components: { Card: componentDefiniton },
+        environment: {},
+    })
+
+    expect(result).toBe(expected)
 })
 
 test('a multi word attribute is camelcased', async () => {

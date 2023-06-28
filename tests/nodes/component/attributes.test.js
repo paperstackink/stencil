@@ -51,13 +51,15 @@ describe('Using components', () => {
         expect(result).toBe(expected)
     })
 
-    test('it fails if the expression uses an undefined identifier', async () => {
+    test('it can handle an undefined identifier', async () => {
         const input = `<span class="{{ class }}">Text</span>`
-        await expect(
-            compile(input, {
-                environment: {},
-            }),
-        ).rejects.toThrow(CompilationError)
+        const expected = `<span class="">Text</span>`
+
+        const result = await compile(input, {
+            environment: {},
+        })
+
+        expect(result).toBe(expected)
     })
 
     test('it ignores regular string attributes', async () => {

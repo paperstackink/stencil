@@ -14,6 +14,10 @@ class Interpreter {
     }
 
     visitLiteralExpression(expression) {
+        if (expression.value === null) {
+            return ''
+        }
+
         return expression.value
     }
 
@@ -26,9 +30,7 @@ class Interpreter {
             return this.scope[expression.name]
         }
 
-        throw new InternalError(
-            `Identifier '${expression.name}' is not defined.`,
-        )
+        return ''
     }
 
     visitUnaryExpression(expression) {

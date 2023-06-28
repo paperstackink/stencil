@@ -27,7 +27,7 @@ describe('Literals', () => {
 
     test('it can evaluate "null"', () => {
         const input = `null`
-        const expected = null
+        const expected = ''
         const output = evaluate(input)
 
         expect(output).toEqual(expected)
@@ -61,13 +61,14 @@ describe('Variables', () => {
         expect(output).toEqual(expected)
     })
 
-    // test('undefined identifiers become "null"', () => {
-    //     const input = `name`
+    test('undefined identifiers become "null"', () => {
+        const input = `name`
+        const expected = ''
 
-    //     const output = evaluate(input, {})
+        const output = evaluate(input, {})
 
-    //     expect(output).toEqual(null)
-    // })
+        expect(output).toEqual(expected)
+    })
 })
 
 describe('Groups', () => {
