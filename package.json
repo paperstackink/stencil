@@ -1,40 +1,40 @@
 {
-  "name": "@paperstack/stencil",
-  "version": "1.0.0",
-  "main": "_dist/index.js",
-  "scripts": {
-    "build": "node scripts/build.js",
-    "test": "jest"
-  },
-  "keywords": [],
-  "author": "",
-  "devDependencies": {
-    "esbuild": "^0.14.43",
-    "esbuild-jest": "^0.5.0",
-    "esbuild-plugin-copy": "^2.0.1",
-    "esbuild-plugin-path-alias": "^1.0.6",
-    "jest": "^28.1.1",
-    "jest-extended": "^3.1.0"
-  },
-  "dependencies": {
-    "hast-util-select": "^5.0.2",
-    "rehype-format": "^4.0.1",
-    "rehype-parse-ns": "^8.0.5",
-    "rehype-stringify": "^9.0.3",
-    "unified": "^10.1.2"
-  },
-  "types": "./_dist/index.d.ts",
-  "directories": {
-    "test": "tests"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/BjornDCode/stencil.git"
-  },
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/BjornDCode/stencil/issues"
-  },
-  "homepage": "https://github.com/BjornDCode/stencil#readme",
-  "description": ""
+    "name": "@paperstack/stencil",
+    "version": "0.1.0",
+    "main": "_dist/index.js",
+    "scripts": {
+        "build": "node scripts/build.js",
+        "test": "jest"
+    },
+    "author": {
+        "name": "Bjørn Lindholm",
+        "email": "me@bjornlindholm.com",
+        "url": "https://bjornlindholm.com"
+    },
+    "devDependencies": {
+        "esbuild": "^0.14.43",
+        "esbuild-jest": "^0.5.0",
+        "esbuild-plugin-copy": "^2.0.1",
+        "esbuild-plugin-path-alias": "^1.0.6",
+        "jest": "^28.1.1",
+        "jest-extended": "^3.1.0"
+    },
+    "dependencies": {
+        "hast-util-select": "^5.0.2",
+        "rehype-format": "^4.0.1",
+        "rehype-parse-ns": "^8.0.5",
+        "rehype-stringify": "^9.0.3",
+        "unified": "^10.1.2"
+    },
+    "types": "./_dist/index.d.ts",
+    "directories": {
+        "test": "tests"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/paperstackink/stencil"
+    },
+    "license": "MIT",
+    "homepage": "https://github.com/paperstackink/stencil",
+    "description": "A templating language."
 }
