@@ -13,6 +13,12 @@ class Interpreter {
         return output
     }
 
+    passes() {
+        const output = this.evaluate(this.ast)
+
+        return this.isTruthy(output)
+    }
+
     visitLiteralExpression(expression) {
         if (expression.value === null) {
             return ''

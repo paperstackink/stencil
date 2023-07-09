@@ -8,6 +8,7 @@ import templates from '@/language/templates'
 import compileAttributes from '@/language/compileAttributes'
 import normaliseTree from '@/language/normaliseTree'
 
+import conform from '@/helpers/conform'
 import afterLast from '@/helpers/afterLast'
 import isDocument from '@/helpers/isDocument'
 import findDuplicates from '@/helpers/findDuplicates'
@@ -24,7 +25,7 @@ export default function (node, context) {
 
     const componentTree = unified()
         .use(parse, { fragment: !isDocument(definition.trim()) })
-        .parse(definition.trim())
+        .parse(conform(definition.trim()))
 
     const normalisedTree = normaliseTree(componentTree)
 
