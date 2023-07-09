@@ -16,6 +16,17 @@ const evaluate = (input, scope) => {
     return output
 }
 
+const evaluateTruthiness = (input, scope) => {
+    const tokenizer = new Tokenizer(input)
+    const tokens = tokenizer.scanTokens()
+    const parser = new Parser(tokens)
+    const ast = parser.parse()
+    const interpreter = new Interpreter(ast, scope)
+    const output = interpreter.passes()
+
+    return output
+}
+
 describe('Literals', () => {
     test('it can evaluate booleans', () => {
         const input = `false`
@@ -168,5 +179,19 @@ describe('Type checking', () => {
 })
 
 describe('Truthiness', () => {
-    // TODO
+    test('it can evaluate whether an expression is truthy', () => {
+        const input = `1 + 2 equals 3`
+        const expected = true
+        const output = evaluateTruthiness(input)
+
+        expect(output).toEqual(expected)
+    })
+
+    test('it can evaluate whether an expression is truthy', () => {
+        const input = `1 + 2 equals 4`
+        const expected = false
+        const output = evaluateTruthiness(input)
+
+        expect(output).toEqual(expected)
+    })
 })

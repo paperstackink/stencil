@@ -24,7 +24,7 @@ export default function (input) {
             )
         }
 
-        const condition = match.groups.expression.replaceAll(`"`, `\\"`)
+        const condition = encodeURI(match.groups.expression)
 
         output = output.replace(lexeme, `<if condition="${condition}">`)
     }

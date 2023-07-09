@@ -5,6 +5,7 @@ import compileSlot from '@/language/compileSlot'
 import compileTextNode from '@/language/compileTextNode'
 import compileFragment from '@/language/compileFragment'
 import compileElementNode from '@/language/compileElementNode'
+import compileIfDirective from '@/language/compileIfDirective'
 import compileComponentNode from '@/language/compileComponentNode'
 
 // Signature: node => [node]
@@ -13,6 +14,10 @@ export default function (node, context) {
     const compiler = match(node.type, {
         text: compileTextNode,
         element: (node, context) => {
+            if (node.tagName === 'if') {
+                return compileIfDirective(node, context)
+            }
+
             if (node.tagName === 'slot') {
                 return compileSlot(node, context)
             }
@@ -27,7 +32,7 @@ export default function (node, context) {
 
             return compileElementNode(node, context)
         },
-        default: node => node,
+        default: node => [node],
     })
 
     return compiler(node, context)

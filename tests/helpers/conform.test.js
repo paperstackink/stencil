@@ -69,8 +69,10 @@ describe('If directives', () => {
             <span>Content</span>
         @endif
     </div>`
+
+        const condition = encodeURI('2 * (3 + 4)')
         const expected = `<div>
-        <if condition="2 * (3 + 4)">
+        <if condition="${condition}">
             <span>Content</span>
         </if>
     </div>`
@@ -115,8 +117,9 @@ describe('If directives', () => {
         <span>Content</span>
     @endif
 </div>`
+        const condition = encodeURI('name equals "Yo"')
         const expected = `<div>
-    <if condition="name equals \\"Yo\\"">
+    <if condition="${condition}">
         <span>Content</span>
     </if>
 </div>`
