@@ -4,7 +4,18 @@ export default function (input) {
     let output = input
 
     //  If statements
-    for (const match of input.matchAll(/@if+\((?<expression>.*)\)/g)) {
+    const openingIfStatements = [
+        ...input.matchAll(/@if+\((?<expression>.*)\)/g),
+    ]
+    const closingIfStatements = [...input.matchAll(/@endif/g)]
+
+    if (openingIfStatements.length !== closingIfStatements.length) {
+        throw new CompilationError(
+            'There is an uneven number of opening and closing @if directives.',
+        )
+    }
+
+    for (const match of openingIfStatements) {
         const lexeme = match[0]
 
         if (!match.groups.expression) {

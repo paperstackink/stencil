@@ -94,6 +94,21 @@ describe('If directives', () => {
         )
     })
 
+    test('it fails if there is not the same number of opening and closing statements', async () => {
+        const input = `<div>
+    @if(true)
+        <span>Content</span>
+</div>`
+
+        const runner = () => conform(input)
+
+        expect(runner).toThrow(
+            new CompilationError(
+                'There is an uneven number of opening and closing @if directives.',
+            ),
+        )
+    })
+
     test('it can handle expressions with quotes', async () => {
         const input = `<div>
     @if(name equals "Yo")
