@@ -1,6 +1,7 @@
 import compileExpression from '@/language/compileExpression'
 import compileExpressions from '@/language/compileExpressions'
 import CompilationError from '@/errors/CompilationError'
+import Expression from '@/expressions/Expression'
 
 describe('Single expression', () => {
     test('it can compile an expression', () => {

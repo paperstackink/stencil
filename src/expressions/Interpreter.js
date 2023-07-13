@@ -1,5 +1,6 @@
 import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
+import Expression from '@/expressions/Expression'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -16,15 +17,11 @@ class Interpreter {
     passes() {
         const output = this.evaluate(this.ast)
 
-        return this.isTruthy(output)
+        return this.isTruthy(output.value)
     }
 
     visitLiteralExpression(expression) {
-        if (expression.value === null) {
-            return ''
-        }
-
-        return expression.value
+        return expression
     }
 
     visitGroupingExpression(expression) {
@@ -33,10 +30,12 @@ class Interpreter {
 
     visitVariableExpression(expression) {
         if (expression.name in this.scope) {
-            return this.scope[expression.name]
+            const resolved = this.scope[expression.name]
+
+            return new Expression.Literal(resolved)
         }
 
-        return ''
+        return new Expression.Literal(null)
     }
 
     visitUnaryExpression(expression) {
@@ -44,11 +43,12 @@ class Interpreter {
 
         switch (expression.operator.type) {
             case 'NOT': {
-                return !this.isTruthy(result)
+                return new Expression.Literal(!this.isTruthy(result.value))
             }
             case 'MINUS': {
-                this.checkNumberOperand(expression.operator, result)
-                return -Number(result)
+                this.checkNumberOperand(expression.operator, result.value)
+
+                return new Expression.Literal(-Number(result))
             }
         }
 
@@ -75,7 +75,7 @@ class Interpreter {
     visitConditionalExpression(expression) {
         const condition = this.evaluate(expression.condition)
 
-        if (condition) {
+        if (condition.value) {
             return this.evaluate(expression.left)
         } else {
             return this.evaluate(expression.right)
@@ -88,43 +88,83 @@ class Interpreter {
 
         switch (expression.operator.type) {
             case 'EQUALS': {
-                return left === right
+                return new Expression.Literal(left.value === right.value)
             }
             case 'NOT_EQUALS': {
-                return left !== right
+                return new Expression.Literal(left.value !== right.value)
             }
             case 'GREATER': {
-                this.checkNumberOperands(expression.operator, left, right)
+                this.checkNumberOperands(
+                    expression.operator,
+                    left.value,
+                    right.value,
+                )
 
-                return Number(left) > Number(right)
+                return new Expression.Literal(
+                    Number(left.value) > Number(right.value),
+                )
             }
             case 'GREATER_EQUALS': {
-                this.checkNumberOperands(expression.operator, left, right)
+                this.checkNumberOperands(
+                    expression.operator,
+                    left.value,
+                    right.value,
+                )
 
-                return Number(left) >= Number(right)
+                return new Expression.Literal(
+                    Number(left.value) >= Number(right.value),
+                )
             }
             case 'LESS': {
-                this.checkNumberOperands(expression.operator, left, right)
+                this.checkNumberOperands(
+                    expression.operator,
+                    left.value,
+                    right.value,
+                )
 
-                return Number(left) < Number(right)
+                return new Expression.Literal(
+                    Number(left.value) < Number(right.value),
+                )
             }
             case 'LESS_EQUALS': {
-                this.checkNumberOperands(expression.operator, left, right)
+                this.checkNumberOperands(
+                    expression.operator,
+                    left.value,
+                    right.value,
+                )
 
-                return Number(left) <= Number(right)
+                return new Expression.Literal(
+                    Number(left.value) <= Number(right.value),
+                )
             }
             case 'MINUS': {
-                this.checkNumberOperands(expression.operator, left, right)
+                this.checkNumberOperands(
+                    expression.operator,
+                    left.value,
+                    right.value,
+                )
 
-                return Number(left) - Number(right)
+                return new Expression.Literal(
+                    Number(left.value) - Number(right.value),
+                )
             }
             case 'PLUS': {
-                if (typeof left === 'number' && typeof right === 'number') {
-                    return Number(left) + Number(right)
+                if (
+                    typeof left.value === 'number' &&
+                    typeof right.value === 'number'
+                ) {
+                    return new Expression.Literal(
+                        Number(left.value) + Number(right.value),
+                    )
                 }
 
-                if (typeof left === 'string' && typeof right === 'string') {
-                    return String(left) + String(right)
+                if (
+                    typeof left.value === 'string' &&
+                    typeof right.value === 'string'
+                ) {
+                    return new Expression.Literal(
+                        String(left.value) + String(right.value),
+                    )
                 }
 
                 throw new RuntimeError(
@@ -132,14 +172,26 @@ class Interpreter {
                 )
             }
             case 'SLASH': {
-                this.checkNumberOperands(expression.operator, left, right)
+                this.checkNumberOperands(
+                    expression.operator,
+                    left.value,
+                    right.value,
+                )
 
-                return Number(left) / Number(right)
+                return new Expression.Literal(
+                    Number(left.value) / Number(right.value),
+                )
             }
             case 'STAR': {
-                this.checkNumberOperands(expression.operator, left, right)
+                this.checkNumberOperands(
+                    expression.operator,
+                    left.value,
+                    right.value,
+                )
 
-                return Number(left) * Number(right)
+                return new Expression.Literal(
+                    Number(left.value) * Number(right.value),
+                )
             }
         }
 
