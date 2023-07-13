@@ -44,4 +44,18 @@ describe('Literals', () => {
 
         expect(result).toBe(expected)
     })
+    test('it can print records', () => {
+        const input = new Expression.Literal(
+            new Map([
+                ['a', 'yo'],
+                ['b', 10],
+                ['c', new Map([['a1', true]])],
+            ]),
+        )
+        const expected = `{ "a": "yo", "b": 10, "c": { "a1": true } }`
+
+        const result = print(input)
+
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
 })

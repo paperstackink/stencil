@@ -59,6 +59,21 @@ describe('Literals', () => {
 
         expect(output).toEqual(expected)
     })
+
+    // We don't parse records so we have to manually create the AST
+    test('it can evaluate records', () => {
+        const input = new Map([
+            ['a', 'yo'],
+            ['b', 10],
+        ])
+        const expected = new Expression.Literal(input)
+
+        const ast = new Expression.Literal(input)
+        const interpreter = new Interpreter(ast)
+        const output = interpreter.interpret()
+
+        expect(output).toEqual(expected)
+    })
 })
 
 describe('Variables', () => {
