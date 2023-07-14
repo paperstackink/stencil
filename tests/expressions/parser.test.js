@@ -62,6 +62,22 @@ describe('Variables', () => {
     })
 })
 
+describe('Properties', () => {
+    test('it can parse a property access', () => {
+        const input = `identifier.property`
+        const expected = new Expression.Get(
+            new Expression.Variable('identifier'),
+            new Token('IDENTIFIER', 'property', '', 11),
+        )
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+})
+
 describe('Groups', () => {
     test('it can parse a group with a literal', () => {
         const input = `(true)`

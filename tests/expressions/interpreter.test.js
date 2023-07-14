@@ -3,6 +3,7 @@ import Parser from '@/expressions/Parser'
 import Tokenizer from '@/expressions/Tokenizer'
 import Expression from '@/expressions/Expression'
 import Interpreter from '@/expressions/Interpreter'
+import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
 
 const evaluate = (input, scope) => {
@@ -73,6 +74,51 @@ describe('Literals', () => {
         const output = interpreter.interpret()
 
         expect(output).toEqual(expected)
+    })
+})
+
+describe('Properties', () => {
+    test('it can access a property', () => {
+        const input = `record.property`
+        const expected = new Expression.Literal('value')
+        const output = evaluate(input, {
+            record: new Map([['property', 'value']]),
+        })
+
+        expect(output).toEqual(expected)
+    })
+
+    test('it can access a nested property', () => {
+        const input = `record.nested.property`
+        const expected = new Expression.Literal('value')
+        const output = evaluate(input, {
+            record: new Map([['nested', new Map([['property', 'value']])]]),
+        })
+
+        expect(output).toEqual(expected)
+    })
+
+    test("it returns null if the property doesn't exist", () => {
+        const input = `record.property`
+        const expected = new Expression.Literal(null)
+        const output = evaluate(input, {
+            record: new Map([]),
+        })
+
+        expect(output).toEqual(expected)
+    })
+
+    test('it fails if reading a property of anything but a record', () => {
+        const input = `record.property`
+        const expected = new Expression.Literal(null)
+        const runner = () =>
+            evaluate(input, {
+                record: 'string',
+            })
+
+        expect(runner).toThrow(
+            new RuntimeError('Can only access properties on records.'),
+        )
     })
 })
 

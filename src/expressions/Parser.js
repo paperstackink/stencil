@@ -114,7 +114,26 @@ class Parser {
             return new Expression.Unary(operator, expression)
         }
 
-        return this.primary()
+        return this.call()
+    }
+
+    call() {
+        let expression = this.primary()
+
+        while (true) {
+            if (this.match('DOT')) {
+                const name = this.consume(
+                    'IDENTIFIER',
+                    "Expect property name after '.'.",
+                )
+
+                expression = new Expression.Get(expression, name)
+            } else {
+                break
+            }
+        }
+
+        return expression
     }
 
     primary() {

@@ -127,10 +127,10 @@ class Tokenizer {
                 this.addToken('RIGHT_PARENTHESIS')
                 break
             }
-            // case '.': {
-            //     this.addToken('DOT')
-            //     break
-            // }
+            case '.': {
+                this.addToken('DOT')
+                break
+            }
             case '+': {
                 this.addToken('PLUS')
                 break

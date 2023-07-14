@@ -1,3 +1,14 @@
+class Get {
+    constructor(record, name) {
+        this.record = record
+        this.name = name
+    }
+
+    accept(visitor) {
+        return visitor.visitGetExpression(this)
+    }
+}
+
 class Unary {
     constructor(operator, expression) {
         this.operator = operator
@@ -76,6 +87,7 @@ class Variable {
 }
 
 export default {
+    Get,
     Unary,
     Binary,
     Literal,

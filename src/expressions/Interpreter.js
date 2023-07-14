@@ -28,6 +28,22 @@ class Interpreter {
         return this.evaluate(expression.expression)
     }
 
+    visitGetExpression(expression) {
+        const literal = this.evaluate(expression.record)
+
+        if (literal.value instanceof Map) {
+            const key = expression.name.lexeme
+
+            if (!literal.value.has(key)) {
+                return new Expression.Literal(null)
+            }
+
+            return new Expression.Literal(literal.value.get(key))
+        }
+
+        throw new RuntimeError('Can only access properties on records.')
+    }
+
     visitVariableExpression(expression) {
         if (expression.name in this.scope) {
             const resolved = this.scope[expression.name]
