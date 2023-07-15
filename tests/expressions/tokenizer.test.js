@@ -238,6 +238,16 @@ test('it can tokenize identifiers', () => {
     expect(result).toEqual(expected)
 })
 
+test('it can tokenize identifiers starting with "$"', () => {
+    const input = `$yo`
+    const expected = new Token('IDENTIFIER', '$yo', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
+
 test('it can tokenize double quoted strings', () => {
     const input = `"yo"`
     const expected = new Token('STRING', '"yo"', 'yo', 0)

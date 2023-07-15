@@ -161,7 +161,7 @@ class Tokenizer {
             default: {
                 if (isDigit(character)) {
                     this.number()
-                } else if (isAlpha(character)) {
+                } else if (isAlpha(character) || character === '$') {
                     this.identifier()
                 } else {
                     throw new ParserError('Unexpected character.')
