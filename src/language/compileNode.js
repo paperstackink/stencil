@@ -6,6 +6,7 @@ import compileTextNode from '@/language/compileTextNode'
 import compileFragment from '@/language/compileFragment'
 import compileElementNode from '@/language/compileElementNode'
 import compileIfDirective from '@/language/compileIfDirective'
+import compileEachDirective from '@/language/compileEachDirective'
 import compileComponentNode from '@/language/compileComponentNode'
 
 // Signature: node => [node]
@@ -16,6 +17,10 @@ export default function (node, context) {
         element: (node, context) => {
             if (node.tagName === 'if') {
                 return compileIfDirective(node, context)
+            }
+
+            if (node.tagName === 'each') {
+                return compileEachDirective(node, context)
             }
 
             if (node.tagName === 'slot') {
