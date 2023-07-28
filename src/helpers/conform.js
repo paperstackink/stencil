@@ -32,56 +32,60 @@ export default function (input) {
     output = output.replaceAll('@endif', '</if>')
 
     // For loops
-    // Check for empty @for directives:
+    // Check for empty @each directives:
     // Examples:
-    // @for()
-    // @for(  )
-    if (input.match(/\s*@for\s*\(\s*\)\s*/g)) {
-        throw new CompilationError('No expressions provided to @for directive.')
+    // @each()
+    // @each(  )
+    if (input.match(/\s*@each\s*\(\s*\)\s*/g)) {
+        throw new CompilationError(
+            'No expressions provided to @each directive.',
+        )
     }
 
     const openingForStatements = [
         ...input.matchAll(
-            /@for\s*\(\s*(?<variable>\w+)\s*(?:,\s*(?<index>\w+)\s*)?(?:in\s*)?(?<record>.+)?\s*\)/g,
+            /@each\s*\(\s*(?<variable>\w+)\s*(?:,\s*(?<key>\w+)\s*)?(?:in\s*)?(?<record>.+)?\s*\)/g,
         ),
     ]
-    const closingForStatements = [...input.matchAll(/@endfor/g)]
+    const closingForStatements = [...input.matchAll(/@endeach/g)]
 
     if (openingForStatements.length !== closingForStatements.length) {
         throw new CompilationError(
-            'There is an uneven number of opening and closing @for directives.',
+            'There is an uneven number of opening and closing @each directives.',
         )
     }
 
     for (const match of openingForStatements) {
         const lexeme = match[0]
         const variable = match.groups.variable
-        const index = match.groups.index
+        const key = match.groups.key
         const inOperator = match.groups.in
         const record = match.groups.record
 
         if (!variable || variable === 'in') {
-            throw new CompilationError('No variable defined in @for directive.')
+            throw new CompilationError(
+                'No variable defined in @each directive.',
+            )
         }
 
         if (!record || record === 'in') {
-            throw new CompilationError('No record defined in @for directive.')
+            throw new CompilationError('No record defined in @each directive.')
         }
 
-        if (index) {
+        if (key) {
             output = output.replace(
                 lexeme,
-                `<for variable="${variable.trim()}" record="${record.trim()}" index="${index.trim()}">`,
+                `<each variable="${variable.trim()}" record="${record.trim()}" key="${key.trim()}">`,
             )
         } else {
             output = output.replace(
                 lexeme,
-                `<for variable="${variable.trim()}" record="${record.trim()}">`,
+                `<each variable="${variable.trim()}" record="${record.trim()}">`,
             )
         }
     }
 
-    output = output.replaceAll('@endfor', '</for>')
+    output = output.replaceAll('@endeach', '</each>')
 
     return output
 }

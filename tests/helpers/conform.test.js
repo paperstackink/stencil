@@ -131,19 +131,19 @@ describe('@if directives', () => {
 
     test('it can convert if statements inside loops', () => {
         const input = `<div>
-    @for(item in items)
+    @each(item in items)
         @if(name equals "Yo")
             <span>Content</span>
         @endif
-    @endfor
+    @endeach
 </div>`
         const condition = encodeURI('name equals "Yo"')
         const expected = `<div>
-    <for variable="item" record="items">
+    <each variable="item" record="items">
         <if condition="${condition}">
             <span>Content</span>
         </if>
-    </for>
+    </each>
 </div>`
 
         const result = conform(input)
@@ -152,17 +152,17 @@ describe('@if directives', () => {
     })
 })
 
-describe('@for directives', () => {
+describe('@each directives', () => {
     test('it can convert @if to <if>', () => {
         const input = `<div>
-    @for(item in items)
+    @each(item in items)
         <span>{{ item }}</span>
-    @endfor
+    @endeach
 </div>`
         const expected = `<div>
-    <for variable="item" record="items">
+    <each variable="item" record="items">
         <span>{{ item }}</span>
-    </for>
+    </each>
 </div>`
 
         const result = conform(input)
@@ -170,16 +170,16 @@ describe('@for directives', () => {
         expect(result).toBe(expected)
     })
 
-    test('it can convert an index', () => {
+    test('it can convert an key', () => {
         const input = `<div>
-    @for(item, index in items)
+    @each(item, key in items)
         <span>{{ item }}</span>
-    @endfor
+    @endeach
 </div>`
         const expected = `<div>
-    <for variable="item" record="items" index="index">
+    <each variable="item" record="items" key="key">
         <span>{{ item }}</span>
-    </for>
+    </each>
 </div>`
 
         const result = conform(input)
@@ -189,14 +189,14 @@ describe('@for directives', () => {
 
     test('it ignores whitespace', () => {
         const input = `<div>
-    @for    (  item,index   in   items  )
+    @each    (  item,key   in   items  )
         <span>{{ item }}</span>
-    @endfor
+    @endeach
 </div>`
         const expected = `<div>
-    <for variable="item" record="items" index="index">
+    <each variable="item" record="items" key="key">
         <span>{{ item }}</span>
-    </for>
+    </each>
 </div>`
 
         const result = conform(input)
@@ -206,18 +206,18 @@ describe('@for directives', () => {
 
     test('it can convert nested loops', () => {
         const input = `<div>
-    @for(item in items)
-        @for(item2 in items2)
+    @each(item in items)
+        @each(item2 in items2)
             <span>{{ item }}</span>
-        @endfor
-    @endfor
+        @endeach
+    @endeach
 </div>`
         const expected = `<div>
-    <for variable="item" record="items">
-        <for variable="item2" record="items2">
+    <each variable="item" record="items">
+        <each variable="item2" record="items2">
             <span>{{ item }}</span>
-        </for>
-    </for>
+        </each>
+    </each>
 </div>`
 
         const result = conform(input)
@@ -228,16 +228,16 @@ describe('@for directives', () => {
     test('it can convert loops inside if statements', () => {
         const input = `<div>
     @if(true)
-        @for(item2 in items2)
+        @each(item2 in items2)
             <span>{{ item }}</span>
-        @endfor
+        @endeach
     @endif
 </div>`
         const expected = `<div>
     <if condition="true">
-        <for variable="item2" record="items2">
+        <each variable="item2" record="items2">
             <span>{{ item }}</span>
-        </for>
+        </each>
     </if>
 </div>`
 
@@ -248,58 +248,58 @@ describe('@for directives', () => {
 
     test('it fails if loop info is not provided', () => {
         const input = `<div>
-    @for()
+    @each()
         <span>{{ item }}</span>
-    @endfor
+    @endeach
 </div>`
 
         const runner = () => conform(input)
 
         expect(runner).toThrow(
-            new CompilationError('No expressions provided to @for directive.'),
+            new CompilationError('No expressions provided to @each directive.'),
         )
     })
 
     test('it fails if loop info is no variable', () => {
         const input = `<div>
-    @for(in items)
+    @each(in items)
         <span>{{ item }}</span>
-    @endfor
+    @endeach
 </div>`
 
         const runner = () => conform(input)
 
         expect(runner).toThrow(
-            new CompilationError('No variable defined in @for directive.'),
+            new CompilationError('No variable defined in @each directive.'),
         )
     })
 
     test('it fails if there is no record', () => {
         const input = `<div>
-    @for(item in)
+    @each(item in)
         <span>{{ item }}</span>
-    @endfor
+    @endeach
 </div>`
 
         const runner = () => conform(input)
 
         expect(runner).toThrow(
-            new CompilationError('No record defined in @for directive.'),
+            new CompilationError('No record defined in @each directive.'),
         )
     })
 
     test('it fails if there is not the same number of opening and closing statements', () => {
         const input = `<div>
-    @for(item in items)
-        @for(item in items)
+    @each(item in items)
+        @each(item in items)
         <span>{{ item }}</span>
-    @endfor
+    @endeach
 </div>`
         const runner = () => conform(input)
 
         expect(runner).toThrow(
             new CompilationError(
-                'There is an uneven number of opening and closing @for directives.',
+                'There is an uneven number of opening and closing @each directives.',
             ),
         )
     })
