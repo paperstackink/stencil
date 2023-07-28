@@ -82,6 +82,76 @@ describe('Default slots', () => {
     })
 
     test.todo('it warns if content is provided if there is no slot')
+
+    test('slots can be nested', async () => {
+        const input = `
+    <Extended>
+        <p>Content</p>
+    </Extended>
+`
+
+        const baseDefinition = `
+<main>
+    <slot />
+</main>
+`
+        const extendedDefinition = `
+<Base>
+    <section>
+        <slot>
+    </section>
+</Base>
+`
+        const expected = `
+<main>
+    <section>
+        <p>Content</p>
+    </section>
+</main>
+`
+
+        const result = await compile(input, {
+            components: {
+                Extended: extendedDefinition,
+                Base: baseDefinition,
+            },
+        })
+
+        expect(result).toBe(expected)
+    })
+
+    test('slots can be directly nested', async () => {
+        const input = `
+    <Extended>
+        <p>Content</p>
+    </Extended>
+`
+
+        const baseDefinition = `
+<main>
+    <slot />
+</main>
+`
+        const extendedDefinition = `
+<Base>
+    <slot>
+</Base>
+`
+        const expected = `
+<main>
+    <p>Content</p>
+</main>
+`
+
+        const result = await compile(input, {
+            components: {
+                Extended: extendedDefinition,
+                Base: baseDefinition,
+            },
+        })
+
+        expect(result).toBe(expected)
+    })
 })
 
 describe('Default content', () => {
