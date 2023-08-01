@@ -89,6 +89,39 @@ test('it can print the key', async () => {
     expect(result).toEqualIgnoringWhitespace(expected)
 })
 
+test('it compiles the record expression', async () => {
+    const input = `
+<div>
+    @each(item, key in $record.nested)
+        <span>{{ key }}</span>
+    @endeach
+</div>
+`
+    const expected = `
+<div>
+    <span>item1</span>
+    <span>item2</span>
+    <span>item3</span>
+</div>
+`
+    const result = await compile(input, {
+        environment: {
+            $record: new Map([
+                [
+                    'nested',
+                    new Map([
+                        ['item1', new Map([['value', 'Item 1']])],
+                        ['item2', new Map([['value', 'Item 2']])],
+                        ['item3', new Map([['value', 'Item 3']])],
+                    ]),
+                ],
+            ]),
+        },
+    })
+
+    expect(result).toEqualIgnoringWhitespace(expected)
+})
+
 test('it compiles the loop html', async () => {
     const input = `
 <div>
