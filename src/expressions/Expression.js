@@ -1,6 +1,6 @@
 class Get {
-    constructor(record, name) {
-        this.record = record
+    constructor(item, name) {
+        this.item = item
         this.name = name
     }
 

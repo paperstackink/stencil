@@ -78,47 +78,105 @@ describe('Literals', () => {
 })
 
 describe('Properties', () => {
-    test('it can access a property', () => {
-        const input = `record.property`
-        const expected = new Expression.Literal('value')
-        const output = evaluate(input, {
-            record: new Map([['property', 'value']]),
-        })
-
-        expect(output).toEqual(expected)
-    })
-
-    test('it can access a nested property', () => {
-        const input = `record.nested.property`
-        const expected = new Expression.Literal('value')
-        const output = evaluate(input, {
-            record: new Map([['nested', new Map([['property', 'value']])]]),
-        })
-
-        expect(output).toEqual(expected)
-    })
-
-    test("it returns null if the property doesn't exist", () => {
-        const input = `record.property`
-        const expected = new Expression.Literal(null)
-        const output = evaluate(input, {
-            record: new Map([]),
-        })
-
-        expect(output).toEqual(expected)
-    })
-
-    test('it fails if reading a property of anything but a record', () => {
-        const input = `record.property`
-        const expected = new Expression.Literal(null)
-        const runner = () =>
-            evaluate(input, {
-                record: 'string',
+    describe('Records', () => {
+        test('it can read a property on a record', () => {
+            const input = `record.property`
+            const expected = new Expression.Literal('value')
+            const output = evaluate(input, {
+                record: new Map([['property', 'value']]),
             })
 
-        expect(runner).toThrow(
-            new RuntimeError('Can only access properties on records.'),
-        )
+            expect(output).toEqual(expected)
+        })
+
+        test('it can read nested propertie', () => {
+            const input = `record.nested.property`
+            const expected = new Expression.Literal('value')
+            const output = evaluate(input, {
+                record: new Map([['nested', new Map([['property', 'value']])]]),
+            })
+
+            expect(output).toEqual(expected)
+        })
+
+        test("it returns null if the property doesn't exist on a record", () => {
+            const input = `record.property`
+            const expected = new Expression.Literal(null)
+            const output = evaluate(input, {
+                record: new Map([]),
+            })
+
+            expect(output).toEqual(expected)
+        })
+
+        test("it can read 'type' on records", () => {
+            const input = `record.type`
+            const expected = new Expression.Literal('record')
+            const output = evaluate(input, {
+                record: new Map(),
+            })
+
+            expect(output).toEqual(expected)
+        })
+    })
+
+    describe('Literals', () => {
+        test("it can read 'type' on strings", () => {
+            const input = `"some string".type`
+            const expected = new Expression.Literal('string')
+            const output = evaluate(input)
+
+            expect(output).toEqual(expected)
+        })
+
+        test("it can read 'type' on booleans", () => {
+            const input = `true.type`
+            const expected = new Expression.Literal('boolean')
+            const output = evaluate(input)
+
+            expect(output).toEqual(expected)
+        })
+
+        test("it can read 'type' on numbers", () => {
+            const input = `1.2.type`
+            const expected = new Expression.Literal('number')
+            const output = evaluate(input)
+
+            expect(output).toEqual(expected)
+        })
+
+        test('it errors if reading properties on null', () => {
+            const input = `null.type`
+            const expected = new Expression.Literal('null')
+            const runner = () =>
+                evaluate(input, {
+                    record: 'string',
+                })
+
+            expect(runner).toThrow(
+                new RuntimeError("Cannot read properties on 'null'"),
+            )
+        })
+
+        test("it returns null if the property doesn't exist on non-records", () => {
+            const input = `"some string".random`
+            const expected = new Expression.Literal(null)
+            const output = evaluate(input)
+
+            expect(output).toEqual(expected)
+        })
+    })
+
+    describe('Variables', () => {
+        test("it can read 'type' on variables", () => {
+            const input = `variable.type`
+            const expected = new Expression.Literal('string')
+            const output = evaluate(input, {
+                variable: 'Yo',
+            })
+
+            expect(output).toEqual(expected)
+        })
     })
 })
 

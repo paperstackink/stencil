@@ -1,6 +1,7 @@
 import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
 import Expression from '@/expressions/Expression'
+import match from '@/helpers/match'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -29,19 +30,50 @@ class Interpreter {
     }
 
     visitGetExpression(expression) {
-        const literal = this.evaluate(expression.record)
+        const literal = this.evaluate(expression.item)
 
         if (literal.value instanceof Map) {
             const key = expression.name.lexeme
 
             if (!literal.value.has(key)) {
-                return new Expression.Literal(null)
+                if (key === 'type') {
+                    return new Expression.Literal('record')
+                } else {
+                    return new Expression.Literal(null)
+                }
             }
 
             return new Expression.Literal(literal.value.get(key))
         }
 
-        throw new RuntimeError('Can only access properties on records.')
+        if (expression.name.lexeme === 'type') {
+            if (expression.item instanceof Expression.Literal) {
+                if (typeof expression.item.value === 'string') {
+                    return new Expression.Literal('string')
+                }
+
+                if (typeof expression.item.value === 'boolean') {
+                    return new Expression.Literal('boolean')
+                }
+
+                if (typeof expression.item.value === 'number') {
+                    return new Expression.Literal('number')
+                }
+
+                if (expression.item.value === null) {
+                    throw new RuntimeError("Cannot read properties on 'null'")
+                }
+            }
+
+            if (expression.item instanceof Expression.Variable) {
+                const resolved = this.visitVariableExpression(expression.item)
+                const newExpression = { ...expression, item: resolved }
+
+                return this.visitGetExpression(newExpression)
+            }
+        }
+
+        return new Expression.Literal(null)
     }
 
     visitVariableExpression(expression) {
