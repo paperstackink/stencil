@@ -5,7 +5,7 @@ export default class DummyInfinite extends Callable {
 		return Infinity
 	}
 
-	call(interpreter, args) {
+	call(args) {
 		return args[0]
 	}
 }

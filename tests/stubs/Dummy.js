@@ -5,7 +5,7 @@ export default class Dummy extends Callable {
 		return 1
 	}
 
-	call(interpreter, args) {
+	call(args) {
 		return args[0]
 	}
 }

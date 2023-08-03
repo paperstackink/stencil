@@ -3,6 +3,7 @@ import InternalError from '@/expressions/errors/InternalError'
 import Expression from '@/expressions/Expression'
 import match from '@/helpers/match'
 import Callable from '@/expressions/functions/Callable'
+import ToLowerCase from '@/expressions/methods/ToLowerCase'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -47,31 +48,41 @@ class Interpreter {
             return new Expression.Literal(literal.value.get(key))
         }
 
-        if (expression.name.lexeme === 'type') {
-            if (expression.item instanceof Expression.Literal) {
-                if (typeof expression.item.value === 'string') {
+        if (expression.item instanceof Expression.Literal) {
+            if (typeof expression.item.value === 'string') {
+                if (expression.name.lexeme === 'type') {
                     return new Expression.Literal('string')
                 }
 
-                if (typeof expression.item.value === 'boolean') {
+                if (expression.name.lexeme === 'toLowerCase') {
+                    return new Expression.Literal(
+                        new ToLowerCase(expression.item),
+                    )
+                }
+            }
+
+            if (typeof expression.item.value === 'boolean') {
+                if (expression.name.lexeme === 'type') {
                     return new Expression.Literal('boolean')
                 }
+            }
 
-                if (typeof expression.item.value === 'number') {
+            if (typeof expression.item.value === 'number') {
+                if (expression.name.lexeme === 'type') {
                     return new Expression.Literal('number')
                 }
-
-                if (expression.item.value === null) {
-                    throw new RuntimeError("Cannot read properties on 'null'")
-                }
             }
 
-            if (expression.item instanceof Expression.Variable) {
-                const resolved = this.visitVariableExpression(expression.item)
-                const newExpression = { ...expression, item: resolved }
-
-                return this.visitGetExpression(newExpression)
+            if (expression.item.value === null) {
+                throw new RuntimeError("Cannot read properties on 'null'")
             }
+        }
+
+        if (expression.item instanceof Expression.Variable) {
+            const resolved = this.visitVariableExpression(expression.item)
+            const newExpression = { ...expression, item: resolved }
+
+            return this.visitGetExpression(newExpression)
         }
 
         return new Expression.Literal(null)
@@ -102,7 +113,7 @@ class Interpreter {
             )
         }
 
-        return callable.call(this, args)
+        return callable.call(args)
     }
 
     visitVariableExpression(expression) {

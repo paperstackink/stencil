@@ -92,7 +92,7 @@ describe('Properties', () => {
             expect(output).toEqual(expected)
         })
 
-        test('it can read nested propertie', () => {
+        test('it can read nested properties', () => {
             const input = `record.nested.property`
             const expected = new Expression.Literal('value')
             const output = evaluate(input, {
@@ -293,68 +293,90 @@ describe('Unary Expressions', () => {
 })
 
 describe('Call Expressions', () => {
-    test('it evaluates call expressions', () => {
-        const input = `dummy('Yo')`
-        const expected = new Expression.Literal('Yo')
-        const output = evaluate(input, {
-            dummy: new Dummy(),
-        })
-
-        expect(output).toEqual(expected)
-    })
-
-    test('it evaluates expressions arguments', () => {
-        const input = `dummy(1 + 2)`
-        const expected = new Expression.Literal(3)
-        const output = evaluate(input, {
-            dummy: new Dummy(),
-        })
-
-        expect(output).toEqual(expected)
-    })
-
-    test('it fails if you call a non-function as a function', () => {
-        const input = `"a string"()`
-        const runner = () => evaluate(input)
-
-        expect(runner).toThrow(new RuntimeError('Can only call functions.'))
-    })
-
-    test('it fails if you call a non-existing function', () => {
-        const input = `random()`
-        const runner = () => evaluate(input, {})
-
-        expect(runner).toThrow(
-            new RuntimeError("Can not call functions on 'null'."),
-        )
-    })
-
-    test('it fails if you provide the wrong number of arguments', () => {
-        const input = `dummy(1, 2)`
-        const runner = () =>
-            evaluate(input, {
+    describe('Functions', () => {
+        test('it evaluates call expressions', () => {
+            const input = `dummy('Yo')`
+            const expected = new Expression.Literal('Yo')
+            const output = evaluate(input, {
                 dummy: new Dummy(),
             })
 
-        expect(runner).toThrow(
-            new RuntimeError('Expected 1 arguments but got 2.'),
-        )
+            expect(output).toEqual(expected)
+        })
+
+        test('it evaluates expressions arguments', () => {
+            const input = `dummy(1 + 2)`
+            const expected = new Expression.Literal(3)
+            const output = evaluate(input, {
+                dummy: new Dummy(),
+            })
+
+            expect(output).toEqual(expected)
+        })
+
+        test('it fails if you call a non-function as a function', () => {
+            const input = `"a string"()`
+            const runner = () => evaluate(input)
+
+            expect(runner).toThrow(new RuntimeError('Can only call functions.'))
+        })
+
+        test('it fails if you call a non-existing function', () => {
+            const input = `random()`
+            const runner = () => evaluate(input, {})
+
+            expect(runner).toThrow(
+                new RuntimeError("Can not call functions on 'null'."),
+            )
+        })
+
+        test('it fails if you provide the wrong number of arguments', () => {
+            const input = `dummy(1, 2)`
+            const runner = () =>
+                evaluate(input, {
+                    dummy: new Dummy(),
+                })
+
+            expect(runner).toThrow(
+                new RuntimeError('Expected 1 arguments but got 2.'),
+            )
+        })
+
+        test('it does not fail if the function takes any number of arguments', () => {
+            const input1 = `dummy()`
+            const runner1 = () =>
+                evaluate(input1, {
+                    dummy: new DummyInfinite(),
+                })
+            const input2 = `dummy(1, 2, 3)`
+            const runner2 = () =>
+                evaluate(input2, {
+                    dummy: new DummyInfinite(),
+                })
+
+            expect(runner1).not.toThrow()
+            expect(runner2).not.toThrow()
+        })
     })
 
-    test('it does not fail if the function takes any number of arguments', () => {
-        const input1 = `dummy()`
-        const runner1 = () =>
-            evaluate(input1, {
-                dummy: new DummyInfinite(),
-            })
-        const input2 = `dummy(1, 2, 3)`
-        const runner2 = () =>
-            evaluate(input2, {
-                dummy: new DummyInfinite(),
+    describe('Methods', () => {
+        test('it evaluates methods on record', () => {
+            const input = `record.dummy(1)`
+            const expected = new Expression.Literal(1)
+            const output = evaluate(input, {
+                record: new Map([['dummy', new Dummy()]]),
             })
 
-        expect(runner1).not.toThrow()
-        expect(runner2).not.toThrow()
+            expect(output).toEqual(expected)
+        })
+
+        test('it evaluates methods on other data types', () => {
+            const input = `"YoYo".toLowerCase()`
+            const expected = new Expression.Literal('yoyo')
+            const output = evaluate(input)
+
+            expect(output).toEqual(expected)
+        })
     })
 })
 
