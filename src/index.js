@@ -8,15 +8,22 @@ import isDocument from '@/helpers/isDocument'
 
 import templates from '@/language/templates'
 
+import Debug from '@/expressions/functions/Debug'
+
 const defaultContext = {
     components: {},
     environment: {},
 }
 
 export const compile = async (input, providedContext = defaultContext) => {
-    const context = {
+    let context = {
         ...defaultContext,
         ...providedContext,
+    }
+
+    context.environment = {
+        ...context.environment,
+        debug: new Debug(),
     }
 
     const result = await unified()
