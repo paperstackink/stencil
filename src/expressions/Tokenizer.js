@@ -131,6 +131,10 @@ class Tokenizer {
                 this.addToken('DOT')
                 break
             }
+            case ',': {
+                this.addToken('COMMA')
+                break
+            }
             case '+': {
                 this.addToken('PLUS')
                 break

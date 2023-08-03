@@ -188,6 +188,16 @@ test('it can tokenize "."', () => {
     expect(result).toEqual(expected)
 })
 
+test('it can tokenize ","', () => {
+    const input = `,`
+    const expected = new Token('COMMA', ',', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
+
 test('it can tokenize "+"', () => {
     const input = `+`
     const expected = new Token('PLUS', '+', '', 0)

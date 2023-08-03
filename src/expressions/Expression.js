@@ -1,3 +1,15 @@
+class Call {
+    constructor(callee, parenthesis, args) {
+        this.callee = callee
+        this.parenthesis = parenthesis
+        this.args = args
+    }
+
+    accept(visitor) {
+        return visitor.visitCallExpression(this)
+    }
+}
+
 class Get {
     constructor(item, name) {
         this.item = item
@@ -88,6 +100,7 @@ class Variable {
 
 export default {
     Get,
+    Call,
     Unary,
     Binary,
     Literal,
