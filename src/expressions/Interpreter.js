@@ -2,6 +2,7 @@ import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
 import Expression from '@/expressions/Expression'
 import match from '@/helpers/match'
+import Callable from '@/expressions/functions/Callable'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -74,6 +75,34 @@ class Interpreter {
         }
 
         return new Expression.Literal(null)
+    }
+
+    visitCallExpression(expression) {
+        const callee = this.evaluate(expression.callee)
+
+        const callable = callee.value
+
+        if (callable === null) {
+            throw new RuntimeError("Can not call functions on 'null'.")
+        }
+
+        if (!(callable instanceof Callable)) {
+            throw new RuntimeError('Can only call functions.')
+        }
+
+        const args = expression.args.map(argument => {
+            return this.evaluate(argument)
+        })
+
+        if (args.length !== callable.arity() && callable.arity() !== Infinity) {
+            throw new RuntimeError(
+                `Expected ${callable.arity()} arguments but got ${
+                    args.length
+                }.`,
+            )
+        }
+
+        return callable.call(this, args)
     }
 
     visitVariableExpression(expression) {
