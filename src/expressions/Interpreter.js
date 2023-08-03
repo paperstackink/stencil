@@ -1,9 +1,11 @@
+import match from '@/helpers/match'
+import Expression from '@/expressions/Expression'
 import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
-import Expression from '@/expressions/Expression'
-import match from '@/helpers/match'
+
 import Callable from '@/expressions/functions/Callable'
-import ToLowerCase from '@/expressions/methods/ToLowerCase'
+import ToLowerCase from '@/expressions/methods/strings/ToLowerCase'
+import SortBy from '@/expressions/methods/records/SortBy'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -40,6 +42,8 @@ class Interpreter {
             if (!literal.value.has(key)) {
                 if (key === 'type') {
                     return new Expression.Literal('record')
+                } else if (key === 'sortBy') {
+                    return new Expression.Literal(new SortBy(literal))
                 } else {
                     return new Expression.Literal(null)
                 }
