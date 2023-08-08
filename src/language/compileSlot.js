@@ -24,5 +24,5 @@ export default function (node, context) {
         }
     }
 
-    return context.slots.default.flatMap(node => compileNode(node, context))
+    return context.slots.default.flatMap(child => compileNode(child, context))
 }

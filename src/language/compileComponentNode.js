@@ -5,8 +5,9 @@ import { select } from 'hast-util-select'
 import CompilationError from '@/errors/CompilationError'
 
 import templates from '@/language/templates'
-import compileAttributes from '@/language/compileAttributes'
+import compileSlots from '@/language/compileSlots'
 import normaliseTree from '@/language/normaliseTree'
+import compileAttributes from '@/language/compileAttributes'
 
 import conform from '@/helpers/conform'
 import afterLast from '@/helpers/afterLast'
@@ -40,19 +41,26 @@ export default function (node, context) {
         context,
     )
 
+    const newContext = {
+        environment: { ...context.environment, ...attributes },
+        components: context.components,
+        slots: { default: node.children },
+    }
+
+    // In order to support component 'extending' other components,
+    // we need to pre-compile the slots before compiling any nested components.
+    const treeWithCompiledSlots = compileSlots(componentTree, newContext)
+
     // When we run 'parse' above it only executes the 'parse' phase of the lifecycle
     // We have to explicitly call 'runSync' to get it to run plugins on the tree
     const transformedComponentTree = unified()
-        .use(templates, {
-            environment: { ...context.environment, ...attributes },
-            components: context.components,
-            slots: { default: node.children },
-        })
-        .runSync(normalisedTree)
+        .use(templates, newContext)
+        .runSync(treeWithCompiledSlots)
 
-    const usedAttributes = extractUsedIdentifiersFromNode(
-        transformedComponentTree,
-    )
+    const usedAttributes = [
+        ...extractUsedIdentifiersFromNode(treeWithCompiledSlots), // For some reason some 'meta' data gets lost when compiling this tree so for now we just extract from this tree as well
+        ...extractUsedIdentifiersFromNode(transformedComponentTree),
+    ]
 
     // Get the actual root node
     const component = select(':first-child', transformedComponentTree)
