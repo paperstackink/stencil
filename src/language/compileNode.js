@@ -31,6 +31,10 @@ export default function (node, context) {
                 return compileFragment(node, context)
             }
 
+            if (node.tagName === 'Data') {
+                return []
+            }
+
             if (isUppercase(node.tagName.charAt(0))) {
                 return compileComponentNode(node, context)
             }
