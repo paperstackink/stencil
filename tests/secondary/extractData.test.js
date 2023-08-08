@@ -1,0 +1,123 @@
+import extractData from '@/secondary/extractData'
+import CompilationError from '@/errors/CompilationError'
+
+test('it extracts data from a top-level Data component', async () => {
+	const input = `
+<Data>
+	layout: Article
+</Data>
+`
+	const expected = new Map([['layout', 'Article']])
+
+	const result = await extractData(input)
+
+	expect(result).toEqual(expected)
+})
+
+test('it extracts data from a nested Data component', async () => {
+	const input = `
+<div>
+	<span>
+		<Data>
+			layout: Article
+		</Data>
+	</span>
+</div>
+`
+	const expected = new Map([['layout', 'Article']])
+
+	const result = await extractData(input)
+
+	expect(result).toEqual(expected)
+})
+
+test("it doesn't extract data from inside a component", async () => {
+	const input = `
+<div>
+	<span>
+		<Card />
+	</span>
+</div>
+`
+	const Component = `
+<div>
+	<Data>
+		layout: Article
+	</Data>
+</div>
+`
+
+	const expected = new Map()
+
+	const result = await extractData(input)
+
+	expect(result).toEqual(expected)
+})
+
+test('it compiles data inside as yaml', async () => {
+	const input = `
+<Data>
+    string: 'string'
+    integer: 25
+    float: 2.5
+    boolean: true
+    date: 2024-12-24
+    nested:
+        key: 'nested'
+    list:
+        - item 1
+        - item 2
+        - item 3
+</Data>
+`
+	const expected = new Map([
+		['date', new Date('2024-12-24')],
+		['float', 2.5],
+		['integer', 25],
+		['boolean', true],
+		['string', 'string'],
+		['nested', new Map([['key', 'nested']])],
+		['list', ['item 1', 'item 2', 'item 3']],
+	])
+
+	const result = await extractData(input)
+
+	expect(result).toEqual(expected)
+})
+
+test('it merges Data components if there is more than 1', async () => {
+	const input = `
+<div>
+    <Data>
+        first: 'first'
+        overlapping: false
+    </Data>
+    <div>
+        <Data>
+            second: 'second'
+            overlapping: true
+        </Data>
+    </div>
+</div>
+`
+	const expected = new Map([
+		['first', 'first'],
+		['second', 'second'],
+		['overlapping', true],
+	])
+
+	const result = await extractData(input)
+
+	expect(result).toEqual(expected)
+})
+
+test('it fails if the Data component contains other nodes', async () => {
+	const input = `
+<Data>
+	layout: Article
+	<span>Yo</span>
+</Data>
+`
+
+	await expect(extractData(input)).rejects.toThrow(CompilationError)
+})

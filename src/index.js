@@ -7,6 +7,7 @@ import conform from '@/helpers/conform'
 import isDocument from '@/helpers/isDocument'
 
 import templates from '@/language/templates'
+import extractData from '@/language/extractData'
 
 import Debug from '@/expressions/functions/Debug'
 
@@ -26,6 +27,8 @@ export const compile = async (input, providedContext = defaultContext) => {
         debug: new Debug(),
     }
 
+    let data = await extractData(input)
+
     const result = await unified()
         .use(parse, {
             fragment: !isDocument(input.trim()),
@@ -42,5 +45,5 @@ export const compile = async (input, providedContext = defaultContext) => {
         })
         .process(conform(input.trim()))
 
-    return result.toString()
+    return [result.toString(), data]
 }
