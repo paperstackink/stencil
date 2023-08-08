@@ -7,6 +7,9 @@ import conform from '@/helpers/conform'
 import isDocument from '@/helpers/isDocument'
 
 import templates from '@/language/templates'
+import extractData from '@/secondary/extractData'
+
+import Debug from '@/expressions/functions/Debug'
 
 const defaultContext = {
     components: {},
@@ -14,9 +17,14 @@ const defaultContext = {
 }
 
 export const compile = async (input, providedContext = defaultContext) => {
-    const context = {
+    let context = {
         ...defaultContext,
         ...providedContext,
+    }
+
+    context.environment = {
+        ...context.environment,
+        debug: new Debug(),
     }
 
     const result = await unified()
@@ -37,3 +45,5 @@ export const compile = async (input, providedContext = defaultContext) => {
 
     return result.toString()
 }
+
+export { extractData }

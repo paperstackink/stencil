@@ -178,15 +178,25 @@ test('it can tokenize ")"', () => {
     expect(result).toEqual(expected)
 })
 
-// test('it can tokenize "."', () => {
-//     const input = `.`
-//     const expected = new Token('DOT', '.', '', 0)
-//     const tokenizer = new Tokenizer(input)
+test('it can tokenize "."', () => {
+    const input = `.`
+    const expected = new Token('DOT', '.', '', 0)
+    const tokenizer = new Tokenizer(input)
 
-//     const result = tokenizer.scanTokens(input)[0]
+    const result = tokenizer.scanTokens(input)[0]
 
-//     expect(result).toEqual(expected)
-// })
+    expect(result).toEqual(expected)
+})
+
+test('it can tokenize ","', () => {
+    const input = `,`
+    const expected = new Token('COMMA', ',', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
 
 test('it can tokenize "+"', () => {
     const input = `+`
@@ -238,6 +248,16 @@ test('it can tokenize identifiers', () => {
     expect(result).toEqual(expected)
 })
 
+test('it can tokenize identifiers starting with "$"', () => {
+    const input = `$yo`
+    const expected = new Token('IDENTIFIER', '$yo', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
+
 test('it can tokenize double quoted strings', () => {
     const input = `"yo"`
     const expected = new Token('STRING', '"yo"', 'yo', 0)
@@ -276,24 +296,6 @@ test('it can tokenize floats', () => {
     const result = tokenizer.scanTokens(input)[0]
 
     expect(result).toEqual(expected)
-})
-
-test('a float must start with an integer', () => {
-    const input = `.3`
-    const tokenizer = new Tokenizer(input)
-
-    const runner = () => tokenizer.scanTokens(input)
-
-    expect(runner).toThrow(new ParserError('Unexpected character.'))
-})
-
-test('a float must end with an integer', () => {
-    const input = `3.`
-    const tokenizer = new Tokenizer(input)
-
-    const runner = () => tokenizer.scanTokens(input)
-
-    expect(runner).toThrow(new ParserError('Unexpected character.'))
 })
 
 test('a string must be terminated', () => {

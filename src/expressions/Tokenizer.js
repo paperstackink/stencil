@@ -127,10 +127,14 @@ class Tokenizer {
                 this.addToken('RIGHT_PARENTHESIS')
                 break
             }
-            // case '.': {
-            //     this.addToken('DOT')
-            //     break
-            // }
+            case '.': {
+                this.addToken('DOT')
+                break
+            }
+            case ',': {
+                this.addToken('COMMA')
+                break
+            }
             case '+': {
                 this.addToken('PLUS')
                 break
@@ -161,7 +165,7 @@ class Tokenizer {
             default: {
                 if (isDigit(character)) {
                     this.number()
-                } else if (isAlpha(character)) {
+                } else if (isAlpha(character) || character === '$') {
                     this.identifier()
                 } else {
                     throw new ParserError('Unexpected character.')

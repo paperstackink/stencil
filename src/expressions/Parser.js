@@ -114,7 +114,28 @@ class Parser {
             return new Expression.Unary(operator, expression)
         }
 
-        return this.primary()
+        return this.call()
+    }
+
+    call() {
+        let expression = this.primary()
+
+        while (true) {
+            if (this.match('LEFT_PARENTHESIS')) {
+                expression = this.finishCall(expression)
+            } else if (this.match('DOT')) {
+                const name = this.consume(
+                    'IDENTIFIER',
+                    "Expect property name after '.'.",
+                )
+
+                expression = new Expression.Get(expression, name)
+            } else {
+                break
+            }
+        }
+
+        return expression
     }
 
     primary() {
@@ -195,6 +216,27 @@ class Parser {
 
     isAtEnd() {
         return this.peek().type === 'EOF'
+    }
+
+    finishCall(callee) {
+        let args = []
+
+        if (!this.check('RIGHT_PARENTHESIS')) {
+            do {
+                if (args.length >= 255) {
+                    throw new ParserError("Can't have more than 255 arguments.")
+                }
+
+                args.push(this.expression())
+            } while (this.match('COMMA'))
+        }
+
+        const parenthesis = this.consume(
+            'RIGHT_PARENTHESIS',
+            "Expect ')' after arguments.",
+        )
+
+        return new Expression.Call(callee, parenthesis, args)
     }
 }
 

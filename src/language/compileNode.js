@@ -6,6 +6,7 @@ import compileTextNode from '@/language/compileTextNode'
 import compileFragment from '@/language/compileFragment'
 import compileElementNode from '@/language/compileElementNode'
 import compileIfDirective from '@/language/compileIfDirective'
+import compileEachDirective from '@/language/compileEachDirective'
 import compileComponentNode from '@/language/compileComponentNode'
 
 // Signature: node => [node]
@@ -18,12 +19,20 @@ export default function (node, context) {
                 return compileIfDirective(node, context)
             }
 
+            if (node.tagName === 'each') {
+                return compileEachDirective(node, context)
+            }
+
             if (node.tagName === 'slot') {
                 return compileSlot(node, context)
             }
 
             if (node.tagName === 'Fragment') {
                 return compileFragment(node, context)
+            }
+
+            if (node.tagName === 'Data') {
+                return []
             }
 
             if (isUppercase(node.tagName.charAt(0))) {
