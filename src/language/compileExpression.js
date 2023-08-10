@@ -1,4 +1,5 @@
 import Parser from '@/expressions/Parser'
+import Printer from '@/expressions/Printer'
 import Tokenizer from '@/expressions/Tokenizer'
 import Interpreter from '@/expressions/Interpreter'
 import CompilationError from '@/errors/CompilationError'
@@ -33,13 +34,16 @@ export default function (source, values = {}) {
         const ast = parser.parse()
 
         const interpreter = new Interpreter(ast, normalisedValues)
-        const output = interpreter.interpret()
+        const literal = interpreter.interpret()
+
+        const printer = new Printer(literal)
+        const output = printer.print()
 
         const usedIdentifiers = normalisedTokens
             .filter(token => token.type === 'IDENTIFIER')
             .map(token => token.lexeme)
 
-        return [String(output), usedIdentifiers]
+        return [output, usedIdentifiers]
     } catch (error) {
         throw new CompilationError(error.message)
     }

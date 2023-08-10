@@ -2,6 +2,7 @@ import Token from '@/expressions/Token'
 import Parser from '@/expressions/Parser'
 import Tokenizer from '@/expressions/Tokenizer'
 import Expression from '@/expressions/Expression'
+import ParserError from '@/expressions/errors/ParserError'
 
 describe('Literals', () => {
     test('it can parse "false"', () => {
@@ -53,6 +54,22 @@ describe('Variables', () => {
     test('it can parse an identifier', () => {
         const input = `yo`
         const expected = new Expression.Variable('yo')
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+})
+
+describe('Properties', () => {
+    test('it can parse a property access', () => {
+        const input = `identifier.property`
+        const expected = new Expression.Get(
+            new Expression.Variable('identifier'),
+            new Token('IDENTIFIER', 'property', '', 11),
+        )
         const tokenizer = new Tokenizer(input)
         const tokens = tokenizer.scanTokens()
         const parser = new Parser(tokens)
@@ -327,6 +344,114 @@ describe('Unary Expressions', () => {
         const expected = new Expression.Unary(
             new Token('MINUS', '-', '', 0),
             new Expression.Literal(1),
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+})
+
+describe('Call expressions', () => {
+    test('it can parse a function call without any arguments', () => {
+        const input = `print()`
+        const expected = new Expression.Call(
+            new Expression.Variable('print'),
+            new Token('RIGHT_PARENTHESIS', ')', '', 6),
+            [],
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+
+    test('it can parse a function call with one argument', () => {
+        const input = `print("arg1")`
+        const expected = new Expression.Call(
+            new Expression.Variable('print'),
+            new Token('RIGHT_PARENTHESIS', ')', '', 12),
+            [new Expression.Literal('arg1')],
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+
+    test('it can parse a function call with multiple arguments', () => {
+        const input = `print("arg1", 2)`
+        const expected = new Expression.Call(
+            new Expression.Variable('print'),
+            new Token('RIGHT_PARENTHESIS', ')', '', 15),
+            [new Expression.Literal('arg1'), new Expression.Literal(2)],
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+
+    test('it cannot parse function calls with more than 255 arguments', () => {
+        const args = new Array(256).fill('X').join(', ')
+        const input = `print(${args})`
+
+        const runner = () => {
+            const tokenizer = new Tokenizer(input)
+            const tokens = tokenizer.scanTokens()
+            const parser = new Parser(tokens)
+            const ast = parser.parse()
+        }
+
+        expect(runner).toThrow(
+            new ParserError("Can't have more than 255 arguments."),
+        )
+    })
+
+    test('it can chain function calls', () => {
+        const input = `print()()`
+        const expected = new Expression.Call(
+            new Expression.Call(
+                new Expression.Variable('print'),
+                new Token('RIGHT_PARENTHESIS', ')', '', 6),
+                [],
+            ),
+            new Token('RIGHT_PARENTHESIS', ')', '', 8),
+            [],
+        )
+
+        const tokenizer = new Tokenizer(input)
+        const tokens = tokenizer.scanTokens()
+        const parser = new Parser(tokens)
+        const ast = parser.parse()
+
+        expect(ast).toEqual(expected)
+    })
+
+    test('arguments can be expressions', () => {
+        const input = `print(1 + 2)`
+        const expected = new Expression.Call(
+            new Expression.Variable('print'),
+            new Token('RIGHT_PARENTHESIS', ')', '', 11),
+            [
+                new Expression.Binary(
+                    new Expression.Literal(1),
+                    new Token('PLUS', '+', '', 8),
+                    new Expression.Literal(2),
+                ),
+            ],
         )
 
         const tokenizer = new Tokenizer(input)

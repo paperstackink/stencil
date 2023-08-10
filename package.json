@@ -1,6 +1,6 @@
 {
     "name": "@paperstack/stencil",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "main": "_dist/index.js",
     "scripts": {
         "build": "node scripts/build.js",
@@ -21,10 +21,12 @@
     },
     "dependencies": {
         "hast-util-select": "^5.0.2",
+        "lodash": "^4.17.21",
         "rehype-format": "^4.0.1",
         "rehype-parse-ns": "^8.0.5",
         "rehype-stringify": "^9.0.3",
-        "unified": "^10.1.2"
+        "unified": "^10.1.2",
+        "yaml": "^2.3.1"
     },
     "types": "./_dist/index.d.ts",
     "directories": {
