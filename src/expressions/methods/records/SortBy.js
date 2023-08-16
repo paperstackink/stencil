@@ -9,12 +9,13 @@ export default class SortBy extends Callable {
 	}
 
 	arity() {
-		return 2
+		return [1, 2]
 	}
 
 	call(args) {
 		const sortKey = args[0].value
-		const providedDirection = args[1].value
+		const providedDirection =
+			args.length === 2 ? args[1].value : 'ascending'
 
 		if (typeof sortKey !== 'string') {
 			throw new RuntimeError('The sort key must be a string.')

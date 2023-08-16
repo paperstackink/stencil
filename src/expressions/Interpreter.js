@@ -109,7 +109,9 @@ class Interpreter {
             return this.evaluate(argument)
         })
 
-        if (args.length !== callable.arity() && callable.arity() !== Infinity) {
+        const arity = callable.arity()
+
+        if (!arity.includes(args.length) && !arity.includes(Infinity)) {
             throw new RuntimeError(
                 `Expected ${callable.arity()} arguments but got ${
                     args.length

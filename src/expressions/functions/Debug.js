@@ -3,7 +3,7 @@ import Expression from '@/expressions/Expression'
 
 export default class Debug extends Callable {
 	arity() {
-		return Infinity
+		return [Infinity]
 	}
 
 	call(interpreter, args) {

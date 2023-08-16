@@ -8,7 +8,7 @@ export default class LowerCase extends Callable {
 	}
 
 	arity() {
-		return 0
+		return [0]
 	}
 
 	call(args) {

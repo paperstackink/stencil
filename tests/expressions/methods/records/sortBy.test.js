@@ -141,6 +141,25 @@ describe('Dates', () => {
 			['item2', new Map([['date', date2001]])],
 		])
 	})
+
+	test('it sorts in ascending order by default', () => {
+		const record = new Expression.Literal(
+			new Map([
+				['item1', new Map([['name', 'B']])],
+				['item2', new Map([['name', 'A']])],
+				['item3', new Map([['name', 'C']])],
+			]),
+		)
+		const callable = new SortBy(record)
+
+		const output = callable.call([new Expression.Literal('name')])
+
+		expect(Array.from(output.value)).toEqual([
+			['item2', new Map([['name', 'A']])],
+			['item1', new Map([['name', 'B']])],
+			['item3', new Map([['name', 'C']])],
+		])
+	})
 })
 
 describe('Errors', () => {
