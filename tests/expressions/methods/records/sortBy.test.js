@@ -1,6 +1,6 @@
-import RuntimeError from '@/expressions/errors/RuntimeError'
-import Expression from '@/expressions/Expression'
 import SortBy from '@/expressions/methods/records/SortBy'
+import Expression from '@/expressions/Expression'
+import RuntimeError from '@/expressions/errors/RuntimeError'
 
 describe('Strings', () => {
 	test('it can sort strings in ascending order', () => {
