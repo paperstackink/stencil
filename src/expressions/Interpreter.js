@@ -6,6 +6,7 @@ import InternalError from '@/expressions/errors/InternalError'
 import Callable from '@/expressions/functions/Callable'
 import LowerCase from '@/expressions/methods/strings/LowerCase'
 import SortBy from '@/expressions/methods/records/SortBy'
+import FilterBy from '@/expressions/methods/records/FilterBy'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -44,6 +45,8 @@ class Interpreter {
                     return new Expression.Literal('record')
                 } else if (key === 'sortBy') {
                     return new Expression.Literal(new SortBy(literal))
+                } else if (key === 'filterBy') {
+                    return new Expression.Literal(new FilterBy(literal))
                 } else {
                     return new Expression.Literal(null)
                 }
