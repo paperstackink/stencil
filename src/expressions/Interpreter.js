@@ -4,7 +4,7 @@ import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
 
 import Callable from '@/expressions/functions/Callable'
-import ToLowerCase from '@/expressions/methods/strings/ToLowerCase'
+import LowerCase from '@/expressions/methods/strings/LowerCase'
 import SortBy from '@/expressions/methods/records/SortBy'
 
 class Interpreter {
@@ -58,9 +58,9 @@ class Interpreter {
                     return new Expression.Literal('string')
                 }
 
-                if (expression.name.lexeme === 'toLowerCase') {
+                if (expression.name.lexeme === 'lowercase') {
                     return new Expression.Literal(
-                        new ToLowerCase(expression.item),
+                        new LowerCase(expression.item),
                     )
                 }
             }
