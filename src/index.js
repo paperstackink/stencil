@@ -11,6 +11,8 @@ import extractData from '@/secondary/extractData'
 
 import Debug from '@/expressions/functions/Debug'
 
+import ReservedComponentNameError from '@/errors/ReservedComponentNameError'
+
 const defaultContext = {
     components: {},
     environment: {},
@@ -20,6 +22,14 @@ export const compile = async (input, providedContext = defaultContext) => {
     let context = {
         ...defaultContext,
         ...providedContext,
+    }
+
+    if (
+        ['Component', 'Data'].some(name =>
+            context.components.hasOwnProperty(name),
+        )
+    ) {
+        throw new ReservedComponentNameError()
     }
 
     context.environment = {
