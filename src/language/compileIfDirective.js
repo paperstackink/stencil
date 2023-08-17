@@ -39,5 +39,15 @@ export default function (node, context) {
         return []
     }
 
+    if (node.children.length > 0) {
+        const usedIdentifiers = normalisedTokens
+            .filter(token => token.type === 'IDENTIFIER')
+            .map(token => token.lexeme)
+
+        node.children[0].meta = {
+            usedIdentifiers,
+        }
+    }
+
     return node.children.flatMap(node => compileNode(node, context))
 }
