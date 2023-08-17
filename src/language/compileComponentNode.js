@@ -3,6 +3,8 @@ import parse from 'rehype-parse-ns'
 import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
+import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
+import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
 
 import templates from '@/language/templates'
 import compileSlots from '@/language/compileSlots'
@@ -10,19 +12,33 @@ import normaliseTree from '@/language/normaliseTree'
 import compileAttributes from '@/language/compileAttributes'
 
 import conform from '@/helpers/conform'
-import afterLast from '@/helpers/afterLast'
 import isDocument from '@/helpers/isDocument'
-import findDuplicates from '@/helpers/findDuplicates'
 import extractUsedIdentifiersFromNode from '@/helpers/extractUsedIdentifiersFromNode'
 
 export default function (node, context) {
-    if (!(node.tagName in context.components)) {
+    const isDynamicComponent = node.tagName === 'Component'
+    if (!(node.tagName in context.components) && !isDynamicComponent) {
         throw new CompilationError(
-            `Componenent '${node.tagName}' is not defined.`,
+            `Component '${node.tagName}' is not defined.`,
         )
     }
 
-    const definition = context.components[node.tagName]
+    if (isDynamicComponent && !node.properties.hasOwnProperty('is')) {
+        throw new ComponentNameNotProvidedError()
+    }
+
+    if (isDynamicComponent && !(node.properties.is in context.components)) {
+        throw new UnknownComponentNameError()
+    }
+
+    const name =
+        node.tagName === 'Component' ? node.properties.is : node.tagName
+
+    let definition = context.components[name]
+
+    if (isDynamicComponent) {
+        delete node.properties.is
+    }
 
     const componentTree = unified()
         .use(parse, { fragment: !isDocument(definition.trim()) })
