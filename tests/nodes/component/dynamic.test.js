@@ -84,6 +84,32 @@ test('slots are applied to the resolved component', async () => {
 	expect(result).toEqualIgnoringWhitespace(expected)
 })
 
+test('it can resolved the component name with an expression', async () => {
+	const input = `
+<div>
+    <Component is="{{ if true then 'Card' else 'Noop' }}" />
+</div>
+`
+	const componentDefiniton = `
+<section class="card">
+    <div>This is a card</div>
+</section>
+`
+	const expected = `
+<div>
+    <section class="card">
+        <div>This is a card</div>
+    </section>
+</div>
+`
+
+	const result = await compile(input, {
+		components: { Card: componentDefiniton },
+	})
+
+	expect(result).toEqualIgnoringWhitespace(expected)
+})
+
 test('it errors if no component name is provided', async () => {
 	const input = `
 <div>

@@ -14,6 +14,7 @@ import compileAttributes from '@/language/compileAttributes'
 import conform from '@/helpers/conform'
 import isDocument from '@/helpers/isDocument'
 import extractUsedIdentifiersFromNode from '@/helpers/extractUsedIdentifiersFromNode'
+import compileExpressions from './compileExpressions'
 
 export default function (node, context) {
     const isDynamicComponent = node.tagName === 'Component'
@@ -27,12 +28,21 @@ export default function (node, context) {
         throw new ComponentNameNotProvidedError()
     }
 
-    if (isDynamicComponent && !(node.properties.is in context.components)) {
-        throw new UnknownComponentNameError()
+    let name = node.tagName
+    let componentNameUsedIdentifiers = []
+
+    if (isDynamicComponent) {
+        const [resolvedName, usedIdentifiers] = compileExpressions(
+            node.properties.is,
+        )
+
+        name = resolvedName
+        componentNameUsedIdentifiers = usedIdentifiers
     }
 
-    const name =
-        node.tagName === 'Component' ? node.properties.is : node.tagName
+    if (isDynamicComponent && !(name in context.components)) {
+        throw new UnknownComponentNameError()
+    }
 
     let definition = context.components[name]
 
@@ -91,7 +101,10 @@ export default function (node, context) {
     const newComponent = {
         ...component,
         meta: {
-            usedIdentifiers,
+            usedIdentifiers: [
+                ...componentNameUsedIdentifiers,
+                ...usedIdentifiers,
+            ],
         },
         properties: { ...component.properties, ...rootAttributes },
     }
