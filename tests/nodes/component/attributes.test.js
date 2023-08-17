@@ -209,6 +209,72 @@ describe('Component templates', () => {
         expect(result).toEqualIgnoringWhitespace(expected)
     })
 
+    test('it does not add the attribute to the root element if it has been used in @if directive', async () => {
+        const input = `
+    <div>
+        <Card class="card" extra="true" />
+    </div>
+    `
+        const componentDefiniton = `
+    <section>
+        <div class="{{ class }}">Yo</div>
+        @if(extra)
+            <span>Sometimes</span>
+        @endif
+    </section>
+    `
+        const expected = `
+    <div>
+        <section>
+            <div class="card">Yo</div>
+            <span>Sometimes</span>
+        </section>
+    </div>
+    `
+        const result = await compile(input, {
+            components: { Card: componentDefiniton },
+            environment: {},
+        })
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('it does not add the attribute to the root element if it has been used in @each directive', async () => {
+        const input = `
+    <div>
+        <Card class="card" short="true" />
+    </div>
+    `
+        const componentDefiniton = `
+    <section>
+        <div class="{{ class }}">Yo</div>
+        @each(item in if short then $short else $long)
+            <span>{{ item }}</span>
+        @endeach
+    </section>
+    `
+        const expected = `
+    <div>
+        <section>
+            <div class="card">Yo</div>
+            <span>1</span>
+            <span>2</span>
+            <span>3</span>
+        </section>
+    </div>
+    `
+        const result = await compile(input, {
+            components: { Card: componentDefiniton },
+            environment: {
+                $short: new Map([
+                    ['item1', '1'],
+                    ['item2', '2'],
+                    ['item3', '3'],
+                ]),
+            },
+        })
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
     test('it detects that an attribute has been used inside an expression', async () => {
         const input = `
     <div>

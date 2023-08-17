@@ -44,6 +44,10 @@ export default function (node, context) {
         )
     }
 
+    const usedIdentifiers = normalisedTokens
+        .filter(token => token.type === 'IDENTIFIER')
+        .map(token => token.lexeme)
+
     literal.value.forEach((value, key) => {
         const compiled = node.children.flatMap(child => {
             return compileNode(child, {
@@ -57,6 +61,15 @@ export default function (node, context) {
                 },
             })
         })
+
+        if (compiled.length > 0) {
+            compiled[0].meta = {
+                usedIdentifiers: [
+                    ...(compiled[0].meta.usedIdentifiers || []),
+                    ...usedIdentifiers,
+                ],
+            }
+        }
 
         children.push(...compiled)
     })
