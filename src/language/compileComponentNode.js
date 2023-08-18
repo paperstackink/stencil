@@ -34,6 +34,7 @@ export default function (node, context) {
     if (isDynamicComponent) {
         const [resolvedName, usedIdentifiers] = compileExpressions(
             node.properties.is,
+            context.environment,
         )
 
         name = resolvedName
