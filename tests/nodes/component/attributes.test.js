@@ -478,7 +478,7 @@ describe('Component templates', () => {
     test.todo('an attributed can be passed down to a nested component')
 })
 
-describe('Binding', () => {
+describe('Binding records a attributes', () => {
     test('it can bind a record as a list of attributes', async () => {
         const input = `<button #bind="$record">Text</button>`
         const expected = `<button type="submit" class="primary">Text</button>`
@@ -523,5 +523,68 @@ describe('Binding', () => {
                 environment: {},
             }),
         ).rejects.toThrow(SpreadNonRecordAsAttributesError)
+    })
+})
+
+describe('Binding attributes', () => {
+    test('it can bind an attribute', async () => {
+        const input = `<button #class="class">Text</button>`
+        const expected = `<button class="primary">Text</button>`
+
+        const result = await compile(input, {
+            environment: {
+                class: 'primary',
+            },
+        })
+
+        expect(result).toBe(expected)
+    })
+
+    test('bound attributes can be used inside components', async () => {
+        const input = `<Modal #open="false" />`
+        const definition = `
+            <div class="container">
+                @if(open)
+                    <div class="modal">
+                    </div>
+                @endif
+            </div>
+        `
+        const expected = `<div class="container"></div>`
+
+        const result = await compile(input, {
+            components: {
+                Modal: definition,
+            },
+        })
+
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('bound attributes are expressions', async () => {
+        const input = `<Modal #open="state equals 'show'" />`
+        const definition = `
+            <div class="container">
+                @if(open)
+                    <div class="modal">
+                    </div>
+                @endif
+            </div>
+        `
+        const expected = `
+            <div class="container">
+                <div class="modal">
+                </div>
+            </div>
+        `
+        const result = await compile(input, {
+            components: {
+                Modal: definition,
+            },
+            environment: {
+                state: 'show',
+            },
+        })
+        expect(result).toEqualIgnoringWhitespace(expected)
     })
 })

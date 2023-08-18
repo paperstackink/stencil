@@ -23,6 +23,17 @@ export default function (properties, context) {
                 usedIdentifiers.concat(bindUsedIdentifiers)
 
                 return [...resolved.value]
+            } else if (name.startsWith('#')) {
+                const attributeName = name.replace('#', '')
+                const [resolved, bindUsedIdentifiers] = compileExpression(
+                    value,
+                    context.environment,
+                    false,
+                )
+
+                usedIdentifiers.concat(bindUsedIdentifiers)
+
+                return [[attributeName, resolved.value]]
             } else if (Array.isArray(value)) {
                 newValue = value
                     .map(value => {
