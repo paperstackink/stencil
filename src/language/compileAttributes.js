@@ -1,13 +1,29 @@
+import compileExpression from '@/language/compileExpression'
 import compileExpressions from '@/language/compileExpressions'
+import SpreadNonRecordAsAttributesError from '@/errors/SpreadNonRecordAsAttributesError'
 
 export default function (properties, context) {
     let usedIdentifiers = []
 
     const attributes = Object.fromEntries(
-        Object.entries(properties).map(([name, value]) => {
+        Object.entries(properties).flatMap(([name, value]) => {
             let newValue = value
 
-            if (Array.isArray(value)) {
+            if (name === '#bind') {
+                const [resolved, bindUsedIdentifiers] = compileExpression(
+                    value,
+                    context.environment,
+                    false,
+                )
+
+                if (!(resolved.value instanceof Map)) {
+                    throw new SpreadNonRecordAsAttributesError()
+                }
+
+                usedIdentifiers.concat(bindUsedIdentifiers)
+
+                return [...resolved.value]
+            } else if (Array.isArray(value)) {
                 newValue = value
                     .map(value => {
                         const [result, usedIdentifiersInAttribute] =
@@ -32,7 +48,7 @@ export default function (properties, context) {
                 newValue = result
             }
 
-            return [name, newValue]
+            return [[name, newValue]]
         }),
     )
 

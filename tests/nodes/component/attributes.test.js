@@ -1,5 +1,5 @@
 import { compile } from '@/index'
-import CompilationError from '@/errors/CompilationError'
+import SpreadNonRecordAsAttributesError from '@/errors/SpreadNonRecordAsAttributesError'
 
 describe('Using components', () => {
     test('it can compile expressions in attributes', async () => {
@@ -476,4 +476,52 @@ describe('Component templates', () => {
     })
 
     test.todo('an attributed can be passed down to a nested component')
+})
+
+describe('Binding', () => {
+    test('it can bind a record as a list of attributes', async () => {
+        const input = `<button #bind="$record">Text</button>`
+        const expected = `<button type="submit" class="primary">Text</button>`
+
+        const result = await compile(input, {
+            environment: {
+                $record: new Map([
+                    ['type', 'submit'],
+                    ['class', 'primary'],
+                ]),
+            },
+        })
+
+        expect(result).toBe(expected)
+    })
+
+    test('it resolves the expression in "#bind"', async () => {
+        const input = `<span #bind="if true then $a else $b">Text</span>`
+        const expected = `<span a="true" b="false">Text</span>`
+
+        const result = await compile(input, {
+            environment: {
+                $a: new Map([
+                    ['a', 'true'],
+                    ['b', 'false'],
+                ]),
+                $b: new Map([
+                    ['a', 'false'],
+                    ['b', 'true'],
+                ]),
+            },
+        })
+
+        expect(result).toBe(expected)
+    })
+
+    test('it errors if binding a non-record', async () => {
+        const input = `<span #bind="true">Text</span>`
+
+        await expect(
+            compile(input, {
+                environment: {},
+            }),
+        ).rejects.toThrow(SpreadNonRecordAsAttributesError)
+    })
 })
