@@ -24,7 +24,12 @@ export default function (node, context) {
         )
     }
 
-    if (isDynamicComponent && !node.properties.hasOwnProperty('is')) {
+    const [attributes, usedIdentifiers] = compileAttributes(
+        node.properties,
+        context,
+    )
+
+    if (isDynamicComponent && !attributes.hasOwnProperty('is')) {
         throw new ComponentNameNotProvidedError()
     }
 
@@ -33,7 +38,7 @@ export default function (node, context) {
 
     if (isDynamicComponent) {
         const [resolvedName, usedIdentifiers] = compileExpressions(
-            node.properties.is,
+            attributes.is,
             context.environment,
         )
 
@@ -48,7 +53,7 @@ export default function (node, context) {
     let definition = context.components[name]
 
     if (isDynamicComponent) {
-        delete node.properties.is
+        delete attributes.is
     }
 
     const componentTree = unified()
@@ -62,11 +67,6 @@ export default function (node, context) {
             `Component '${node.tagName}' has more than 1 root element.`,
         )
     }
-
-    const [attributes, usedIdentifiers] = compileAttributes(
-        node.properties,
-        context,
-    )
 
     const newContext = {
         environment: { ...context.environment, ...attributes },
