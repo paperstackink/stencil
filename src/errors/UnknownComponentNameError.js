@@ -1,7 +1,8 @@
 export default class UnknownComponentNameError extends Error {
-    constructor(message) {
-        super(message)
+    constructor(name) {
+        super()
 
         this.name = 'UnknownComponentNameError'
+        this.component = name
     }
 }

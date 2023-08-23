@@ -1,0 +1,14 @@
+<div class="record" id="{{ level }}" data-open>
+    <Toggle>
+        <ArrowToggle onClick="toggle('{{ level }}')"></ArrowToggle>
+        <RecordToggle onClick="toggle('{{ level }}')">
+            record:{{ length }}
+        </RecordToggle>
+    </Toggle>
+
+    <Entries>
+    	@each(item in children)
+    		<Component is="{{ item.type }}" #bind="item.attributes"></Component>
+    	@endeach
+    </Entries>
+</div>

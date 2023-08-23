@@ -1,0 +1,24 @@
+<Entry>
+    <div class="record" id="{{ level }}">
+        <Toggle>
+            <ArrowToggle onClick="toggle('{{ level }}')"></ArrowToggle>
+            <String muted value="{{ key }}"></String>
+            <Separator></Separator>
+            <RecordToggle onClick="toggle('{{ level }}')">
+                record:{{ length }}
+            </RecordToggle>
+        </Toggle>
+
+        <Entries>
+            @each(item in children)
+                <Component is="{{ item.type }}" #bind="item.attributes"></Component>
+            @endeach
+            <Entry data-more-toggle>
+                <MoreToggle onClick="toggleMore('{{ level }}')"></MoreToggle>
+            </Entry>
+            @each(item in more)
+                <Component is="{{ item.type }}" #bind="item.attributes" extra="true"></Component>
+            @endeach
+        </Entries>
+    </div>
+</Entry>

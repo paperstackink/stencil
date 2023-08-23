@@ -1,0 +1,5 @@
+<div class="string">
+    <span class="quote">"</span>
+    <Literal muted="{{ muted }}" value="{{ value }}"></Literal>
+    <span class="quote">"</span>
+</div>

@@ -3,6 +3,7 @@ import Printer from '@/expressions/Printer'
 import Tokenizer from '@/expressions/Tokenizer'
 import Interpreter from '@/expressions/Interpreter'
 import CompilationError from '@/errors/CompilationError'
+import DumpSignal from '@/dumping/DumpSignal'
 
 export default function (source, values = {}, print = true) {
     try {
@@ -49,6 +50,11 @@ export default function (source, values = {}, print = true) {
 
         return [output, usedIdentifiers]
     } catch (error) {
-        throw new CompilationError(error.message)
+        // Bubble DumpSignal further up
+        if (error instanceof DumpSignal) {
+            throw error
+        } else {
+            throw new CompilationError(error.message)
+        }
     }
 }
