@@ -69,7 +69,11 @@ export default function (node, context) {
     }
 
     const newContext = {
-        environment: { ...context.environment, ...attributes },
+        environment: {
+            ...context.environment,
+            ...attributes,
+            $attributes: Map.fromObject(attributes),
+        },
         components: context.components,
         slots: { default: node.children },
     }

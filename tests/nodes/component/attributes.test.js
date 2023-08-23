@@ -475,7 +475,32 @@ describe('Component templates', () => {
         expect(result).toEqualIgnoringWhitespace(expected)
     })
 
-    test.todo('an attributed can be passed down to a nested component')
+    test('all attributes are available in an "$attributes" record', async () => {
+        const input = `
+    <div>
+        <Item variant="primary" size="small" />
+    </div>
+    `
+        const componentDefiniton = `
+    <section>
+        <span>Variant: {{ $attributes.variant }}</span>
+        <span>Size: {{ $attributes.size }}</span>
+    </section>
+    `
+        const expected = `
+    <div>
+        <section>
+            <span>Variant: primary</span>
+            <span>Size: small</span>
+        </section>
+    </div>
+    `
+        const result = await compile(input, {
+            components: { Item: componentDefiniton },
+            environment: {},
+        })
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
 })
 
 describe('Binding records a attributes', () => {
