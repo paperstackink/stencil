@@ -17,7 +17,8 @@
         "esbuild-plugin-copy": "^2.0.1",
         "esbuild-plugin-path-alias": "^1.0.6",
         "jest": "^28.1.1",
-        "jest-extended": "^3.1.0"
+        "jest-extended": "^3.1.0",
+        "jest-text-transformer": "^1.0.4"
     },
     "dependencies": {
         "hast-util-select": "^5.0.2",
@@ -26,6 +27,7 @@
         "rehype-parse-ns": "^8.0.5",
         "rehype-stringify": "^9.0.3",
         "unified": "^10.1.2",
+        "uuid": "^9.0.0",
         "yaml": "^2.3.1"
     },
     "types": "./_dist/index.d.ts",

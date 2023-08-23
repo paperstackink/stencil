@@ -1,0 +1,3 @@
+<li class="entry {{ if extra then 'entry-extra' else '' }}">
+    <slot />
+</li>

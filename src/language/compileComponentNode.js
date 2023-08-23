@@ -47,7 +47,7 @@ export default function (node, context) {
     }
 
     if (isDynamicComponent && !(name in context.components)) {
-        throw new UnknownComponentNameError()
+        throw new UnknownComponentNameError(name)
     }
 
     let definition = context.components[name]
