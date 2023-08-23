@@ -3,6 +3,8 @@ import parse from 'rehype-parse-ns'
 import stringify from 'rehype-stringify'
 import format from 'rehype-format'
 
+import '@/setup'
+
 import conform from '@/helpers/conform'
 import isDocument from '@/helpers/isDocument'
 

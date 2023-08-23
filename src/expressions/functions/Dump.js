@@ -1,37 +1,10 @@
-import Callable from '@/expressions/functions/Callable'
-import Expression from '@/expressions/Expression'
 import { v4 as uuid } from 'uuid'
-import fs from 'node:fs/promises'
-import path from 'path'
-import { compile } from '@/index'
+
+import Callable from '@/expressions/functions/Callable'
 import DumpSignal from '@/dumping/DumpSignal'
-import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
-import { isPlainObject } from 'lodash'
 
 function getKey() {
 	return `key-${uuid()}`
-}
-
-Map.prototype.merge = function (merged) {
-	merged.forEach((value, key) => {
-		this.set(key, value)
-	})
-
-	return this
-}
-
-Map.fromObject = object => {
-	let entries = Object.entries(object)
-
-	entries = entries.map(entry => {
-		if (!isPlainObject(entry[1])) {
-			return entry
-		}
-
-		return [entry[0], Map.fromObject(entry[1])]
-	})
-
-	return new Map(entries)
 }
 
 function getEntry(value, key) {
@@ -48,7 +21,7 @@ function getEntry(value, key) {
 								type: 'EntryFunction',
 								attributes: {
 									key: 'lowerCase()',
-									value: '() => String',
+									value: '() -> String',
 									description:
 										'Converts the string to lower case',
 								},
@@ -69,7 +42,7 @@ function getEntry(value, key) {
 							type: 'EntryFunction',
 							attributes: {
 								key: 'lowerCase()',
-								value: '() => String',
+								value: '() -> String',
 								description:
 									'Converts the string to lower case',
 							},
