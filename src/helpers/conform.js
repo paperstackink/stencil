@@ -87,5 +87,18 @@ export default function (input) {
 
     output = output.replaceAll('@endeach', '</each>')
 
+    // Void components
+    const voidComponents = output.matchAll(
+        /<(?<name>[A-Z]\w+)(?<attributes>.*)\/>/g,
+    )
+
+    for (const match of voidComponents) {
+        const lexeme = match[0]
+        const name = match.groups.name
+        const attributes = match.groups.attributes
+
+        output = output.replace(lexeme, `<${name} ${attributes}></${name}>`)
+    }
+
     return output
 }
