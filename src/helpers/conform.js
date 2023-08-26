@@ -1,5 +1,4 @@
 import CompilationError from '@/errors/CompilationError'
-import { at } from 'lodash'
 
 export default function (input) {
     let output = input
