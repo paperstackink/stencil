@@ -304,3 +304,46 @@ describe('@each directives', () => {
         )
     })
 })
+
+describe('Void components', () => {
+    test('it converts a void component to a regular component', () => {
+        const input = `<div>
+        <Card />
+</div>`
+        const expected = `<div>
+    <Card></Card>
+</div>`
+
+        const result = conform(input)
+
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('it preserves attributes', () => {
+        const input = `<div>
+        <Card attribute="value" data-another-attribute />
+</div>`
+        const expected = `<div>
+    <Card attribute="value" data-another-attribute></Card>
+</div>`
+
+        const result = conform(input)
+
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('it can convert the same void component name with different attributes', () => {
+        const input = `<div>
+        <Card attribute="value" />
+        <Card another="value2" />
+</div>`
+        const expected = `<div>
+    <Card attribute="value"></Card>
+    <Card another="value2"></Card>
+</div>`
+
+        const result = conform(input)
+
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+})
