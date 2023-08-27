@@ -67,7 +67,9 @@ test('it compiles nodes inside the @if directive', async () => {
 `
     const result = await compile(input, {
         environment: {
-            text: 'Content',
+            global: {
+                text: 'Content',
+            },
         },
     })
 
@@ -109,7 +111,7 @@ test('it can compile a directive with a quoted string', async () => {
 `
     const result = await compile(input, {
         environment: {
-            value: 'Yo',
+            global: { value: 'Yo' },
         },
     })
 

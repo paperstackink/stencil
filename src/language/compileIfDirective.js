@@ -23,17 +23,17 @@ export default function (node, context) {
         }
     })
 
-    let normalisedValues = { ...context.environment }
+    let values = { ...context.environment.global, ...context.environment.local }
 
-    if (normalisedValues.hasOwnProperty('class')) {
-        normalisedValues.className = normalisedValues.class
-        delete normalisedValues.class
+    if (values.hasOwnProperty('class')) {
+        values.className = values.class
+        delete values.class
     }
 
     const parser = new Parser(normalisedTokens)
     const ast = parser.parse()
 
-    const interpreter = new Interpreter(ast, normalisedValues)
+    const interpreter = new Interpreter(ast, values)
 
     if (!interpreter.passes()) {
         return []

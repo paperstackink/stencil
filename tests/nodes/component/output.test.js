@@ -22,7 +22,7 @@ test('it can compile a global identifier expression', async () => {
 
     const result = await compile(input, {
         components: { Card: componentDefiniton },
-        environment: { value: 'card' },
+        environment: { global: { value: 'card' } },
     })
 
     expect(result).toBe(expected)
@@ -76,7 +76,7 @@ test('it can compile an expression in a text child node', async () => {
 
     const result = await compile(input, {
         components: { Card: componentDefiniton },
-        environment: { value: 'card' },
+        environment: { global: { value: 'card' } },
     })
 
     expect(result).toBe(expected)
@@ -103,7 +103,7 @@ test('it can compile an expression in an attribute', async () => {
 
     const result = await compile(input, {
         components: { Card: componentDefiniton },
-        environment: { id: 'card' },
+        environment: { global: { id: 'card' } },
     })
 
     expect(result).toBe(expected)
@@ -161,7 +161,7 @@ test('it can compile an expression in a passed slot', async () => {
 
     const result = await compile(input, {
         components: { Card: componentDefiniton },
-        environment: { value: 'Yo' },
+        environment: { global: { value: 'Yo' } },
     })
 
     expect(result).toBe(expected)
@@ -188,7 +188,7 @@ test('a global identifier can be overriden by a local identifier', async () => {
 
     const result = await compile(input, {
         components: { Card: componentDefiniton },
-        environment: { value: 'global' },
+        environment: { global: { value: 'global' } },
     })
 
     expect(result).toBe(expected)
@@ -296,7 +296,7 @@ test('it can print a class attribute', async () => {
 `
     const result = await compile(input, {
         components: { Card: componentDefiniton },
-        environment: { className: 'card' },
+        environment: { global: { className: 'card' } },
     })
 
     expect(result).toBe(expected)

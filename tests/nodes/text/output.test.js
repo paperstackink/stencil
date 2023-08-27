@@ -6,7 +6,7 @@ test('it can compile expressions', async () => {
     const expected = `<span>Outputted text</span>`
 
     const result = await compile(input, {
-        environment: { value: 'Outputted text' },
+        environment: { global: { value: 'Outputted text' } },
     })
 
     expect(result).toBe(expected)

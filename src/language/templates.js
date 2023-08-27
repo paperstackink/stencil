@@ -9,7 +9,10 @@ const compileRootNode = (node, context) => {
 }
 
 const defaultContext = {
-    environment: {},
+    environment: {
+        global: {},
+        local: {},
+    },
     components: {},
     slots: {},
 }

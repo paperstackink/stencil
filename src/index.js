@@ -2,6 +2,7 @@ import { unified } from 'unified'
 import parse from 'rehype-parse-ns'
 import stringify from 'rehype-stringify'
 import format from 'rehype-format'
+import { merge } from 'lodash'
 
 import '@/setup'
 
@@ -20,14 +21,16 @@ import ReservedComponentNameError from '@/errors/ReservedComponentNameError'
 
 const defaultContext = {
     components: {},
-    environment: {},
+    environment: {
+        global: {
+            dump: new Dump(),
+        },
+        local: {},
+    },
 }
 
 export const compile = async (input, providedContext = defaultContext) => {
-    let context = {
-        ...defaultContext,
-        ...providedContext,
-    }
+    let context = merge({}, defaultContext, providedContext)
 
     if (
         ['Component', 'Data'].some(name =>
@@ -37,20 +40,12 @@ export const compile = async (input, providedContext = defaultContext) => {
         throw new ReservedComponentNameError()
     }
 
-    context.environment = {
-        ...context.environment,
-        dump: new Dump(),
-    }
-
     try {
         const result = await unified()
             .use(parse, {
                 fragment: !isDocument(input.trim()),
             })
-            .use(templates, {
-                environment: context.environment,
-                components: context.components,
-            })
+            .use(templates, context)
             .use(format, {
                 indent: 4,
             })

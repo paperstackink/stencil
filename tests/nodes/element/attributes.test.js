@@ -6,7 +6,7 @@ test('it can compile expressions in attributes', async () => {
     const expected = `<span id="headline">Text</span>`
 
     const result = await compile(input, {
-        environment: { id: 'headline' },
+        environment: { global: { id: 'headline' } },
     })
 
     expect(result).toBe(expected)
@@ -17,7 +17,7 @@ test('it can compile multiple expressions in the same attribute', async () => {
     const expected = `<span class="red large">Text</span>`
 
     const result = await compile(input, {
-        environment: { color: 'red', size: 'large' },
+        environment: { global: { color: 'red', size: 'large' } },
     })
 
     expect(result).toBe(expected)
@@ -28,7 +28,7 @@ test('it can compile multiple expressions in different attributes', async () => 
     const expected = `<span class="text-red" id="text-element">Text</span>`
 
     const result = await compile(input, {
-        environment: { className: 'text-red', id: 'text-element' },
+        environment: { global: { className: 'text-red', id: 'text-element' } },
     })
 
     expect(result).toBe(expected)
@@ -39,7 +39,7 @@ test('it can compile the same expression multiple times', async () => {
     const expected = `<span class="title" id="title">Text</span>`
 
     const result = await compile(input, {
-        environment: { name: 'title' },
+        environment: { global: { name: 'title' } },
     })
 
     expect(result).toBe(expected)
@@ -50,7 +50,7 @@ test('it can compile expressions concatenated to an existing attribute', async (
     const expected = `<span class="text-large">Text</span>`
 
     const result = await compile(input, {
-        environment: { size: 'large' },
+        environment: { global: { size: 'large' } },
     })
 
     expect(result).toBe(expected)
@@ -132,7 +132,7 @@ test('it can compile an expression that contains spaces', async () => {
     const result = await compile(input, {
         components: {},
         environment: {
-            class: 'passed',
+            global: { class: 'passed' },
         },
     })
     expect(result).toEqualIgnoringWhitespace(expected)
@@ -145,10 +145,12 @@ describe('Binding records a attributes', () => {
 
         const result = await compile(input, {
             environment: {
-                $record: new Map([
-                    ['type', 'submit'],
-                    ['class', 'primary'],
-                ]),
+                global: {
+                    $record: new Map([
+                        ['type', 'submit'],
+                        ['class', 'primary'],
+                    ]),
+                },
             },
         })
 
@@ -161,14 +163,16 @@ describe('Binding records a attributes', () => {
 
         const result = await compile(input, {
             environment: {
-                $a: new Map([
-                    ['a', 'true'],
-                    ['b', 'false'],
-                ]),
-                $b: new Map([
-                    ['a', 'false'],
-                    ['b', 'true'],
-                ]),
+                global: {
+                    $a: new Map([
+                        ['a', 'true'],
+                        ['b', 'false'],
+                    ]),
+                    $b: new Map([
+                        ['a', 'false'],
+                        ['b', 'true'],
+                    ]),
+                },
             },
         })
 
@@ -193,7 +197,7 @@ describe('Binding attributes', () => {
 
         const result = await compile(input, {
             environment: {
-                class: 'primary',
+                global: { class: 'primary' },
             },
         })
 
@@ -242,7 +246,7 @@ describe('Binding attributes', () => {
                 Modal: definition,
             },
             environment: {
-                state: 'show',
+                global: { state: 'show' },
             },
         })
         expect(result).toEqualIgnoringWhitespace(expected)

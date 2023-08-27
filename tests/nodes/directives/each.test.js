@@ -18,11 +18,13 @@ test('it renders each item in the loop', async () => {
 `
     const result = await compile(input, {
         environment: {
-            $record: new Map([
-                ['item1', new Map([['value', 'Item 1']])],
-                ['item2', new Map([['value', 'Item 2']])],
-                ['item3', new Map([['value', 'Item 3']])],
-            ]),
+            global: {
+                $record: new Map([
+                    ['item1', new Map([['value', 'Item 1']])],
+                    ['item2', new Map([['value', 'Item 2']])],
+                    ['item3', new Map([['value', 'Item 3']])],
+                ]),
+            },
         },
     })
 
@@ -50,11 +52,13 @@ test('it can compile with multiple child root nodes', async () => {
 `
     const result = await compile(input, {
         environment: {
-            $record: new Map([
-                ['item1', new Map([['value', 'Item 1']])],
-                ['item2', new Map([['value', 'Item 2']])],
-                ['item3', new Map([['value', 'Item 3']])],
-            ]),
+            global: {
+                $record: new Map([
+                    ['item1', new Map([['value', 'Item 1']])],
+                    ['item2', new Map([['value', 'Item 2']])],
+                    ['item3', new Map([['value', 'Item 3']])],
+                ]),
+            },
         },
     })
 
@@ -78,11 +82,13 @@ test('it can print the key', async () => {
 `
     const result = await compile(input, {
         environment: {
-            $record: new Map([
-                ['item1', new Map([['value', 'Item 1']])],
-                ['item2', new Map([['value', 'Item 2']])],
-                ['item3', new Map([['value', 'Item 3']])],
-            ]),
+            global: {
+                $record: new Map([
+                    ['item1', new Map([['value', 'Item 1']])],
+                    ['item2', new Map([['value', 'Item 2']])],
+                    ['item3', new Map([['value', 'Item 3']])],
+                ]),
+            },
         },
     })
 
@@ -106,16 +112,18 @@ test('it compiles the record expression', async () => {
 `
     const result = await compile(input, {
         environment: {
-            $record: new Map([
-                [
-                    'nested',
-                    new Map([
-                        ['item1', new Map([['value', 'Item 1']])],
-                        ['item2', new Map([['value', 'Item 2']])],
-                        ['item3', new Map([['value', 'Item 3']])],
-                    ]),
-                ],
-            ]),
+            global: {
+                $record: new Map([
+                    [
+                        'nested',
+                        new Map([
+                            ['item1', new Map([['value', 'Item 1']])],
+                            ['item2', new Map([['value', 'Item 2']])],
+                            ['item3', new Map([['value', 'Item 3']])],
+                        ]),
+                    ],
+                ]),
+            },
         },
     })
 
@@ -144,29 +152,31 @@ test('it compiles the loop html', async () => {
             Link: definition,
         },
         environment: {
-            $record: new Map([
-                [
-                    'item1',
-                    new Map([
-                        ['url', 'http://example.com/item1'],
-                        ['label', 'Item 1'],
-                    ]),
-                ],
-                [
-                    'item2',
-                    new Map([
-                        ['url', 'http://example.com/item2'],
-                        ['label', 'Item 2'],
-                    ]),
-                ],
-                [
-                    'item3',
-                    new Map([
-                        ['url', 'http://example.com/item3'],
-                        ['label', 'Item 3'],
-                    ]),
-                ],
-            ]),
+            global: {
+                $record: new Map([
+                    [
+                        'item1',
+                        new Map([
+                            ['url', 'http://example.com/item1'],
+                            ['label', 'Item 1'],
+                        ]),
+                    ],
+                    [
+                        'item2',
+                        new Map([
+                            ['url', 'http://example.com/item2'],
+                            ['label', 'Item 2'],
+                        ]),
+                    ],
+                    [
+                        'item3',
+                        new Map([
+                            ['url', 'http://example.com/item3'],
+                            ['label', 'Item 3'],
+                        ]),
+                    ],
+                ]),
+            },
         },
     })
 
@@ -196,29 +206,31 @@ test('it can render nested loops', async () => {
 
     const result = await compile(input, {
         environment: {
-            $record: new Map([
-                [
-                    'item1',
-                    new Map([
-                        ['1', new Map([['value', 'Item 1a']])],
-                        ['2', new Map([['value', 'Item 1b']])],
-                    ]),
-                ],
-                [
-                    'item2',
-                    new Map([
-                        ['1', new Map([['value', 'Item 2a']])],
-                        ['2', new Map([['value', 'Item 2b']])],
-                    ]),
-                ],
-                [
-                    'item3',
-                    new Map([
-                        ['1', new Map([['value', 'Item 3a']])],
-                        ['2', new Map([['value', 'Item 3b']])],
-                    ]),
-                ],
-            ]),
+            global: {
+                $record: new Map([
+                    [
+                        'item1',
+                        new Map([
+                            ['1', new Map([['value', 'Item 1a']])],
+                            ['2', new Map([['value', 'Item 1b']])],
+                        ]),
+                    ],
+                    [
+                        'item2',
+                        new Map([
+                            ['1', new Map([['value', 'Item 2a']])],
+                            ['2', new Map([['value', 'Item 2b']])],
+                        ]),
+                    ],
+                    [
+                        'item3',
+                        new Map([
+                            ['1', new Map([['value', 'Item 3a']])],
+                            ['2', new Map([['value', 'Item 3b']])],
+                        ]),
+                    ],
+                ]),
+            },
         },
     })
 
@@ -243,11 +255,13 @@ test('it can conditionally render items', async () => {
 `
     const result = await compile(input, {
         environment: {
-            $record: new Map([
-                ['item1', new Map([['value', 1]])],
-                ['item2', new Map([['value', 2]])],
-                ['item3', new Map([['value', 3]])],
-            ]),
+            global: {
+                $record: new Map([
+                    ['item1', new Map([['value', 1]])],
+                    ['item2', new Map([['value', 2]])],
+                    ['item3', new Map([['value', 3]])],
+                ]),
+            },
         },
     })
 
@@ -271,12 +285,14 @@ test('it can use variables from the outer scope', async () => {
 `
     const result = await compile(input, {
         environment: {
-            global: 'Global',
-            $record: new Map([
-                ['item1', new Map([['value', 'Item 1']])],
-                ['item2', new Map([['value', 'Item 2']])],
-                ['item3', new Map([['value', 'Item 3']])],
-            ]),
+            global: {
+                global: 'Global',
+                $record: new Map([
+                    ['item1', new Map([['value', 'Item 1']])],
+                    ['item2', new Map([['value', 'Item 2']])],
+                    ['item3', new Map([['value', 'Item 3']])],
+                ]),
+            },
         },
     })
 
@@ -300,12 +316,14 @@ test('the variable overrides a variable with the same name in an outer scope', a
 `
     const result = await compile(input, {
         environment: {
-            item: new Map([['value', 'Noop']]),
-            $record: new Map([
-                ['item1', new Map([['value', 'Item 1']])],
-                ['item2', new Map([['value', 'Item 2']])],
-                ['item3', new Map([['value', 'Item 3']])],
-            ]),
+            global: {
+                item: new Map([['value', 'Noop']]),
+                $record: new Map([
+                    ['item1', new Map([['value', 'Item 1']])],
+                    ['item2', new Map([['value', 'Item 2']])],
+                    ['item3', new Map([['value', 'Item 3']])],
+                ]),
+            },
         },
     })
 
@@ -335,30 +353,32 @@ test('the variable overrides a variable with the same name in an outer loop', as
 
     const result = await compile(input, {
         environment: {
-            nested: 'Noop',
-            $record: new Map([
-                [
-                    'item1',
-                    new Map([
-                        ['1', new Map([['value', 'Item 1a']])],
-                        ['2', new Map([['value', 'Item 1b']])],
-                    ]),
-                ],
-                [
-                    'item2',
-                    new Map([
-                        ['1', new Map([['value', 'Item 2a']])],
-                        ['2', new Map([['value', 'Item 2b']])],
-                    ]),
-                ],
-                [
-                    'item3',
-                    new Map([
-                        ['1', new Map([['value', 'Item 3a']])],
-                        ['2', new Map([['value', 'Item 3b']])],
-                    ]),
-                ],
-            ]),
+            global: {
+                nested: 'Noop',
+                $record: new Map([
+                    [
+                        'item1',
+                        new Map([
+                            ['1', new Map([['value', 'Item 1a']])],
+                            ['2', new Map([['value', 'Item 1b']])],
+                        ]),
+                    ],
+                    [
+                        'item2',
+                        new Map([
+                            ['1', new Map([['value', 'Item 2a']])],
+                            ['2', new Map([['value', 'Item 2b']])],
+                        ]),
+                    ],
+                    [
+                        'item3',
+                        new Map([
+                            ['1', new Map([['value', 'Item 3a']])],
+                            ['2', new Map([['value', 'Item 3b']])],
+                        ]),
+                    ],
+                ]),
+            },
         },
     })
 
@@ -384,7 +404,9 @@ test("it fails if looping over something that's not a record", async () => {
     await expect(
         compile(input, {
             environment: {
-                $record: 'a string',
+                global: {
+                    $record: 'a string',
+                },
             },
         }),
     ).rejects.toThrow(CompilationError)

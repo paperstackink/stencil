@@ -41,7 +41,9 @@ export default async function compileDumpPage($record) {
             EntryFunction,
         },
         environment: {
-            data: $record,
+            global: {
+                data: $record,
+            },
         },
     })
 
