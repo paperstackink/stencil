@@ -1,5 +1,5 @@
 import { compile } from '@/index'
-import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
+import UnknownDynamicComponentNameError from '@/errors/UnknownDynamicComponentNameError'
 import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
 
 test('it can compile a dynamic component', async () => {
@@ -140,5 +140,5 @@ test("it errors if the dynamic component name doesn't exist", async () => {
 		compile(input, {
 			components: {},
 		}),
-	).rejects.toThrow(UnknownComponentNameError)
+	).rejects.toThrow(UnknownDynamicComponentNameError)
 })

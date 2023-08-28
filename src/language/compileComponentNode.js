@@ -3,7 +3,7 @@ import parse from 'rehype-parse-ns'
 import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
-import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
+import UnknownDynamicComponentNameError from '@/errors/UnknownDynamicComponentNameError'
 import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
 
 import templates from '@/language/templates'
@@ -50,7 +50,7 @@ export default function (node, context) {
     }
 
     if (isDynamicComponent && !(name in context.components)) {
-        throw new UnknownComponentNameError(name)
+        throw new UnknownDynamicComponentNameError(name)
     }
 
     let definition = context.components[name]
