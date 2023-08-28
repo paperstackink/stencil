@@ -7,7 +7,7 @@ describe('Using components', () => {
         const definition = `<span></span>`
         const expected = `<span id="headline"></span>`
         const result = await compile(input, {
-            environment: { id: 'headline' },
+            environment: { global: { id: 'headline' } },
             components: {
                 Text: definition,
             },
@@ -19,7 +19,7 @@ describe('Using components', () => {
         const input = `<span class="{{ color }} {{ size }}">Text</span>`
         const expected = `<span class="red large">Text</span>`
         const result = await compile(input, {
-            environment: { color: 'red', size: 'large' },
+            environment: { global: { color: 'red', size: 'large' } },
         })
         expect(result).toBe(expected)
     })
@@ -28,7 +28,9 @@ describe('Using components', () => {
         const input = `<span class="{{ class }}" id="{{ id }}">Text</span>`
         const expected = `<span class="text-red" id="text-element">Text</span>`
         const result = await compile(input, {
-            environment: { className: 'text-red', id: 'text-element' },
+            environment: {
+                global: { className: 'text-red', id: 'text-element' },
+            },
         })
         expect(result).toBe(expected)
     })
@@ -37,7 +39,7 @@ describe('Using components', () => {
         const input = `<span class="{{ name }}" id="{{ name }}">Text</span>`
         const expected = `<span class="title" id="title">Text</span>`
         const result = await compile(input, {
-            environment: { name: 'title' },
+            environment: { global: { name: 'title' } },
         })
         expect(result).toBe(expected)
     })
@@ -46,7 +48,7 @@ describe('Using components', () => {
         const input = `<span class="text-{{ size }}">Text</span>`
         const expected = `<span class="text-large">Text</span>`
         const result = await compile(input, {
-            environment: { size: 'large' },
+            environment: { global: { size: 'large' } },
         })
         expect(result).toBe(expected)
     })
@@ -265,11 +267,13 @@ describe('Component templates', () => {
         const result = await compile(input, {
             components: { Card: componentDefiniton },
             environment: {
-                $short: new Map([
-                    ['item1', '1'],
-                    ['item2', '2'],
-                    ['item3', '3'],
-                ]),
+                global: {
+                    $short: new Map([
+                        ['item1', '1'],
+                        ['item2', '2'],
+                        ['item3', '3'],
+                    ]),
+                },
             },
         })
         expect(result).toEqualIgnoringWhitespace(expected)
@@ -510,10 +514,12 @@ describe('Binding records a attributes', () => {
 
         const result = await compile(input, {
             environment: {
-                $record: new Map([
-                    ['type', 'submit'],
-                    ['class', 'primary'],
-                ]),
+                global: {
+                    $record: new Map([
+                        ['type', 'submit'],
+                        ['class', 'primary'],
+                    ]),
+                },
             },
         })
 
@@ -526,14 +532,16 @@ describe('Binding records a attributes', () => {
 
         const result = await compile(input, {
             environment: {
-                $a: new Map([
-                    ['a', 'true'],
-                    ['b', 'false'],
-                ]),
-                $b: new Map([
-                    ['a', 'false'],
-                    ['b', 'true'],
-                ]),
+                global: {
+                    $a: new Map([
+                        ['a', 'true'],
+                        ['b', 'false'],
+                    ]),
+                    $b: new Map([
+                        ['a', 'false'],
+                        ['b', 'true'],
+                    ]),
+                },
             },
         })
 
@@ -558,7 +566,9 @@ describe('Binding attributes', () => {
 
         const result = await compile(input, {
             environment: {
-                class: 'primary',
+                global: {
+                    class: 'primary',
+                },
             },
         })
 
@@ -607,7 +617,9 @@ describe('Binding attributes', () => {
                 Modal: definition,
             },
             environment: {
-                state: 'show',
+                global: {
+                    state: 'show',
+                },
             },
         })
         expect(result).toEqualIgnoringWhitespace(expected)

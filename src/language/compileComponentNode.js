@@ -39,7 +39,10 @@ export default function (node, context) {
     if (isDynamicComponent) {
         const [resolvedName, usedIdentifiers] = compileExpressions(
             attributes.is,
-            context.environment,
+            {
+                ...context.environment.global,
+                ...context.environment.local,
+            },
         )
 
         name = resolvedName
@@ -68,24 +71,35 @@ export default function (node, context) {
         )
     }
 
-    const newContext = {
+    // In order to support component 'extending' other components,
+    // we need to pre-compile the slots before compiling any nested components.
+    const treeWithCompiledSlots = compileSlots(componentTree, {
         environment: {
             ...context.environment,
-            ...attributes,
-            $attributes: Map.fromObject(attributes),
+            local: {
+                ...context.environment.local,
+                ...attributes,
+                $attributes: Map.fromObject(attributes),
+            },
         },
         components: context.components,
         slots: { default: node.children },
-    }
-
-    // In order to support component 'extending' other components,
-    // we need to pre-compile the slots before compiling any nested components.
-    const treeWithCompiledSlots = compileSlots(componentTree, newContext)
+    })
 
     // When we run 'parse' above it only executes the 'parse' phase of the lifecycle
     // We have to explicitly call 'runSync' to get it to run plugins on the tree
     const transformedComponentTree = unified()
-        .use(templates, newContext)
+        .use(templates, {
+            environment: {
+                ...context.environment,
+                local: {
+                    ...attributes,
+                    $attributes: Map.fromObject(attributes),
+                },
+            },
+            components: context.components,
+            slots: { default: node.children },
+        })
         .runSync(treeWithCompiledSlots)
 
     const usedAttributes = [

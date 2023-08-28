@@ -12,7 +12,10 @@ export default function (properties, context) {
             if (name === '#bind') {
                 const [resolved, bindUsedIdentifiers] = compileExpression(
                     value,
-                    context.environment,
+                    {
+                        ...context.environment.global,
+                        ...context.environment.local,
+                    },
                     false,
                 )
 
@@ -27,7 +30,10 @@ export default function (properties, context) {
                 const attributeName = name.replace('#', '')
                 const [resolved, bindUsedIdentifiers] = compileExpression(
                     value,
-                    context.environment,
+                    {
+                        ...context.environment.global,
+                        ...context.environment.local,
+                    },
                     false,
                 )
 
@@ -38,7 +44,10 @@ export default function (properties, context) {
                 newValue = value
                     .map(value => {
                         const [result, usedIdentifiersInAttribute] =
-                            compileExpressions(value, context.environment)
+                            compileExpressions(value, {
+                                ...context.environment.global,
+                                ...context.environment.local,
+                            })
                         usedIdentifiers = [
                             ...usedIdentifiers,
                             ...usedIdentifiersInAttribute,
@@ -50,7 +59,10 @@ export default function (properties, context) {
             } else if (typeof value === 'string') {
                 const [result, usedIdentifiersInAttribute] = compileExpressions(
                     value,
-                    context.environment,
+                    {
+                        ...context.environment.global,
+                        ...context.environment.local,
+                    },
                 )
                 usedIdentifiers = [
                     ...usedIdentifiers,
