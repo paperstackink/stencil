@@ -17,6 +17,8 @@ import DumpSignal from '@/dumping/DumpSignal'
 import Dump from '@/expressions/functions/Dump'
 import compileDumpPage from '@/language/compileDumpPage'
 
+import CompilationError from '@/errors/CompilationError'
+import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
 import ReservedComponentNameError from '@/errors/ReservedComponentNameError'
 
 const defaultContext = {
@@ -29,7 +31,11 @@ const defaultContext = {
     },
 }
 
-export const compile = async (input, providedContext = defaultContext) => {
+export const compile = async (
+    input,
+    providedContext = defaultContext,
+    meta,
+) => {
     let context = merge({}, defaultContext, providedContext)
 
     if (
@@ -60,10 +66,76 @@ export const compile = async (input, providedContext = defaultContext) => {
             const page = await compileDumpPage(error.data)
 
             return page
+        } else if (error instanceof UnknownComponentNameError) {
+            function getCharacterDiffCount(a, b) {
+                return a.split('').filter((character, index) => {
+                    return character !== b.charAt(index)
+                }).length
+            }
+
+            function digits(number) {
+                return number.toString().length
+            }
+
+            const componentNames = Object.keys(context.components)
+            const suggestedComponents = componentNames.filter(
+                name => getCharacterDiffCount(error.component, name) === 1,
+            )
+
+            const suggestions = suggestedComponents
+                .map(name => `     ${name}`)
+                .join('\n')
+
+            const relevantLines = input
+                .split('\n')
+                .map((content, index) => {
+                    const lineNumber = index + 1
+                    const errorLineNumber = error.position.start.line
+                    const diff = lineNumber - errorLineNumber
+                    if (diff === 0 || Math.abs(diff) === 1) {
+                        return {
+                            number: lineNumber,
+                            content,
+                        }
+                    } else {
+                        return null
+                    }
+                })
+                .filter(Boolean)
+            const codeContext = relevantLines
+                .map(line => {
+                    // Find the number of digits in a line number in relevant lines
+                    // So we can calculate the number of padded spaces we need to add to align all lines
+                    const maxLineNumberLength = digits(
+                        Math.max(...relevantLines.map(line => line.number)),
+                    )
+                    const lineNumberLength = digits(line.number)
+                    const padding = Array.from(
+                        new Array(maxLineNumberLength - lineNumberLength + 1),
+                    )
+                        .map(_ => ' ')
+                        .join('')
+
+                    return `${line.number}${padding}| ${line.content}`
+                })
+                .join('\n')
+
+            const output = `
+-----  Error: Unknown component name  ----------------------
+You tried to use a component called "${error.component}" but there are no components with that name.
+
+The error occured in "${meta.path}":
+${codeContext}
+
+It might be one of these components instead:
+${suggestions}
+`
+
+            throw new CompilationError(output)
         } else {
             throw error
         }
     }
 }
 
-export { extractData }
+export { extractData, CompilationError }

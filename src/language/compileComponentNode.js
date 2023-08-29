@@ -3,8 +3,9 @@ import parse from 'rehype-parse-ns'
 import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
-import UnknownDynamicComponentNameError from '@/errors/UnknownDynamicComponentNameError'
+import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
 import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
+import UnknownDynamicComponentNameError from '@/errors/UnknownDynamicComponentNameError'
 
 import templates from '@/language/templates'
 import compileSlots from '@/language/compileSlots'
@@ -19,9 +20,7 @@ import compileExpressions from './compileExpressions'
 export default function (node, context) {
     const isDynamicComponent = node.tagName === 'Component'
     if (!(node.tagName in context.components) && !isDynamicComponent) {
-        throw new CompilationError(
-            `Component '${node.tagName}' is not defined.`,
-        )
+        throw new UnknownComponentNameError(node.tagName, node.position)
     }
 
     const [attributes, usedIdentifiers] = compileAttributes(
