@@ -305,7 +305,7 @@ describe('@each directives', () => {
     })
 })
 
-describe('Void components', () => {
+describe('Void nodes', () => {
     test('it converts a void component to a regular component', () => {
         const input = `<div>
         <Card />
@@ -340,6 +340,19 @@ describe('Void components', () => {
         const expected = `<div>
     <Card attribute="value"></Card>
     <Card another="value2"></Card>
+</div>`
+
+        const result = conform(input)
+
+        expect(result).toEqualIgnoringWhitespace(expected)
+    })
+
+    test('it converts a void slot to a regular node', () => {
+        const input = `<div>
+        <slot />
+</div>`
+        const expected = `<div>
+    <slot></slot>
 </div>`
 
         const result = conform(input)

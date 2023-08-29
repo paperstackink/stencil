@@ -100,5 +100,15 @@ export default function (input) {
         output = output.replace(lexeme, `<${name} ${attributes}></${name}>`)
     }
 
+    // Slots
+    const slots = output.matchAll(/<slot\s*(?<attributes>.*)\/>/g)
+
+    for (const match of slots) {
+        const lexeme = match[0]
+        const attributes = match.groups.attributes
+
+        output = output.replace(lexeme, `<slot ${attributes}></slot>`)
+    }
+
     return output
 }
