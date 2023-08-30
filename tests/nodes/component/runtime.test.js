@@ -7,7 +7,7 @@ test('it can print values in attributes', async () => {
     const expected = `<span id="headline">Text</span>`
 
     const result = await compile(input, {
-        environment: { id: 'headline' },
+        environment: { global: { id: 'headline' } },
         components: {
             Text: definition,
         },

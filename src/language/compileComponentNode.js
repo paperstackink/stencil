@@ -3,6 +3,8 @@ import parse from 'rehype-parse-ns'
 import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
+import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
+import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
 
 import templates from '@/language/templates'
 import compileSlots from '@/language/compileSlots'
@@ -10,19 +12,52 @@ import normaliseTree from '@/language/normaliseTree'
 import compileAttributes from '@/language/compileAttributes'
 
 import conform from '@/helpers/conform'
-import afterLast from '@/helpers/afterLast'
 import isDocument from '@/helpers/isDocument'
-import findDuplicates from '@/helpers/findDuplicates'
 import extractUsedIdentifiersFromNode from '@/helpers/extractUsedIdentifiersFromNode'
+import compileExpressions from './compileExpressions'
 
 export default function (node, context) {
-    if (!(node.tagName in context.components)) {
+    const isDynamicComponent = node.tagName === 'Component'
+    if (!(node.tagName in context.components) && !isDynamicComponent) {
         throw new CompilationError(
-            `Componenent '${node.tagName}' is not defined.`,
+            `Component '${node.tagName}' is not defined.`,
         )
     }
 
-    const definition = context.components[node.tagName]
+    const [attributes, usedIdentifiers] = compileAttributes(
+        node.properties,
+        context,
+    )
+
+    if (isDynamicComponent && !attributes.hasOwnProperty('is')) {
+        throw new ComponentNameNotProvidedError()
+    }
+
+    let name = node.tagName
+    let componentNameUsedIdentifiers = []
+
+    if (isDynamicComponent) {
+        const [resolvedName, usedIdentifiers] = compileExpressions(
+            attributes.is,
+            {
+                ...context.environment.global,
+                ...context.environment.local,
+            },
+        )
+
+        name = resolvedName
+        componentNameUsedIdentifiers = usedIdentifiers
+    }
+
+    if (isDynamicComponent && !(name in context.components)) {
+        throw new UnknownComponentNameError(name)
+    }
+
+    let definition = context.components[name]
+
+    if (isDynamicComponent) {
+        delete attributes.is
+    }
 
     const componentTree = unified()
         .use(parse, { fragment: !isDocument(definition.trim()) })
@@ -36,25 +71,35 @@ export default function (node, context) {
         )
     }
 
-    const [attributes, usedIdentifiers] = compileAttributes(
-        node.properties,
-        context,
-    )
-
-    const newContext = {
-        environment: { ...context.environment, ...attributes },
-        components: context.components,
-        slots: { default: node.children },
-    }
-
     // In order to support component 'extending' other components,
     // we need to pre-compile the slots before compiling any nested components.
-    const treeWithCompiledSlots = compileSlots(componentTree, newContext)
+    const treeWithCompiledSlots = compileSlots(componentTree, {
+        environment: {
+            ...context.environment,
+            local: {
+                ...context.environment.local,
+                ...attributes,
+                $attributes: Map.fromObject(attributes),
+            },
+        },
+        components: context.components,
+        slots: { default: node.children },
+    })
 
     // When we run 'parse' above it only executes the 'parse' phase of the lifecycle
     // We have to explicitly call 'runSync' to get it to run plugins on the tree
     const transformedComponentTree = unified()
-        .use(templates, newContext)
+        .use(templates, {
+            environment: {
+                ...context.environment,
+                local: {
+                    ...attributes,
+                    $attributes: Map.fromObject(attributes),
+                },
+            },
+            components: context.components,
+            slots: { default: node.children },
+        })
         .runSync(treeWithCompiledSlots)
 
     const usedAttributes = [
@@ -75,7 +120,10 @@ export default function (node, context) {
     const newComponent = {
         ...component,
         meta: {
-            usedIdentifiers,
+            usedIdentifiers: [
+                ...componentNameUsedIdentifiers,
+                ...usedIdentifiers,
+            ],
         },
         properties: { ...component.properties, ...rootAttributes },
     }

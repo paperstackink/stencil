@@ -3,8 +3,9 @@ import Printer from '@/expressions/Printer'
 import Tokenizer from '@/expressions/Tokenizer'
 import Interpreter from '@/expressions/Interpreter'
 import CompilationError from '@/errors/CompilationError'
+import DumpSignal from '@/dumping/DumpSignal'
 
-export default function (source, values = {}) {
+export default function (source, values = {}, print = true) {
     try {
         const tokenizer = new Tokenizer(source)
         const tokens = tokenizer.scanTokens()
@@ -36,15 +37,24 @@ export default function (source, values = {}) {
         const interpreter = new Interpreter(ast, normalisedValues)
         const literal = interpreter.interpret()
 
-        const printer = new Printer(literal)
-        const output = printer.print()
-
         const usedIdentifiers = normalisedTokens
             .filter(token => token.type === 'IDENTIFIER')
             .map(token => token.lexeme)
 
+        if (!print) {
+            return [literal, usedIdentifiers]
+        }
+
+        const printer = new Printer(literal)
+        const output = printer.print()
+
         return [output, usedIdentifiers]
     } catch (error) {
-        throw new CompilationError(error.message)
+        // Bubble DumpSignal further up
+        if (error instanceof DumpSignal) {
+            throw error
+        } else {
+            throw new CompilationError(error.message)
+        }
     }
 }

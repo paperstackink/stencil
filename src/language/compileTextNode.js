@@ -44,10 +44,10 @@ const stringToNodesWithResolvedExpressions = (source, values) => {
 }
 
 export default function (node, context) {
-    const newNodes = stringToNodesWithResolvedExpressions(
-        node.value,
-        context.environment,
-    )
+    const newNodes = stringToNodesWithResolvedExpressions(node.value, {
+        ...context.environment.global,
+        ...context.environment.local,
+    })
 
     return newNodes
 }

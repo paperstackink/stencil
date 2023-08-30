@@ -25,17 +25,20 @@ export default function (node, context) {
         }
     })
 
-    let normalisedValues = { ...context.environment }
+    let values = {
+        ...context.environment.global,
+        ...context.environment.local,
+    }
 
-    if (normalisedValues.hasOwnProperty('class')) {
-        normalisedValues.className = values.class
-        delete normalisedValues.class
+    if (values.hasOwnProperty('class')) {
+        values.className = values.class
+        delete values.class
     }
 
     const parser = new Parser(normalisedTokens)
     const ast = parser.parse()
 
-    const interpreter = new Interpreter(ast, normalisedValues)
+    const interpreter = new Interpreter(ast, values)
     const literal = interpreter.interpret()
 
     if (!(literal.value instanceof Map)) {
@@ -44,19 +47,35 @@ export default function (node, context) {
         )
     }
 
+    const usedIdentifiers = normalisedTokens
+        .filter(token => token.type === 'IDENTIFIER')
+        .map(token => token.lexeme)
+
     literal.value.forEach((value, key) => {
         const compiled = node.children.flatMap(child => {
             return compileNode(child, {
                 ...context,
                 environment: {
                     ...context.environment,
-                    [node.properties.variable]: value,
-                    ...(node.properties.key
-                        ? { [node.properties.key]: key }
-                        : {}),
+                    local: {
+                        ...context.environment.local,
+                        [node.properties.variable]: value,
+                        ...(node.properties.key
+                            ? { [node.properties.key]: key }
+                            : {}),
+                    },
                 },
             })
         })
+
+        if (compiled.length > 0) {
+            compiled[0].meta = {
+                usedIdentifiers: [
+                    ...(compiled[0].meta.usedIdentifiers || []),
+                    ...usedIdentifiers,
+                ],
+            }
+        }
 
         children.push(...compiled)
     })

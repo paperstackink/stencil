@@ -1,0 +1,15 @@
+<Entry>
+    <div class="record" id="{{ level }}">
+        <Toggle #extra="true">
+            <String muted value="{{ key }}"></String>
+            <Separator></Separator>
+            <String value="{{ value }}"></String>
+            <ExtraToggle onClick="toggle('{{ level }}')"></ExtraToggle>
+        </Toggle>
+        <Entries>
+            @each(item in children)
+                <Component is="{{ item.type }}" #bind="item.attributes"></Component>
+            @endeach
+        </Entries>
+    </div>
+</Entry>

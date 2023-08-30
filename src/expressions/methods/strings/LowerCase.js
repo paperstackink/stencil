@@ -1,14 +1,14 @@
 import Callable from '@/expressions/functions/Callable'
 import Expression from '@/expressions/Expression'
 
-export default class ToLowerCase extends Callable {
+export default class LowerCase extends Callable {
 	constructor(item) {
 		super()
 		this.item = item
 	}
 
 	arity() {
-		return 0
+		return [0]
 	}
 
 	call(args) {

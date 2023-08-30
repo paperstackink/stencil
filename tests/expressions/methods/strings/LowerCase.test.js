@@ -1,8 +1,8 @@
 import Expression from '@/expressions/Expression'
-import ToLowerCase from '@/expressions/methods/strings/ToLowerCase'
+import LowerCase from '@/expressions/methods/strings/LowerCase'
 
 test('it converts the string to lower case', () => {
-	const callable = new ToLowerCase(new Expression.Literal('YoYo'))
+	const callable = new LowerCase(new Expression.Literal('YoYo'))
 	const output = callable.call([])
 
 	expect(output).toEqual(new Expression.Literal('yoyo'))

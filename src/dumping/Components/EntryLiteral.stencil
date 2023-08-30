@@ -1,0 +1,5 @@
+<Entry>
+    <String muted value="{{ key }}"></String>
+    <Separator></Separator>
+	<Literal value="{{ value }}"></Literal>
+</Entry>

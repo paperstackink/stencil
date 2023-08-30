@@ -4,8 +4,9 @@ import RuntimeError from '@/expressions/errors/RuntimeError'
 import InternalError from '@/expressions/errors/InternalError'
 
 import Callable from '@/expressions/functions/Callable'
-import ToLowerCase from '@/expressions/methods/strings/ToLowerCase'
+import LowerCase from '@/expressions/methods/strings/LowerCase'
 import SortBy from '@/expressions/methods/records/SortBy'
+import FilterBy from '@/expressions/methods/records/FilterBy'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -44,6 +45,8 @@ class Interpreter {
                     return new Expression.Literal('record')
                 } else if (key === 'sortBy') {
                     return new Expression.Literal(new SortBy(literal))
+                } else if (key === 'filterBy') {
+                    return new Expression.Literal(new FilterBy(literal))
                 } else {
                     return new Expression.Literal(null)
                 }
@@ -58,9 +61,9 @@ class Interpreter {
                     return new Expression.Literal('string')
                 }
 
-                if (expression.name.lexeme === 'toLowerCase') {
+                if (expression.name.lexeme === 'lowerCase') {
                     return new Expression.Literal(
-                        new ToLowerCase(expression.item),
+                        new LowerCase(expression.item),
                     )
                 }
             }
@@ -109,7 +112,9 @@ class Interpreter {
             return this.evaluate(argument)
         })
 
-        if (args.length !== callable.arity() && callable.arity() !== Infinity) {
+        const arity = callable.arity()
+
+        if (!arity.includes(args.length) && !arity.includes(Infinity)) {
             throw new RuntimeError(
                 `Expected ${callable.arity()} arguments but got ${
                     args.length
