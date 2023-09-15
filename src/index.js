@@ -92,9 +92,6 @@ export const compile = async (
         }
 
         const content = String(parsed)
-        context = merge({}, context, {
-            environment: { global: { ...frontMatter } },
-        })
 
         input = `<${frontMatter.template}>${content}</${frontMatter.template}>`
     }

@@ -86,46 +86,6 @@ This is a paragraph
     expect(result).toEqualIgnoringWhitespace(expected)
 })
 
-test('frontmatter data is available in the template', async () => {
-    const input = `
----
-template: Template
-item: Yo
----
-
-# Heading 1
-
-This is a paragraph
-`
-    const templateDefinition = `
-<article>
-    <span>{{ item }}</span>
-    <slot />
-</article>
-`
-    const expected = `
-<article>
-    <span>Yo</span>
-    <h1>Heading 1</h1>
-    <p>This is a paragraph</p>
-</article>
-`
-
-    const result = await compile(
-        input,
-        {
-            components: {
-                Template: templateDefinition,
-            },
-        },
-        {
-            language: 'mds',
-        },
-    )
-
-    expect(result).toEqualIgnoringWhitespace(expected)
-})
-
 test('it fails if there is no frontmatter', async () => {
     const input = `
 # Heading 1
