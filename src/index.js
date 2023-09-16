@@ -59,7 +59,7 @@ export const compile = async (
 
     let input = providedInput.trim()
 
-    if (options.language === 'mds') {
+    if (options.language === 'markdown') {
         let yamlContent
         const parsed = await unified()
             .use(remarkParse)
