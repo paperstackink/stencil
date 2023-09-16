@@ -371,7 +371,7 @@ describe('Call Expressions', () => {
         })
 
         test('it evaluates methods on other data types', () => {
-            const input = `"YoYo".lowercase()`
+            const input = `"YoYo".lowerCase()`
             const expected = new Expression.Literal('yoyo')
             const output = evaluate(input)
 

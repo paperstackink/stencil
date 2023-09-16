@@ -1,10 +1,16 @@
 import yaml from 'yaml'
 import parse from 'rehype-parse-ns'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import remarkFrontmatter from 'remark-frontmatter'
 import { unified } from 'unified'
 import { isPlainObject } from 'lodash'
+import { find } from 'unist-util-find'
+import stringify from 'rehype-stringify'
 
 import isDocument from '@/helpers/isDocument'
 import CompilationError from '@/errors/CompilationError'
+import NoFrontMatterError from '@/errors/NoFrontMatterError'
 
 function mapFromObject(object) {
 	let entries = Object.entries(object)
@@ -50,7 +56,7 @@ function plugin() {
 	Object.assign(this, { Compiler: extract })
 }
 
-const extractData = async input => {
+const extractDataFromStencil = async input => {
 	const result = await unified()
 		.use(parse, {
 			fragment: !isDocument(input.trim()),
@@ -59,6 +65,42 @@ const extractData = async input => {
 		.process(input.trim())
 
 	return result.result
+}
+
+const extractDataFromMarkdown = async input => {
+	let yamlContent
+
+	await unified()
+		.use(remarkParse)
+		.use(remarkFrontmatter, ['yaml'])
+		.use(() => tree => {
+			const node = find(tree, { type: 'yaml' })
+
+			if (node) {
+				yamlContent = node.value
+			}
+		})
+		.use(remarkRehype, { allowDangerousHtml: true })
+		.use(stringify, { allowDangerousHtml: true })
+		.process(input)
+
+	if (!yamlContent) {
+		throw new NoFrontMatterError()
+	}
+
+	const frontMatter = yaml.parse(yamlContent, {
+		customTags: ['timestamp'],
+	})
+
+	return mapFromObject(frontMatter)
+}
+
+const extractData = async (input, options) => {
+	if (options.type === 'markdown') {
+		return extractDataFromMarkdown(input)
+	}
+
+	return extractDataFromStencil(input)
 }
 
 export default extractData

@@ -61,7 +61,7 @@ class Interpreter {
                     return new Expression.Literal('string')
                 }
 
-                if (expression.name.lexeme === 'lowercase') {
+                if (expression.name.lexeme === 'lowerCase') {
                     return new Expression.Literal(
                         new LowerCase(expression.item),
                     )
