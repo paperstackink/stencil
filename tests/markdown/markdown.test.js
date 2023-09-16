@@ -2,6 +2,7 @@ import { compile } from '@/index'
 import NoFrontMatterError from '@/errors/NoFrontMatterError'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import NoTemplateInMarkdownPageError from '@/errors/NoTemplateInMarkdownPageError'
+import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 test('it can compile markdown', async () => {
     const input = `
@@ -31,7 +32,7 @@ This is a paragraph
             components: { Template: templateDefinition },
         },
         {
-            language: 'mds',
+            language: 'markdown',
         },
     )
 
@@ -79,7 +80,7 @@ This is a paragraph
             },
         },
         {
-            language: 'mds',
+            language: 'markdown',
         },
     )
 
@@ -107,7 +108,7 @@ This is a paragraph
                 },
             },
             {
-                language: 'mds',
+                language: 'markdown',
             },
         ),
     ).rejects.toThrow(new NoFrontMatterError())
@@ -137,7 +138,7 @@ This is a paragraph
                 },
             },
             {
-                language: 'mds',
+                language: 'markdown',
             },
         ),
     ).rejects.toThrow(new NoTemplateInMarkdownPageError())
@@ -167,8 +168,39 @@ This is a paragraph
                 },
             },
             {
-                language: 'mds',
+                language: 'markdown',
             },
         ),
     ).rejects.toThrow(new UnknownTemplateInMarkdown())
+})
+
+test('it fails if the templates does not have a default slot', async () => {
+    const input = `
+---
+template: Template
+---
+
+# Heading 1
+
+This is a paragraph
+`
+    const templateDefinition = `
+<article>
+    <div></div>
+</article>
+`
+
+    await expect(
+        compile(
+            input,
+            {
+                components: {
+                    Template: templateDefinition,
+                },
+            },
+            {
+                language: 'markdown',
+            },
+        ),
+    ).rejects.toThrow(new NoDefaultSlotInMarkdownTemplate())
 })

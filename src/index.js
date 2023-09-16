@@ -12,6 +12,7 @@ import yaml from 'yaml'
 import '@/setup'
 
 import conform from '@/helpers/conform'
+import hasNode from '@/helpers/hasNode'
 import isDocument from '@/helpers/isDocument'
 
 import templates from '@/language/templates'
@@ -22,6 +23,7 @@ import DumpSignal from '@/dumping/DumpSignal'
 import NoFrontMatterError from '@/errors/NoFrontMatterError'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import NoTemplateInMarkdownPageError from '@/errors/NoTemplateInMarkdownPageError'
+import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 import Dump from '@/expressions/functions/Dump'
 import compileDumpPage from '@/language/compileDumpPage'
@@ -89,6 +91,15 @@ export const compile = async (
 
         if (!context.components.hasOwnProperty(frontMatter.template)) {
             throw new UnknownTemplateInMarkdown()
+        }
+
+        const hasDefaultSlot = await hasNode(
+            context.components[frontMatter.template],
+            'slot',
+        )
+
+        if (!hasDefaultSlot) {
+            throw new NoDefaultSlotInMarkdownTemplate()
         }
 
         const content = String(parsed)
