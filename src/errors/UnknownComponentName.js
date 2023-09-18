@@ -1,9 +1,9 @@
 export default class UnknownComponentName extends Error {
-    constructor(name, position) {
+    constructor(component, position) {
         super()
 
         this.name = 'UnknownComponentName'
-        this.component = name
+        this.component = component
         this.position = position
     }
 }

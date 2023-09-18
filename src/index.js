@@ -101,7 +101,7 @@ export const compile = async (
             }
 
             if (!context.components.hasOwnProperty(frontMatter.template)) {
-                throw new UnknownTemplateInMarkdown()
+                throw new UnknownTemplateInMarkdown(frontMatter.template)
             }
 
             const hasDefaultSlot = await hasNode(
