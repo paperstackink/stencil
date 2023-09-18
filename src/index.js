@@ -143,12 +143,15 @@ export const compile = async (
 
             const componentNames = Object.keys(context.components)
             const suggestedComponents = componentNames.filter(
-                name => getCharacterDiffCount(error.component, name) === 1,
+                name =>
+                    getCharacterDiffCount(error.component, name) === 1 &&
+                    getCharacterDiffCount(name, error.component) === 1,
             )
 
-            const suggestions = suggestedComponents
-                .map(name => `     ${name}`)
-                .join('\n')
+            const suggestions = suggestedComponents.length
+                ? `\nIt might be one of these components instead:\n` +
+                  suggestedComponents.map(name => `     ${name}`).join('\n')
+                : ''
 
             const relevantLines = input
                 .split('\n')
@@ -190,8 +193,6 @@ You tried to use a component called "${error.component}" but there are no compon
 
 The error occured in "${options.path}":
 ${codeContext}
-
-It might be one of these components instead:
 ${suggestions}
 `
 
