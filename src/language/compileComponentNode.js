@@ -3,9 +3,9 @@ import parse from 'rehype-parse-ns'
 import { select } from 'hast-util-select'
 
 import CompilationError from '@/errors/CompilationError'
-import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
-import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
-import UnknownDynamicComponentNameError from '@/errors/UnknownDynamicComponentNameError'
+import UnknownComponentName from '@/errors/UnknownComponentName'
+import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
+import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 
 import templates from '@/language/templates'
 import compileSlots from '@/language/compileSlots'
@@ -20,7 +20,7 @@ import compileExpressions from './compileExpressions'
 export default function (node, context) {
     const isDynamicComponent = node.tagName === 'Component'
     if (!(node.tagName in context.components) && !isDynamicComponent) {
-        throw new UnknownComponentNameError(node.tagName, node.position)
+        throw new UnknownComponentName(node.tagName, node.position)
     }
 
     const [attributes, usedIdentifiers] = compileAttributes(
@@ -29,7 +29,7 @@ export default function (node, context) {
     )
 
     if (isDynamicComponent && !attributes.hasOwnProperty('is')) {
-        throw new ComponentNameNotProvidedError()
+        throw new ComponentNameNotProvided()
     }
 
     let name = node.tagName
@@ -49,7 +49,7 @@ export default function (node, context) {
     }
 
     if (isDynamicComponent && !(name in context.components)) {
-        throw new UnknownDynamicComponentNameError(name)
+        throw new UnknownDynamicComponentName(name)
     }
 
     let definition = context.components[name]

@@ -1,6 +1,6 @@
 import { compile } from '@/index'
-import UnknownDynamicComponentNameError from '@/errors/UnknownDynamicComponentNameError'
-import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
+import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
+import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 
 test('it can compile a dynamic component', async () => {
 	const input = `
@@ -126,7 +126,7 @@ test('it errors if no component name is provided', async () => {
 		compile(input, {
 			components: { Card: componentDefiniton },
 		}),
-	).rejects.toThrow(ComponentNameNotProvidedError)
+	).rejects.toThrow(ComponentNameNotProvided)
 })
 
 test("it errors if the dynamic component name doesn't exist", async () => {
@@ -140,5 +140,5 @@ test("it errors if the dynamic component name doesn't exist", async () => {
 		compile(input, {
 			components: {},
 		}),
-	).rejects.toThrow(UnknownDynamicComponentNameError)
+	).rejects.toThrow(UnknownDynamicComponentName)
 })

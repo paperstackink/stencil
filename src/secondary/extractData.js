@@ -12,7 +12,7 @@ import isDocument from '@/helpers/isDocument'
 import formatError from '@/helpers/formatError'
 
 import CompilationError from '@/errors/CompilationError'
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
+import NoFrontMatter from '@/errors/NoFrontMatter'
 
 function mapFromObject(object) {
 	let entries = Object.entries(object)
@@ -87,7 +87,7 @@ const extractDataFromMarkdown = async input => {
 		.process(input)
 
 	if (!yamlContent) {
-		throw new NoFrontMatterError()
+		throw new NoFrontMatter()
 	}
 
 	const frontMatter = yaml.parse(yamlContent, {

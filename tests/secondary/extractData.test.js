@@ -1,6 +1,6 @@
 import extractData from '@/secondary/extractData'
 import CompilationError from '@/errors/CompilationError'
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
+import NoFrontMatter from '@/errors/NoFrontMatter'
 
 describe('Stencil', () => {
 	test('it extracts data from a top-level Data component', async () => {
@@ -148,7 +148,7 @@ featured: true
 `
 
 		await expect(extractData(input, { type: 'markdown' })).rejects.toThrow(
-			NoFrontMatterError,
+			NoFrontMatter,
 		)
 	})
 })

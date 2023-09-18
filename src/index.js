@@ -21,16 +21,16 @@ import extractData from '@/secondary/extractData'
 
 import DumpSignal from '@/dumping/DumpSignal'
 
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
+import NoFrontMatter from '@/errors/NoFrontMatter'
+import NoTemplateInMarkdownPage from '@/errors/NoTemplateInMarkdownPage'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoTemplateInMarkdownPageError from '@/errors/NoTemplateInMarkdownPageError'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 import Dump from '@/expressions/functions/Dump'
 import compileDumpPage from '@/language/compileDumpPage'
 
 import CompilationError from '@/errors/CompilationError'
-import ReservedComponentNameError from '@/errors/ReservedComponentNameError'
+import ReservedComponentName from '@/errors/ReservedComponentName'
 
 const defaultContext = {
     components: {},
@@ -59,7 +59,7 @@ export const compile = async (
             context.components.hasOwnProperty(name),
         )
     ) {
-        throw new ReservedComponentNameError()
+        throw new ReservedComponentName()
     }
 
     let input = providedInput.trim()
@@ -82,7 +82,7 @@ export const compile = async (
                 .process(input)
 
             if (!yamlContent) {
-                throw new NoFrontMatterError()
+                throw new NoFrontMatter()
             }
 
             const frontMatter = yaml.parse(yamlContent, {
@@ -90,7 +90,7 @@ export const compile = async (
             })
 
             if (!frontMatter.hasOwnProperty('template')) {
-                throw new NoTemplateInMarkdownPageError()
+                throw new NoTemplateInMarkdownPage()
             }
 
             if (!context.components.hasOwnProperty(frontMatter.template)) {

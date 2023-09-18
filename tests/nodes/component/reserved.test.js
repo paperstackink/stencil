@@ -1,5 +1,5 @@
 import { compile } from '@/index'
-import ReservedComponentNameError from '@/errors/ReservedComponentNameError'
+import ReservedComponentName from '@/errors/ReservedComponentName'
 
 test("it errors if providing a component called 'Component'", async () => {
 	const input = `
@@ -15,7 +15,7 @@ test("it errors if providing a component called 'Component'", async () => {
 		compile(input, {
 			components: { Component: componentDefiniton },
 		}),
-	).rejects.toThrow(ReservedComponentNameError)
+	).rejects.toThrow(ReservedComponentName)
 })
 
 test("it errors if providing a component called 'Data'", async () => {
@@ -32,5 +32,5 @@ test("it errors if providing a component called 'Data'", async () => {
 		compile(input, {
 			components: { Data: componentDefiniton },
 		}),
-	).rejects.toThrow(ReservedComponentNameError)
+	).rejects.toThrow(ReservedComponentName)
 })

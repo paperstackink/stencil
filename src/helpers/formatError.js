@@ -1,6 +1,6 @@
 import CompilationError from '@/errors/CompilationError'
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
-import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
+import NoFrontMatter from '@/errors/NoFrontMatter'
+import UnknownComponentName from '@/errors/UnknownComponentName'
 
 import isWhitespace from '@/helpers/isWhitespace'
 
@@ -15,7 +15,7 @@ function digits(number) {
 }
 
 export default function (input, error, options, context) {
-	if (error instanceof UnknownComponentNameError) {
+	if (error instanceof UnknownComponentName) {
 		const componentNames = Object.keys(context.components)
 		const suggestedComponents = componentNames.filter(
 			name =>
@@ -72,7 +72,7 @@ ${suggestions}
 `
 
 		return new CompilationError(output)
-	} else if (error instanceof NoFrontMatterError) {
+	} else if (error instanceof NoFrontMatter) {
 		const context = !isWhitespace(input)
 			? input.split('\n').slice(0, 3).join('\n')
 			: '# Headline 1'

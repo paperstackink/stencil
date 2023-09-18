@@ -1,7 +1,7 @@
 import { compile } from '@/index'
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
+import NoFrontMatter from '@/errors/NoFrontMatter'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoTemplateInMarkdownPageError from '@/errors/NoTemplateInMarkdownPageError'
+import NoTemplateInMarkdownPage from '@/errors/NoTemplateInMarkdownPage'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 test('it can compile markdown', async () => {
@@ -111,7 +111,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoFrontMatterError())
+    ).rejects.toThrow(new NoFrontMatter())
 })
 
 test('it fails if template is not defined', async () => {
@@ -141,7 +141,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoTemplateInMarkdownPageError())
+    ).rejects.toThrow(new NoTemplateInMarkdownPage())
 })
 
 test('it fails if template does not exist', async () => {
