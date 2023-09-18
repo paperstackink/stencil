@@ -1,8 +1,9 @@
 export default class CompilationError extends Error {
-    constructor(output) {
+    constructor(original, output) {
         super()
 
         this.name = 'CompilationError'
+        this.original = original
         this.output = output
     }
 }

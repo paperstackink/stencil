@@ -1,5 +1,6 @@
 import { compile } from '@/index'
 import NoFrontMatter from '@/errors/NoFrontMatter'
+import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import NoTemplateInMarkdownPage from '@/errors/NoTemplateInMarkdownPage'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
@@ -87,7 +88,7 @@ This is a paragraph
     expect(result).toEqualIgnoringWhitespace(expected)
 })
 
-test('it fails if there is no frontmatter', async () => {
+test('it fails if there is no front matter block', async () => {
     const input = `
 # Heading 1
 
@@ -112,6 +113,36 @@ This is a paragraph
             },
         ),
     ).rejects.toThrow(new NoFrontMatter())
+})
+
+test('it fails if there is an empty front matter block', async () => {
+    const input = `---
+
+---
+
+# Heading 1
+
+This is a paragraph
+`
+    const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+
+    await expect(
+        compile(
+            input,
+            {
+                components: {
+                    Template: templateDefinition,
+                },
+            },
+            {
+                language: 'markdown',
+            },
+        ),
+    ).rejects.toThrow(new EmptyFrontmatter())
 })
 
 test('it fails if template is not defined', async () => {

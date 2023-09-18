@@ -1,5 +1,7 @@
 import CompilationError from '@/errors/CompilationError'
+
 import NoFrontMatter from '@/errors/NoFrontMatter'
+import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import UnknownComponentName from '@/errors/UnknownComponentName'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 
@@ -59,7 +61,9 @@ export default function (input, error, options, context) {
 					.map(_ => ' ')
 					.join('')
 
-				return `${line.number}${padding}| ${line.content}`
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} | ${line.content}`
 			})
 			.join('\n')
 
@@ -72,25 +76,71 @@ ${codeContext}
 ${suggestions}
 `
 
-		return new CompilationError(output)
+		return new CompilationError('UnknownComponentName', output)
 	} else if (error instanceof NoFrontMatter) {
-		const context = !isWhitespace(input)
-			? input.split('\n').slice(0, 3).join('\n')
-			: '# Headline 1'
-
 		const output = `
 -----  Error: No front matter  ----------------------
-You didn't include any front matter in "${options.path}".
+
+You didn't include a front matter block in "${options.path}".
 
 When creating a markdown page it's required to specify a 'template':
-
----
-template: Base
----
-
-${context}
+    1 |   ---
+    2 |   template: Base
+    3 |   ---
+    4 |
+    5 |   # Headline 1
 `
-		return new CompilationError(output)
+		return new CompilationError('NoFrontMatter', output)
+	} else if (error instanceof EmptyFrontmatter) {
+		const relevantLines = input
+			.split('\n')
+			.map((content, index) => {
+				const lineNumber = index + 1
+				const errorLineNumber = error.position.start.line
+				const diff = lineNumber - errorLineNumber
+				if (diff === 0 || Math.abs(diff) === 1) {
+					return {
+						number: lineNumber,
+						content,
+					}
+				} else {
+					return null
+				}
+			})
+			.filter(Boolean)
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Empty front matter  ----------------------
+
+You included an empty front matter block in "${options.path}":
+${codeContext}
+
+When creating a markdown page it's required to specify a 'template':
+    1 |   ---
+    2 |   template: Base
+    3 |   ---
+`
+
+		return new CompilationError('EmptyFrontmatter', output)
 	} else if (error instanceof NodeNestedInsideDataNode) {
 		const relevantLines = input
 			.split('\n')
@@ -122,23 +172,26 @@ ${context}
 					.map(_ => ' ')
 					.join('')
 
-				return `${line.number}${padding}| ${line.content}`
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
 			})
 			.join('\n')
 		const output = `
 -----  Error: Element nested inside Data component  ----------------------
+
 You nested an element inside the '<Data>' component, but it should only contain yaml.
 
 The error occured in "${options.path}":
 ${codeContext}
 
 Try adding yaml inside the '<Data>':
-     <Data>
-         template: Base
-         featured: true
-     </Data>
+    1 |   <Data>
+    2 |       template: Base
+    3 |       featured: true
+    4 |   </Data>
 `
-		return new CompilationError(output)
+		return new CompilationError('NodeNestedInsideDataNode', output)
 	} else {
 		return error
 	}

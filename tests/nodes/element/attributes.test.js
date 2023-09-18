@@ -1,5 +1,5 @@
 import { compile } from '@/index'
-import SpreadNonRecordAsAttributesError from '@/errors/SpreadNonRecordAsAttributesError'
+import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 
 test('it can compile expressions in attributes', async () => {
     const input = `<span id="{{ id }}">Text</span>`
@@ -186,7 +186,7 @@ describe('Binding records a attributes', () => {
             compile(input, {
                 environment: {},
             }),
-        ).rejects.toThrow(SpreadNonRecordAsAttributesError)
+        ).rejects.toThrow(SpreadNonRecordAsAttributes)
     })
 })
 

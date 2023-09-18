@@ -21,16 +21,16 @@ import extractData from '@/secondary/extractData'
 
 import DumpSignal from '@/dumping/DumpSignal'
 
-import NoFrontMatter from '@/errors/NoFrontMatter'
-import NoTemplateInMarkdownPage from '@/errors/NoTemplateInMarkdownPage'
-import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
-
 import Dump from '@/expressions/functions/Dump'
 import compileDumpPage from '@/language/compileDumpPage'
 
+import NoFrontMatter from '@/errors/NoFrontMatter'
 import CompilationError from '@/errors/CompilationError'
+import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import ReservedComponentName from '@/errors/ReservedComponentName'
+import NoTemplateInMarkdownPage from '@/errors/NoTemplateInMarkdownPage'
+import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
+import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 const defaultContext = {
     components: {},
@@ -66,7 +66,9 @@ export const compile = async (
 
     if (options.language === 'markdown') {
         try {
+            let hasYamlSection = false
             let yamlContent
+
             const parsed = await unified()
                 .use(remarkParse)
                 .use(remarkFrontmatter, ['yaml'])
@@ -74,6 +76,7 @@ export const compile = async (
                     const node = find(tree, { type: 'yaml' })
 
                     if (node) {
+                        hasYamlSection = true
                         yamlContent = node.value
                     }
                 })
@@ -81,8 +84,12 @@ export const compile = async (
                 .use(stringify, { allowDangerousHtml: true })
                 .process(input)
 
-            if (!yamlContent) {
+            if (!hasYamlSection) {
                 throw new NoFrontMatter()
+            }
+
+            if (!yamlContent) {
+                throw new EmptyFrontmatter()
             }
 
             const frontMatter = yaml.parse(yamlContent, {

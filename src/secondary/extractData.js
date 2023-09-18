@@ -12,6 +12,7 @@ import isDocument from '@/helpers/isDocument'
 import formatError from '@/helpers/formatError'
 
 import NoFrontMatter from '@/errors/NoFrontMatter'
+import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 
 function mapFromObject(object) {
@@ -69,6 +70,7 @@ const extractDataFromStencil = async input => {
 }
 
 const extractDataFromMarkdown = async input => {
+	let hasYamlSection = false
 	let yamlContent
 
 	await unified()
@@ -79,14 +81,19 @@ const extractDataFromMarkdown = async input => {
 
 			if (node) {
 				yamlContent = node.value
+				hasYamlSection = true
 			}
 		})
 		.use(remarkRehype, { allowDangerousHtml: true })
 		.use(stringify, { allowDangerousHtml: true })
 		.process(input)
 
-	if (!yamlContent) {
+	if (!hasYamlSection) {
 		throw new NoFrontMatter()
+	}
+
+	if (!yamlContent) {
+		throw new EmptyFrontmatter()
 	}
 
 	const frontMatter = yaml.parse(yamlContent, {
