@@ -1,6 +1,7 @@
 import CompilationError from '@/errors/CompilationError'
 import NoFrontMatter from '@/errors/NoFrontMatter'
 import UnknownComponentName from '@/errors/UnknownComponentName'
+import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 
 import isWhitespace from '@/helpers/isWhitespace'
 
@@ -88,6 +89,54 @@ template: Base
 ---
 
 ${context}
+`
+		return new CompilationError(output)
+	} else if (error instanceof NodeNestedInsideDataNode) {
+		const relevantLines = input
+			.split('\n')
+			.map((content, index) => {
+				const lineNumber = index + 1
+				const errorLineNumber = error.position.start.line
+				const diff = lineNumber - errorLineNumber
+				if (diff === 0 || Math.abs(diff) === 1) {
+					return {
+						number: lineNumber,
+						content,
+					}
+				} else {
+					return null
+				}
+			})
+			.filter(Boolean)
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				return `${line.number}${padding}| ${line.content}`
+			})
+			.join('\n')
+		const output = `
+-----  Error: Element nested inside Data component  ----------------------
+You nested an element inside the '<Data>' component, but it should only contain yaml.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Try adding yaml inside the '<Data>':
+     <Data>
+         template: Base
+         featured: true
+     </Data>
 `
 		return new CompilationError(output)
 	} else {

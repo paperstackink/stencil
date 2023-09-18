@@ -11,8 +11,8 @@ import stringify from 'rehype-stringify'
 import isDocument from '@/helpers/isDocument'
 import formatError from '@/helpers/formatError'
 
-import CompilationError from '@/errors/CompilationError'
 import NoFrontMatter from '@/errors/NoFrontMatter'
+import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 
 function mapFromObject(object) {
 	let entries = Object.entries(object)
@@ -32,10 +32,9 @@ const extract = node => {
 	let data = new Map()
 
 	if (node.type === 'element' && node.tagName === 'Data') {
-		if (node.children.some(child => child.type !== 'text')) {
-			throw new CompilationError(
-				'Can not nest nodes inside <Data /> component.',
-			)
+		const child = node.children.find(child => child.type !== 'text')
+		if (child) {
+			throw new NodeNestedInsideDataNode(child.position)
 		}
 
 		const content = node.children.map(child => child.value).join('')
