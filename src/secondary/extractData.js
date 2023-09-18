@@ -9,6 +9,8 @@ import { find } from 'unist-util-find'
 import stringify from 'rehype-stringify'
 
 import isDocument from '@/helpers/isDocument'
+import formatError from '@/helpers/formatError'
+
 import CompilationError from '@/errors/CompilationError'
 import NoFrontMatterError from '@/errors/NoFrontMatterError'
 
@@ -96,11 +98,16 @@ const extractDataFromMarkdown = async input => {
 }
 
 const extractData = async (input, options) => {
-	if (options.type === 'markdown') {
-		return extractDataFromMarkdown(input)
-	}
+	try {
+		// Await so it throws error before returning
+		const data = await (options.language === 'markdown'
+			? extractDataFromMarkdown(input)
+			: extractDataFromStencil(input))
 
-	return extractDataFromStencil(input)
+		return data
+	} catch (error) {
+		throw formatError(input, error, options)
+	}
 }
 
 export default extractData
