@@ -28,7 +28,7 @@ import NoFrontMatter from '@/errors/NoFrontMatter'
 import CompilationError from '@/errors/CompilationError'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import ReservedComponentName from '@/errors/ReservedComponentName'
-import NoTemplateInMarkdownPage from '@/errors/NoTemplateInMarkdownPage'
+import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
@@ -97,7 +97,7 @@ export const compile = async (
             })
 
             if (!frontMatter.hasOwnProperty('template')) {
-                throw new NoTemplateInMarkdownPage()
+                throw new NoTemplateInFrontmatter()
             }
 
             if (!context.components.hasOwnProperty(frontMatter.template)) {

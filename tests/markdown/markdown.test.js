@@ -1,8 +1,8 @@
 import { compile } from '@/index'
 import NoFrontMatter from '@/errors/NoFrontMatter'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
+import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoTemplateInMarkdownPage from '@/errors/NoTemplateInMarkdownPage'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 test('it can compile markdown', async () => {
@@ -172,7 +172,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoTemplateInMarkdownPage())
+    ).rejects.toThrow(new NoTemplateInFrontmatter())
 })
 
 test('it fails if template does not exist', async () => {

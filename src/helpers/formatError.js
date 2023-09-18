@@ -3,9 +3,18 @@ import CompilationError from '@/errors/CompilationError'
 import NoFrontMatter from '@/errors/NoFrontMatter'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import UnknownComponentName from '@/errors/UnknownComponentName'
+import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 
 import isWhitespace from '@/helpers/isWhitespace'
+
+Array.prototype.insert = function (index) {
+	this.splice.apply(
+		this,
+		[index, 0].concat(Array.prototype.slice.call(arguments, 1)),
+	)
+	return this
+}
 
 function getCharacterDiffCount(a, b) {
 	return a.split('').filter((character, index) => {
@@ -141,6 +150,84 @@ When creating a markdown page it's required to specify a 'template':
 `
 
 		return new CompilationError('EmptyFrontmatter', output)
+	} else if (error instanceof NoTemplateInFrontmatter) {
+		// Find Context: Find everything betweet the line that contains '---' and the line that contains '---'
+		// Maybe apply this to the other frontmatter one - The EmptyFrontmatter one
+
+		const openingFrontMatterLineIndex = 0
+		const closingFrontMatterLineIndex =
+			input
+				.split('\n')
+				.slice(1)
+				.findIndex(line => line.startsWith('---')) + 1
+
+		const relevantLines = input
+			.split('\n')
+			.filter(
+				(_, index) =>
+					index >= openingFrontMatterLineIndex &&
+					index <= closingFrontMatterLineIndex,
+			)
+			.map((content, index) => ({ number: index + 1, content }))
+
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const suggestion = relevantLines
+			.insert(1, { content: 'template: Base' })
+			.map((item, index) => ({ ...item, number: index + 1 }))
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		// For the 2nd part: Split into lines (by '\n')
+		// Insert right after the first '---'
+		// Get the line number of the first line (error position?)
+		// Manually count the line numbers on the remaining items
+
+		const output = `
+-----  Error: No template specified  ----------------------
+
+You didn't specify a template in "${options.path}":
+${codeContext}
+
+It's required to configure a 'template' in markdown pages:
+${suggestion}
+`
+
+		return new CompilationError('NoTemplateInFrontmatter', output)
 	} else if (error instanceof NodeNestedInsideDataNode) {
 		const relevantLines = input
 			.split('\n')
