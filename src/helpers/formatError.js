@@ -7,6 +7,7 @@ import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import UnknownComponentName from '@/errors/UnknownComponentName'
 import ReservedComponentName from '@/errors/ReservedComponentName'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
+import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
@@ -402,6 +403,61 @@ Try adding yaml inside the '<Data>':
 `
 
 		return new CompilationError('NodeNestedInsideDataNode', output)
+	} else if (error instanceof ComponentNameNotProvided) {
+		const relevantLines = input
+			.split('\n')
+			.map((content, index) => {
+				const lineNumber = index + 1
+				const errorLineNumber = error.position.start.line
+				const diff = lineNumber - errorLineNumber
+				if (diff === 0 || Math.abs(diff) === 1) {
+					return {
+						number: lineNumber,
+						content,
+					}
+				} else {
+					return null
+				}
+			})
+			.filter(Boolean)
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const solution = codeContext.replace(
+			'<Component',
+			'<Component is="Card"',
+		)
+
+		const output = `
+-----  Error: Missing component name  ----------------------
+
+You tried to use a dynamic component, but didn't specify the name of the component it should render.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Try adding an "is" attribute with a component name:
+${solution}
+`
+
+		return new CompilationError('ComponentNameNotProvided', output)
 	} else {
 		return error
 	}

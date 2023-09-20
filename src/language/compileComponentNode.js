@@ -29,7 +29,7 @@ export default function (node, context) {
     )
 
     if (isDynamicComponent && !attributes.hasOwnProperty('is')) {
-        throw new ComponentNameNotProvided()
+        throw new ComponentNameNotProvided(node.position)
     }
 
     let name = node.tagName
