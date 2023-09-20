@@ -6,6 +6,7 @@ import UnknownComponentName from '@/errors/UnknownComponentName'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
+import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 Array.prototype.insert = function (index) {
 	this.splice.apply(
@@ -279,6 +280,48 @@ ${suggestions}
 `
 
 		return new CompilationError('UnknownTemplateInMarkdown', output)
+	} else if (error instanceof NoDefaultSlotInMarkdownTemplate) {
+		const relevantLines = input.split('\n').map((content, index) => {
+			const lineNumber = index + 1
+
+			return {
+				number: lineNumber,
+				content,
+			}
+		})
+
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: No slot in template  ----------------------
+
+Your template doesn't contain a "<slot />" element, which is used to render your content.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Try adding a "<slot />" component somewhere in "${options.path}"
+`
+
+		return new CompilationError('NoDefaultSlotInMarkdownTemplate', output)
 	} else if (error instanceof NodeNestedInsideDataNode) {
 		const relevantLines = input
 			.split('\n')
@@ -315,6 +358,7 @@ ${suggestions}
 				return `${beginning} |   ${line.content}`
 			})
 			.join('\n')
+
 		const output = `
 -----  Error: Element nested inside Data component  ----------------------
 
@@ -329,6 +373,7 @@ Try adding yaml inside the '<Data>':
     3 |       featured: true
     4 |   </Data>
 `
+
 		return new CompilationError('NodeNestedInsideDataNode', output)
 	} else {
 		return error
