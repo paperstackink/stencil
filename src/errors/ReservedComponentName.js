@@ -1,7 +1,8 @@
 export default class ReservedComponentName extends Error {
-    constructor(message) {
-        super(message)
+    constructor(component) {
+        super(component)
 
         this.name = 'ReservedComponentName'
+        this.component = component
     }
 }

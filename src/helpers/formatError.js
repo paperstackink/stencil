@@ -1,8 +1,11 @@
 import CompilationError from '@/errors/CompilationError'
 
+import match from '@/helpers/match'
+
 import NoFrontMatter from '@/errors/NoFrontMatter'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import UnknownComponentName from '@/errors/UnknownComponentName'
+import ReservedComponentName from '@/errors/ReservedComponentName'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
@@ -322,6 +325,30 @@ Try adding a "<slot />" component somewhere in "${options.path}"
 `
 
 		return new CompilationError('NoDefaultSlotInMarkdownTemplate', output)
+	} else if (error instanceof ReservedComponentName) {
+		const explanation = match(error.component, {
+			Data: `"<Data>" is used to add extra data to a page with Yaml:`,
+			Component: `"<Component>" is used to dynamically render another component:`,
+		})
+		const example = match(error.component, {
+			Data: `     1 |   <Data>
+     2 |       title: My Beautiful Dark Twisted Fantasy
+     3 |       featured: true
+     4 |   </Data>
+`,
+			Component: `     1 |   <Component is="{{ $name }}" />`,
+		})
+
+		const output = `
+-----  Error: Reserved component name  ----------------------
+
+You have a custom component called "${error.component}", but that is a reserved name.
+
+${explanation}
+${example}
+`
+
+		return new CompilationError('ReservedComponentName', output)
 	} else if (error instanceof NodeNestedInsideDataNode) {
 		const relevantLines = input
 			.split('\n')

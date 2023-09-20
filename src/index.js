@@ -53,16 +53,20 @@ export const compile = async (
     options = defaultOptions,
 ) => {
     let context = merge({}, defaultContext, providedContext)
-
-    if (
-        ['Component', 'Data'].some(name =>
-            context.components.hasOwnProperty(name),
-        )
-    ) {
-        throw new ReservedComponentName()
-    }
-
     let input = providedInput.trim()
+
+    const reservedComponentName = ['Component', 'Data'].find(name =>
+        context.components.hasOwnProperty(name),
+    )
+
+    if (reservedComponentName) {
+        throw formatError(
+            input,
+            new ReservedComponentName(reservedComponentName),
+            options,
+            context,
+        )
+    }
 
     if (options.language === 'markdown') {
         try {
