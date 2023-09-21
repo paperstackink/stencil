@@ -8,6 +8,7 @@ import NestedExpression from '@/errors/NestedExpression'
 import UnclosedExpression from '@/errors/UnclosedExpression'
 import UnknownComponentName from '@/errors/UnknownComponentName'
 import ReservedComponentName from '@/errors/ReservedComponentName'
+import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
@@ -718,6 +719,43 @@ ${codeContext}
 `
 
 		return new CompilationError('UnevenEachDirectiveCount', output)
+	} else if (error instanceof UnevenIfDirectiveCount) {
+		const relevantLines = input.split('\n').map((line, index) => ({
+			number: index + 1,
+			content: line,
+		}))
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Unclosed @if directive  ----------------------
+
+You forgot to close an "@if" directive.
+
+The error occured in "${options.path}":
+${codeContext}
+
+"@if" directives can be closed with "@endif".
+`
+
+		return new CompilationError('UnevenIfDirectiveCount', output)
 	} else {
 		return error
 	}
