@@ -2,7 +2,7 @@ import compileNode from '@/language/compileNode'
 import Parser from '@/expressions/Parser'
 import Tokenizer from '@/expressions/Tokenizer'
 import Interpreter from '@/expressions/Interpreter'
-import CompilationError from '@/errors/CompilationError'
+import LoopingNonRecord from '@/errors/LoopingNonRecord'
 import compileExpression from '@/language/compileExpression'
 
 export default function (node, context) {
@@ -42,9 +42,7 @@ export default function (node, context) {
     const literal = interpreter.interpret()
 
     if (!(literal.value instanceof Map)) {
-        throw new CompilationError(
-            "Cannot loop over something that's not a record.",
-        )
+        throw new LoopingNonRecord()
     }
 
     const usedIdentifiers = normalisedTokens

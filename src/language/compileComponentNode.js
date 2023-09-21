@@ -2,9 +2,9 @@ import { unified } from 'unified'
 import parse from 'rehype-parse-ns'
 import { select } from 'hast-util-select'
 
-import CompilationError from '@/errors/CompilationError'
 import UnknownComponentName from '@/errors/UnknownComponentName'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
+import MultipleRootsInComponent from '@/errors/MultipleRootsInComponent'
 import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 
 import templates from '@/language/templates'
@@ -67,9 +67,7 @@ export default function (node, context) {
     const normalisedTree = normaliseTree(componentTree)
 
     if (normalisedTree.children.length > 1) {
-        throw new CompilationError(
-            `Component '${node.tagName}' has more than 1 root element.`,
-        )
+        throw new MultipleRootsInComponent()
     }
 
     // In order to support component 'extending' other components,

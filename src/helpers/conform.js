@@ -1,4 +1,9 @@
-import CompilationError from '@/errors/CompilationError'
+import NoEachDirectiveRecord from '@/errors/NoEachDirectiveRecord'
+import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
+import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
+import NoIfDirectiveExpression from '@/errors/NoIfDirectiveExpression'
+import EachDirectiveExpression from '@/errors/EachDirectiveExpression'
+import UnevenEachDirectiveCount from '@/errors/UnevenEachDirectiveCount'
 
 export default function (input) {
     let output = input
@@ -10,18 +15,14 @@ export default function (input) {
     const closingIfStatements = [...input.matchAll(/@endif/g)]
 
     if (openingIfStatements.length !== closingIfStatements.length) {
-        throw new CompilationError(
-            'There is an uneven number of opening and closing @if directives.',
-        )
+        throw new UnevenIfDirectiveCount()
     }
 
     for (const match of openingIfStatements) {
         const lexeme = match[0]
 
         if (!match.groups.expression) {
-            throw new CompilationError(
-                'No expressions provided to @if directive.',
-            )
+            throw new NoIfDirectiveExpression()
         }
 
         const condition = encodeURI(match.groups.expression)
@@ -37,9 +38,7 @@ export default function (input) {
     // @each()
     // @each(  )
     if (input.match(/\s*@each\s*\(\s*\)\s*/g)) {
-        throw new CompilationError(
-            'No expressions provided to @each directive.',
-        )
+        throw new EachDirectiveExpression()
     }
 
     const openingForStatements = [
@@ -50,9 +49,7 @@ export default function (input) {
     const closingForStatements = [...input.matchAll(/@endeach/g)]
 
     if (openingForStatements.length !== closingForStatements.length) {
-        throw new CompilationError(
-            'There is an uneven number of opening and closing @each directives.',
-        )
+        throw new UnevenEachDirectiveCount()
     }
 
     for (const match of openingForStatements) {
@@ -63,13 +60,11 @@ export default function (input) {
         const record = match.groups.record
 
         if (!variable || variable === 'in') {
-            throw new CompilationError(
-                'No variable defined in @each directive.',
-            )
+            throw new NoEachDirectiveVariable()
         }
 
         if (!record || record === 'in') {
-            throw new CompilationError('No record defined in @each directive.')
+            throw new NoEachDirectiveRecord()
         }
 
         if (key) {

@@ -1,4 +1,5 @@
-import CompilationError from '@/errors/CompilationError'
+import NestedExpression from '@/errors/NestedExpression'
+import UnclosedExpression from '@/errors/UnclosedExpression'
 
 const normaliseExpressionsInAttributes = attributes => {
     return Object.fromEntries(
@@ -28,16 +29,14 @@ const normaliseExpressionsInAttributes = attributes => {
                 )
 
                 if (expressionCloserIndex === -1) {
-                    throw new CompilationError('Unclosed expression.')
+                    throw new UnclosedExpression()
                 }
 
                 if (
                     nextExpressionOpenerIndex !== -1 &&
                     nextExpressionOpenerIndex < expressionCloserIndex
                 ) {
-                    throw new CompilationError(
-                        'Nested expressions are not supported.',
-                    )
+                    throw new NestedExpression()
                 }
 
                 if (
