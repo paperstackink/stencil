@@ -5,7 +5,7 @@ import normaliseExpressionsInAttributes from '@/helpers/normaliseExpressionsInAt
 export default function (node, context) {
     const newNode = { ...node }
     const [properties, usedIdentifiers] = compileAttributes(
-        normaliseExpressionsInAttributes(node.properties),
+        normaliseExpressionsInAttributes(node.properties, node.position),
         context,
         node.position,
     )

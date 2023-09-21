@@ -1,7 +1,8 @@
 export default class NestedExpression extends Error {
-    constructor() {
+    constructor(position) {
         super()
 
         this.name = 'NestedExpression'
+        this.position = position
     }
 }

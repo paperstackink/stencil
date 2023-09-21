@@ -1,5 +1,7 @@
 import normaliseExpressionsInAttributes from '@/helpers/normaliseExpressionsInAttributes'
 import CompilationError from '@/errors/CompilationError'
+import NestedExpression from '@/errors/NestedExpression'
+import UnclosedExpression from '@/errors/UnclosedExpression'
 
 test('it can normalise an expression in an attribute value', () => {
     const attributes = {
@@ -72,7 +74,7 @@ test('it ignores non-array attribute values', () => {
     })
 })
 
-test('it errors if there are nested expressions', () => {
+test('it errors if there are nested expressions in array attributes', () => {
     const attributes = {
         class: ['{{', 'expression', '{{', 'nested', '}}', '}}'],
     }
@@ -83,13 +85,40 @@ test('it errors if there are nested expressions', () => {
     )
 })
 
-test('it errors if an expression is not closed', () => {
+test('it errors if there are nested expressions in non-array attributes', () => {
+    const attributes = {
+        yo: '{{ expression {{ nested }} }}',
+    }
+    const runner = () => normaliseExpressionsInAttributes(attributes)
+
+    expect(runner).toThrow(new NestedExpression())
+})
+
+test('it ignores multiple expressions in a non-array attributes', () => {
+    const attributes = {
+        yo: '{{ expression }} {{ nested }}',
+    }
+    const runner = () => normaliseExpressionsInAttributes(attributes)
+
+    expect(runner).not.toThrow()
+})
+
+test('it errors if an expression is not closed in array attributes', () => {
     const attributes = {
         class: ['{{', 'expression'],
     }
     const runner = () => normaliseExpressionsInAttributes(attributes)
 
     expect(runner).toThrow(new CompilationError('Unclosed expression.'))
+})
+
+test('it errors if an expression is not closed on non-array attributes', () => {
+    const attributes = {
+        id: '{{ expression }} {{ another ',
+    }
+    const runner = () => normaliseExpressionsInAttributes(attributes)
+
+    expect(runner).toThrow(new UnclosedExpression())
 })
 
 test('it errors if there are multiple expressions and the last one is not closed', () => {

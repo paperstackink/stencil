@@ -4,6 +4,8 @@ import match from '@/helpers/match'
 
 import NoFrontMatter from '@/errors/NoFrontMatter'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
+import NestedExpression from '@/errors/NestedExpression'
+import UnclosedExpression from '@/errors/UnclosedExpression'
 import UnknownComponentName from '@/errors/UnknownComponentName'
 import ReservedComponentName from '@/errors/ReservedComponentName'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
@@ -580,6 +582,104 @@ Make sure you are using the name of one of your components.
 `
 
 		return new CompilationError('UnknownDynamicComponentName', output)
+	} else if (error instanceof UnclosedExpression) {
+		const relevantLines = input
+			.split('\n')
+			.map((content, index) => {
+				const lineNumber = index + 1
+				const errorLineNumber = error.position.start.line
+				const diff = lineNumber - errorLineNumber
+				if (diff === 0 || Math.abs(diff) === 1) {
+					return {
+						number: lineNumber,
+						content,
+					}
+				} else {
+					return null
+				}
+			})
+			.filter(Boolean)
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Unclosed expression  ----------------------
+
+You forgot to close an expression.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Make sure to add "}}" after the expression.
+`
+
+		return new CompilationError('UnclosedExpression', output)
+	} else if (error instanceof NestedExpression) {
+		const relevantLines = input
+			.split('\n')
+			.map((content, index) => {
+				const lineNumber = index + 1
+				const errorLineNumber = error.position.start.line
+				const diff = lineNumber - errorLineNumber
+				if (diff === 0 || Math.abs(diff) === 1) {
+					return {
+						number: lineNumber,
+						content,
+					}
+				} else {
+					return null
+				}
+			})
+			.filter(Boolean)
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Nested expression  ----------------------
+
+It seems like you tried to nest an expression inside another expression.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Everything between "{{" and "}}" is an expression, so you don't need to use nested brackets.
+`
+
+		return new CompilationError('NestedExpression', output)
 	} else {
 		return error
 	}
