@@ -1,8 +1,9 @@
 export default class UnknownDynamicComponentName extends Error {
-    constructor(name) {
+    constructor(component, position) {
         super()
 
         this.name = 'UnknownDynamicComponentName'
-        this.component = name
+        this.component = component
+        this.position = position
     }
 }

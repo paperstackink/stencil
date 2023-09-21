@@ -15,7 +15,7 @@ import compileAttributes from '@/language/compileAttributes'
 import conform from '@/helpers/conform'
 import isDocument from '@/helpers/isDocument'
 import extractUsedIdentifiersFromNode from '@/helpers/extractUsedIdentifiersFromNode'
-import compileExpressions from './compileExpressions'
+import compileExpressions from '@/language/compileExpressions'
 
 export default function (node, context) {
     const isDynamicComponent = node.tagName === 'Component'
@@ -43,6 +43,7 @@ export default function (node, context) {
                 ...context.environment.global,
                 ...context.environment.local,
             },
+            false,
         )
 
         name = resolvedName
@@ -50,7 +51,7 @@ export default function (node, context) {
     }
 
     if (isDynamicComponent && !(name in context.components)) {
-        throw new UnknownDynamicComponentName(name)
+        throw new UnknownDynamicComponentName(name, node.position)
     }
 
     let definition = context.components[name]

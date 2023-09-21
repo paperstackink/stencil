@@ -11,6 +11,7 @@ import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
+import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 Array.prototype.insert = function (index) {
@@ -528,6 +529,57 @@ Make sure "#bind" contains a record or an expression that evaluates to a record.
 `
 
 		return new CompilationError('SpreadNonRecordAsAttributes', output)
+	} else if (error instanceof UnknownDynamicComponentName) {
+		const name = error.component || 'null'
+
+		const relevantLines = input
+			.split('\n')
+			.map((content, index) => {
+				const lineNumber = index + 1
+				const errorLineNumber = error.position.start.line
+				const diff = lineNumber - errorLineNumber
+				if (diff === 0 || Math.abs(diff) === 1) {
+					return {
+						number: lineNumber,
+						content,
+					}
+				} else {
+					return null
+				}
+			})
+			.filter(Boolean)
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Unknown component  ----------------------
+
+You tried to use a dynamic component with the name "${name}", but that doesn't exist.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Make sure you are using the name of one of your components.
+`
+
+		return new CompilationError('UnknownDynamicComponentName', output)
 	} else {
 		return error
 	}
