@@ -26,6 +26,7 @@ export default function (node, context) {
     const [attributes, usedIdentifiers] = compileAttributes(
         node.properties,
         context,
+        node.position,
     )
 
     if (isDynamicComponent && !attributes.hasOwnProperty('is')) {

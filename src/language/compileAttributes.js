@@ -2,7 +2,7 @@ import compileExpression from '@/language/compileExpression'
 import compileExpressions from '@/language/compileExpressions'
 import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 
-export default function (properties, context) {
+export default function (properties, context, position) {
     let usedIdentifiers = []
 
     const attributes = Object.fromEntries(
@@ -20,7 +20,11 @@ export default function (properties, context) {
                 )
 
                 if (!(resolved.value instanceof Map)) {
-                    throw new SpreadNonRecordAsAttributes()
+                    throw new SpreadNonRecordAsAttributes(
+                        position,
+                        value,
+                        resolved.value,
+                    )
                 }
 
                 usedIdentifiers.concat(bindUsedIdentifiers)

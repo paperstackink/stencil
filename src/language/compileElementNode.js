@@ -7,6 +7,7 @@ export default function (node, context) {
     const [properties, usedIdentifiers] = compileAttributes(
         normaliseExpressionsInAttributes(node.properties),
         context,
+        node.position,
     )
 
     newNode.meta = {
