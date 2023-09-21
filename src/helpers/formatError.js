@@ -11,6 +11,7 @@ import ReservedComponentName from '@/errors/ReservedComponentName'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
+import UnevenEachDirectiveCount from '@/errors/UnevenEachDirectiveCount'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
@@ -680,6 +681,43 @@ Everything between "{{" and "}}" is an expression, so you don't need to use nest
 `
 
 		return new CompilationError('NestedExpression', output)
+	} else if (error instanceof UnevenEachDirectiveCount) {
+		const relevantLines = input.split('\n').map((line, index) => ({
+			number: index + 1,
+			content: line,
+		}))
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Unclosed @each directive  ----------------------
+
+You forgot to close an "@each" directive.
+
+The error occured in "${options.path}":
+${codeContext}
+
+"@each" directives can be closed with "@endeach".
+`
+
+		return new CompilationError('UnevenEachDirectiveCount', output)
 	} else {
 		return error
 	}

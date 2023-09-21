@@ -1,7 +1,8 @@
 export default class UnevenEachDirectiveCount extends Error {
-    constructor() {
+    constructor(position) {
         super()
 
         this.name = 'UnevenEachDirectiveCount'
+        this.position = position
     }
 }
