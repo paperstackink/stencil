@@ -57,6 +57,53 @@ function digits(number) {
 	return number.toString().length
 }
 
+function getLinesFromSnippet(snippet) {
+	return snippet.split('\n').map((line, index) => ({
+		number: index + 1,
+		content: line,
+	}))
+}
+
+function getRelevantLinesFromIndex(input, errorLineNumber) {
+	return input
+		.split('\n')
+		.map((content, index) => {
+			const lineNumber = index + 1
+			const diff = lineNumber - errorLineNumber
+			if (diff === 0 || Math.abs(diff) === 1) {
+				return {
+					number: lineNumber,
+					content,
+				}
+			} else {
+				return null
+			}
+		})
+		.filter(Boolean)
+}
+
+function getCodeFromLines(lines) {
+	return lines
+		.map(line => {
+			// Find the number of digits in a line number in relevant lines
+			// So we can calculate the number of padded spaces we need to add to align all lines
+			const maxLineNumberLength = digits(
+				Math.max(...lines.map(line => line.number)),
+			)
+			const lineNumberLength = digits(line.number)
+			const padding = Array.from(
+				new Array(maxLineNumberLength - lineNumberLength + 1),
+			)
+				.map(_ => ' ')
+				.join('')
+
+			const beginning = `${line.number}`.padStart(5)
+
+			return `${beginning} |   ${line.content}`
+		})
+		.join('\n')
+}
+
 export default function (input, error, options, context) {
 	if (error instanceof UnknownComponentName) {
 		const componentNames = Object.keys(context.components)
@@ -70,42 +117,11 @@ export default function (input, error, options, context) {
 			? `\nIt might be one of these components instead:\n` +
 			  suggestedComponents.map(name => `     ${name}`).join('\n')
 			: ''
-
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} | ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Unknown component name  ----------------------
 You tried to use a component called "${error.component}" but there are no components with that name.
@@ -130,41 +146,11 @@ When creating a markdown page it's required to specify a 'template':
 `
 		return new CompilationError('NoFrontMatter', output)
 	} else if (error instanceof EmptyFrontmatter) {
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Empty front matter  ----------------------
 
@@ -195,25 +181,7 @@ When creating a markdown page it's required to specify a 'template':
 			)
 			.map((content, index) => ({ number: index + 1, content }))
 
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const suggestion = relevantLines
 			.insert(1, { content: 'template: Base' })
@@ -264,25 +232,7 @@ ${suggestion}
 			)
 			.map((content, index) => ({ number: index + 1, content }))
 
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const componentNames = Object.keys(context.components)
 		const suggestedComponents = componentNames.filter(
@@ -307,34 +257,8 @@ ${suggestions}
 
 		return new CompilationError('UnknownTemplateInMarkdown', output)
 	} else if (error instanceof NoDefaultSlotInMarkdownTemplate) {
-		const relevantLines = input.split('\n').map((content, index) => {
-			const lineNumber = index + 1
-
-			return {
-				number: lineNumber,
-				content,
-			}
-		})
-
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(input)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: No slot in template  ----------------------
 
@@ -371,41 +295,11 @@ ${example}
 
 		return new CompilationError('ReservedComponentName', output)
 	} else if (error instanceof NodeNestedInsideDataNode) {
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Element nested inside Data component  ----------------------
 
@@ -423,41 +317,11 @@ Try adding yaml inside the '<Data>':
 
 		return new CompilationError('NodeNestedInsideDataNode', output)
 	} else if (error instanceof ComponentNameNotProvided) {
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const solution = codeContext.replace(
 			'<Component',
@@ -478,44 +342,12 @@ ${solution}
 		return new CompilationError('ComponentNameNotProvided', output)
 	} else if (error instanceof SpreadNonRecordAsAttributes) {
 		const type = getType(error.value)
-
 		const article = getArticle(type)
-
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Spreading ${type}  ----------------------
 
@@ -530,42 +362,11 @@ Make sure "#bind" contains a record or an expression that evaluates to a record.
 		return new CompilationError('SpreadNonRecordAsAttributes', output)
 	} else if (error instanceof UnknownDynamicComponentName) {
 		const name = error.component || 'null'
-
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Unknown component  ----------------------
 
@@ -579,41 +380,11 @@ Make sure you are using the name of one of your components.
 
 		return new CompilationError('UnknownDynamicComponentName', output)
 	} else if (error instanceof UnclosedExpression) {
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Unclosed expression  ----------------------
 
@@ -627,41 +398,11 @@ Make sure to add "}}" after the expression.
 
 		return new CompilationError('UnclosedExpression', output)
 	} else if (error instanceof NestedExpression) {
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Nested expression  ----------------------
 
@@ -675,29 +416,8 @@ Everything between "{{" and "}}" is an expression, so you don't need to use nest
 
 		return new CompilationError('NestedExpression', output)
 	} else if (error instanceof UnevenEachDirectiveCount) {
-		const relevantLines = input.split('\n').map((line, index) => ({
-			number: index + 1,
-			content: line,
-		}))
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(input)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Unclosed @each directive  ----------------------
 
@@ -711,29 +431,8 @@ ${codeContext}
 
 		return new CompilationError('UnevenEachDirectiveCount', output)
 	} else if (error instanceof UnevenIfDirectiveCount) {
-		const relevantLines = input.split('\n').map((line, index) => ({
-			number: index + 1,
-			content: line,
-		}))
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(input)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Unclosed @if directive  ----------------------
 
@@ -747,29 +446,8 @@ ${codeContext}
 
 		return new CompilationError('UnevenIfDirectiveCount', output)
 	} else if (error instanceof MissingEachDirectiveExpression) {
-		const relevantLines = input.split('\n').map((line, index) => ({
-			number: index + 1,
-			content: line,
-		}))
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(input)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Missing expression in @each  ----------------------
 
@@ -786,29 +464,8 @@ Try writing the loop like this:
 
 		return new CompilationError('MissingEachDirectiveExpression', output)
 	} else if (error instanceof NoEachDirectiveVariable) {
-		const relevantLines = input.split('\n').map((line, index) => ({
-			number: index + 1,
-			content: line,
-		}))
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(input)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Missing variable in @each  ----------------------
 
@@ -825,29 +482,8 @@ Try writing the loop like this:
 
 		return new CompilationError('NoEachDirectiveVariable', output)
 	} else if (error instanceof NoEachDirectiveRecord) {
-		const relevantLines = input.split('\n').map((line, index) => ({
-			number: index + 1,
-			content: line,
-		}))
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(input)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Missing record in @each  ----------------------
 
@@ -864,41 +500,11 @@ Try writing the loop like this:
 
 		return new CompilationError('NoEachDirectiveRecord', output)
 	} else if (error instanceof LoopingNonRecord) {
-		const relevantLines = input
-			.split('\n')
-			.map((content, index) => {
-				const lineNumber = index + 1
-				const errorLineNumber = error.position.start.line
-				const diff = lineNumber - errorLineNumber
-				if (diff === 0 || Math.abs(diff) === 1) {
-					return {
-						number: lineNumber,
-						content,
-					}
-				} else {
-					return null
-				}
-			})
-			.filter(Boolean)
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getRelevantLinesFromIndex(
+			input,
+			error.position.start.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const type = getType(error.value)
 		const article = getArticle(type)
@@ -915,29 +521,8 @@ It's only possible to loop over records.
 
 		return new CompilationError('LoopingNonRecord', output)
 	} else if (error instanceof NoIfDirectiveExpression) {
-		const relevantLines = input.split('\n').map((line, index) => ({
-			number: index + 1,
-			content: line,
-		}))
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(input)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Missing expression in @if  ----------------------
 
@@ -954,31 +539,8 @@ Try writing the @if directive like this:
 
 		return new CompilationError('NoIfDirectiveExpression', output)
 	} else if (error instanceof MultipleRootsInComponent) {
-		const relevantLines = error.definition
-			.split('\n')
-			.map((line, index) => ({
-				number: index + 1,
-				content: line,
-			}))
-		const codeContext = relevantLines
-			.map(line => {
-				// Find the number of digits in a line number in relevant lines
-				// So we can calculate the number of padded spaces we need to add to align all lines
-				const maxLineNumberLength = digits(
-					Math.max(...relevantLines.map(line => line.number)),
-				)
-				const lineNumberLength = digits(line.number)
-				const padding = Array.from(
-					new Array(maxLineNumberLength - lineNumberLength + 1),
-				)
-					.map(_ => ' ')
-					.join('')
-
-				const beginning = `${line.number}`.padStart(5)
-
-				return `${beginning} |   ${line.content}`
-			})
-			.join('\n')
+		const relevantLines = getLinesFromSnippet(error.definition)
+		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Multiple root nodes in component  ----------------------
 
