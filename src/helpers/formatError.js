@@ -107,8 +107,7 @@ export default function (input, error, options, context) {
 			})
 			.join('\n')
 
-		const output = `
------  Error: Unknown component name  ----------------------
+		const output = `-----  Error: Unknown component name  ----------------------
 You tried to use a component called "${error.component}" but there are no components with that name.
 
 The error occured in "${options.path}":
@@ -118,8 +117,7 @@ ${suggestions}
 
 		return new CompilationError('UnknownComponentName', output)
 	} else if (error instanceof NoFrontMatter) {
-		const output = `
------  Error: No front matter  ----------------------
+		const output = `-----  Error: No front matter  ----------------------
 
 You didn't include a front matter block in "${options.path}".
 
@@ -168,8 +166,7 @@ When creating a markdown page it's required to specify a 'template':
 			})
 			.join('\n')
 
-		const output = `
------  Error: Empty front matter  ----------------------
+		const output = `-----  Error: Empty front matter  ----------------------
 
 You included an empty front matter block in "${options.path}":
 ${codeContext}
@@ -240,8 +237,7 @@ When creating a markdown page it's required to specify a 'template':
 			})
 			.join('\n')
 
-		const output = `
------  Error: No template specified  ----------------------
+		const output = `-----  Error: No template specified  ----------------------
 
 You didn't specify a template in "${options.path}":
 ${codeContext}
@@ -300,8 +296,7 @@ ${suggestion}
 			  suggestedComponents.map(name => `     ${name}`).join('\n')
 			: ''
 
-		const output = `
------  Error: Unknown template specified  ----------------------
+		const output = `-----  Error: Unknown template specified  ----------------------
 
 You specified a template "${error.component}" but there are no components with that name.
 
@@ -341,8 +336,7 @@ ${suggestions}
 			})
 			.join('\n')
 
-		const output = `
------  Error: No slot in template  ----------------------
+		const output = `-----  Error: No slot in template  ----------------------
 
 Your template doesn't contain a "<slot />" element, which is used to render your content.
 
@@ -367,8 +361,7 @@ Try adding a "<slot />" component somewhere in "${options.path}"
 			Component: `     1 |   <Component is="{{ $name }}" />`,
 		})
 
-		const output = `
------  Error: Reserved component name  ----------------------
+		const output = `-----  Error: Reserved component name  ----------------------
 
 You have a custom component called "${error.component}", but that is a reserved name.
 
@@ -414,8 +407,7 @@ ${example}
 			})
 			.join('\n')
 
-		const output = `
------  Error: Element nested inside Data component  ----------------------
+		const output = `-----  Error: Element nested inside Data component  ----------------------
 
 You nested an element inside the '<Data>' component, but it should only contain yaml.
 
@@ -472,8 +464,7 @@ Try adding yaml inside the '<Data>':
 			'<Component is="Card"',
 		)
 
-		const output = `
------  Error: Missing component name  ----------------------
+		const output = `-----  Error: Missing component name  ----------------------
 
 You tried to use a dynamic component, but didn't specify the name of the component it should render.
 
@@ -526,8 +517,7 @@ ${solution}
 			})
 			.join('\n')
 
-		const output = `
------  Error: Spreading ${type}  ----------------------
+		const output = `-----  Error: Spreading ${type}  ----------------------
 
 You tried to spread ${article}"${type}" as attributes, but only records can be spread.
 
@@ -577,8 +567,7 @@ Make sure "#bind" contains a record or an expression that evaluates to a record.
 			})
 			.join('\n')
 
-		const output = `
------  Error: Unknown component  ----------------------
+		const output = `-----  Error: Unknown component  ----------------------
 
 You tried to use a dynamic component with the name "${name}", but that doesn't exist.
 
@@ -626,8 +615,7 @@ Make sure you are using the name of one of your components.
 			})
 			.join('\n')
 
-		const output = `
------  Error: Unclosed expression  ----------------------
+		const output = `-----  Error: Unclosed expression  ----------------------
 
 You forgot to close an expression.
 
@@ -675,8 +663,7 @@ Make sure to add "}}" after the expression.
 			})
 			.join('\n')
 
-		const output = `
------  Error: Nested expression  ----------------------
+		const output = `-----  Error: Nested expression  ----------------------
 
 It seems like you tried to nest an expression inside another expression.
 
@@ -712,8 +699,7 @@ Everything between "{{" and "}}" is an expression, so you don't need to use nest
 			})
 			.join('\n')
 
-		const output = `
------  Error: Unclosed @each directive  ----------------------
+		const output = `-----  Error: Unclosed @each directive  ----------------------
 
 You forgot to close an "@each" directive.
 
@@ -749,8 +735,7 @@ ${codeContext}
 			})
 			.join('\n')
 
-		const output = `
------  Error: Unclosed @if directive  ----------------------
+		const output = `-----  Error: Unclosed @if directive  ----------------------
 
 You forgot to close an "@if" directive.
 
@@ -786,8 +771,7 @@ ${codeContext}
 			})
 			.join('\n')
 
-		const output = `
------  Error: Missing expression in @each  ----------------------
+		const output = `-----  Error: Missing expression in @each  ----------------------
 
 You declared an @each loop, but you didn't specify what it should loop over.
 
@@ -826,8 +810,7 @@ Try writing the loop like this:
 			})
 			.join('\n')
 
-		const output = `
------  Error: Missing variable in @each  ----------------------
+		const output = `-----  Error: Missing variable in @each  ----------------------
 
 You declared an @each loop, but you didn't specify a variable to use in the loop.
 
@@ -866,8 +849,7 @@ Try writing the loop like this:
 			})
 			.join('\n')
 
-		const output = `
------  Error: Missing record in @each  ----------------------
+		const output = `-----  Error: Missing record in @each  ----------------------
 
 You declared an @each loop, but you didn't specify a record to to loop over.
 
@@ -921,8 +903,7 @@ Try writing the loop like this:
 		const type = getType(error.value)
 		const article = getArticle(type)
 
-		const output = `
------  Error: Looping over "${type}"  ----------------------
+		const output = `-----  Error: Looping over "${type}"  ----------------------
 
 You tried to loop over ${article}"${type}" in an @each directive.
 
@@ -958,8 +939,7 @@ It's only possible to loop over records.
 			})
 			.join('\n')
 
-		const output = `
------  Error: Missing expression in @if  ----------------------
+		const output = `-----  Error: Missing expression in @if  ----------------------
 
 You declared an @if directive, but you didn't specify what it should check.
 
@@ -1000,8 +980,7 @@ Try writing the @if directive like this:
 			})
 			.join('\n')
 
-		const output = `
------  Error: Multiple root nodes in component  ----------------------
+		const output = `-----  Error: Multiple root nodes in component  ----------------------
 
 You declared multiple root nodes in a component.
 
