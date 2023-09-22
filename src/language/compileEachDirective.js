@@ -42,7 +42,7 @@ export default function (node, context) {
     const literal = interpreter.interpret()
 
     if (!(literal.value instanceof Map)) {
-        throw new LoopingNonRecord()
+        throw new LoopingNonRecord(literal.value, node.position)
     }
 
     const usedIdentifiers = normalisedTokens

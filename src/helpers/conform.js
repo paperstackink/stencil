@@ -2,8 +2,8 @@ import NoEachDirectiveRecord from '@/errors/NoEachDirectiveRecord'
 import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
 import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
 import NoIfDirectiveExpression from '@/errors/NoIfDirectiveExpression'
-import EachDirectiveExpression from '@/errors/EachDirectiveExpression'
 import UnevenEachDirectiveCount from '@/errors/UnevenEachDirectiveCount'
+import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 
 export default function (input) {
     let output = input
@@ -38,7 +38,7 @@ export default function (input) {
     // @each()
     // @each(  )
     if (input.match(/\s*@each\s*\(\s*\)\s*/g)) {
-        throw new EachDirectiveExpression()
+        throw new MissingEachDirectiveExpression()
     }
 
     const openingForStatements = [

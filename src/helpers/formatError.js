@@ -1,22 +1,41 @@
 import CompilationError from '@/errors/CompilationError'
 
 import match from '@/helpers/match'
-
 import NoFrontMatter from '@/errors/NoFrontMatter'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
+import LoopingNonRecord from '@/errors/LoopingNonRecord'
 import NestedExpression from '@/errors/NestedExpression'
 import UnclosedExpression from '@/errors/UnclosedExpression'
 import UnknownComponentName from '@/errors/UnknownComponentName'
+import NoEachDirectiveRecord from '@/errors/NoEachDirectiveRecord'
 import ReservedComponentName from '@/errors/ReservedComponentName'
 import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
+import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 import UnevenEachDirectiveCount from '@/errors/UnevenEachDirectiveCount'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
+import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
+
+function getArticle(type) {
+	if (type === 'null') {
+		return ''
+	}
+
+	return `a `
+}
+
+function getType(value) {
+	if (value === null) {
+		return 'null'
+	}
+
+	return typeof value
+}
 
 Array.prototype.insert = function (index) {
 	this.splice.apply(
@@ -465,23 +484,7 @@ ${solution}
 
 		return new CompilationError('ComponentNameNotProvided', output)
 	} else if (error instanceof SpreadNonRecordAsAttributes) {
-		function getType(value) {
-			if (value === null) {
-				return 'null'
-			}
-
-			return typeof value
-		}
-
 		const type = getType(error.value)
-
-		function getArticle(type) {
-			if (type === 'null') {
-				return ''
-			}
-
-			return `a `
-		}
 
 		const article = getArticle(type)
 
@@ -756,6 +759,178 @@ ${codeContext}
 `
 
 		return new CompilationError('UnevenIfDirectiveCount', output)
+	} else if (error instanceof MissingEachDirectiveExpression) {
+		const relevantLines = input.split('\n').map((line, index) => ({
+			number: index + 1,
+			content: line,
+		}))
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Missing expression in @each  ----------------------
+
+You declared an @each loop, but you didn't specify what it should loop over.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Try writing the loop like this:
+     1 |   @each(identifier in $record)
+     2 |       <span>{{ identifier.value }}</span>
+     3 |   @endeach
+`
+
+		return new CompilationError('MissingEachDirectiveExpression', output)
+	} else if (error instanceof NoEachDirectiveVariable) {
+		const relevantLines = input.split('\n').map((line, index) => ({
+			number: index + 1,
+			content: line,
+		}))
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Missing variable in @each  ----------------------
+
+You declared an @each loop, but you didn't specify a variable to use in the loop.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Try writing the loop like this:
+     1 |   @each(identifier in $record)
+     2 |       <span>{{ identifier.value }}</span>
+     3 |   @endeach
+`
+
+		return new CompilationError('NoEachDirectiveVariable', output)
+	} else if (error instanceof NoEachDirectiveRecord) {
+		const relevantLines = input.split('\n').map((line, index) => ({
+			number: index + 1,
+			content: line,
+		}))
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Missing record in @each  ----------------------
+
+You declared an @each loop, but you didn't specify a record to to loop over.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Try writing the loop like this:
+     1 |   @each(identifier in $record)
+     2 |       <span>{{ identifier.value }}</span>
+     3 |   @endeach
+`
+
+		return new CompilationError('NoEachDirectiveRecord', output)
+	} else if (error instanceof LoopingNonRecord) {
+		const relevantLines = input
+			.split('\n')
+			.map((content, index) => {
+				const lineNumber = index + 1
+				const errorLineNumber = error.position.start.line
+				const diff = lineNumber - errorLineNumber
+				if (diff === 0 || Math.abs(diff) === 1) {
+					return {
+						number: lineNumber,
+						content,
+					}
+				} else {
+					return null
+				}
+			})
+			.filter(Boolean)
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const type = getType(error.value)
+		const article = getArticle(type)
+
+		const output = `
+-----  Error: Looping over "${type}"  ----------------------
+
+You tried to loop over ${article}"${type}" in an @each directive.
+
+The error occured in "${options.path}":
+${codeContext}
+
+It's only possible to loop over records.
+`
+
+		return new CompilationError('LoopingNonRecord', output)
 	} else {
 		return error
 	}

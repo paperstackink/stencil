@@ -153,7 +153,7 @@ describe('@if directives', () => {
 })
 
 describe('@each directives', () => {
-    test('it can convert @if to <if>', () => {
+    test('it can convert @each to <each>', () => {
         const input = `<div>
     @each(item in items)
         <span>{{ item }}</span>
