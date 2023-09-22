@@ -67,7 +67,7 @@ export default function (node, context) {
     const normalisedTree = normaliseTree(componentTree)
 
     if (normalisedTree.children.length > 1) {
-        throw new MultipleRootsInComponent()
+        throw new MultipleRootsInComponent(definition)
     }
 
     // In order to support component 'extending' other components,

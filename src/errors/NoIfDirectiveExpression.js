@@ -1,7 +1,7 @@
-export default class MultipleRootsInComponent extends Error {
+export default class NoIfDirectiveExpression extends Error {
     constructor() {
         super()
 
-        this.name = 'MultipleRootsInComponent'
+        this.name = 'NoIfDirectiveExpression'
     }
 }

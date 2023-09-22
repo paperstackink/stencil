@@ -13,6 +13,7 @@ import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
 import NoIfDirectiveExpression from '@/errors/NoIfDirectiveExpression'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
+import MultipleRootsInComponent from '@/errors/MultipleRootsInComponent'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 import UnevenEachDirectiveCount from '@/errors/UnevenEachDirectiveCount'
@@ -972,6 +973,45 @@ Try writing the @if directive like this:
 `
 
 		return new CompilationError('NoIfDirectiveExpression', output)
+	} else if (error instanceof MultipleRootsInComponent) {
+		const relevantLines = error.definition
+			.split('\n')
+			.map((line, index) => ({
+				number: index + 1,
+				content: line,
+			}))
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Multiple root nodes in component  ----------------------
+
+You declared multiple root nodes in a component.
+
+The error occured in "${options.path}":
+${codeContext}
+
+A component can only have 1 root node. Try wrapping the nodes in a "<div>" or nest one node inside the other.
+`
+
+		return new CompilationError('MultipleRootsInComponent', output)
 	} else {
 		return error
 	}

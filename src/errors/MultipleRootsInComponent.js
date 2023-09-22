@@ -1,7 +1,8 @@
 export default class MultipleRootsInComponent extends Error {
-    constructor() {
+    constructor(definition) {
         super()
 
         this.name = 'MultipleRootsInComponent'
+        this.definition = definition
     }
 }
