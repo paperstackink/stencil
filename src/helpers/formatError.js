@@ -10,6 +10,7 @@ import UnknownComponentName from '@/errors/UnknownComponentName'
 import NoEachDirectiveRecord from '@/errors/NoEachDirectiveRecord'
 import ReservedComponentName from '@/errors/ReservedComponentName'
 import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
+import NoIfDirectiveExpression from '@/errors/NoIfDirectiveExpression'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
@@ -358,7 +359,7 @@ Try adding a "<slot />" component somewhere in "${options.path}"
 		})
 		const example = match(error.component, {
 			Data: `     1 |   <Data>
-     2 |       title: My Beautiful Dark Twisted Fantasy
+     2 |       title: Value, Price and Profit
      3 |       featured: true
      4 |   </Data>
 `,
@@ -931,6 +932,46 @@ It's only possible to loop over records.
 `
 
 		return new CompilationError('LoopingNonRecord', output)
+	} else if (error instanceof NoIfDirectiveExpression) {
+		const relevantLines = input.split('\n').map((line, index) => ({
+			number: index + 1,
+			content: line,
+		}))
+		const codeContext = relevantLines
+			.map(line => {
+				// Find the number of digits in a line number in relevant lines
+				// So we can calculate the number of padded spaces we need to add to align all lines
+				const maxLineNumberLength = digits(
+					Math.max(...relevantLines.map(line => line.number)),
+				)
+				const lineNumberLength = digits(line.number)
+				const padding = Array.from(
+					new Array(maxLineNumberLength - lineNumberLength + 1),
+				)
+					.map(_ => ' ')
+					.join('')
+
+				const beginning = `${line.number}`.padStart(5)
+
+				return `${beginning} |   ${line.content}`
+			})
+			.join('\n')
+
+		const output = `
+-----  Error: Missing expression in @if  ----------------------
+
+You declared an @if directive, but you didn't specify what it should check.
+
+The error occured in "${options.path}":
+${codeContext}
+
+Try writing the @if directive like this:
+     1 |   @if(true)
+     2 |       <span>Revolutions are the locomotives of history</span>
+     3 |   @endif
+`
+
+		return new CompilationError('NoIfDirectiveExpression', output)
 	} else {
 		return error
 	}
