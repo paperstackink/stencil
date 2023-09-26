@@ -23,6 +23,8 @@ import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
+import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
+
 function getArticle(type) {
 	if (type === 'null') {
 		return ''
@@ -80,6 +82,13 @@ function getRelevantLinesFromIndex(input, errorLineNumber) {
 			}
 		})
 		.filter(Boolean)
+}
+
+function getRelevantLinesFromLineNumbers(input, start, end) {
+	return input
+		.split('\n')
+		.map((content, index) => ({ number: index + 1, content }))
+		.slice(start - 1, end)
 }
 
 function getCodeFromLines(lines) {
@@ -553,6 +562,23 @@ A component can only have 1 root node. Try wrapping the nodes in a "<div>" or ne
 `
 
 		return new CompilationError('MultipleRootsInComponent', output)
+	} else if (error instanceof UnexpectedCharacter) {
+		const relevantLines = getRelevantLinesFromLineNumbers(
+			input,
+			error.position.start.line,
+			error.position.end.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
+
+		const output = `-----  Error: Unexpected character  ----------------------
+
+There was an unexpected character "${error.character}" in an expression.
+
+The error occured in "${options.path}":
+${codeContext}
+`
+
+		return new CompilationError('UnexpectedCharacter', output)
 	} else {
 		return error
 	}

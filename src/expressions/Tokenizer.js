@@ -3,6 +3,8 @@ import Token from '@/expressions/Token'
 import ParserError from '@/expressions/errors/ParserError'
 import InternalError from '@/expressions/errors/InternalError'
 
+import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
+
 const keywords = {
     true: 'TRUE',
     false: 'FALSE',
@@ -168,7 +170,7 @@ class Tokenizer {
                 } else if (isAlpha(character) || character === '$') {
                     this.identifier()
                 } else {
-                    throw new ParserError('Unexpected character.')
+                    throw new UnexpectedCharacter(character)
                 }
             }
         }

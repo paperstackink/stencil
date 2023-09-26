@@ -17,6 +17,7 @@ export default function (properties, context, position) {
                         ...context.environment.local,
                     },
                     false,
+                    position,
                 )
 
                 if (!(resolved.value instanceof Map)) {
@@ -39,6 +40,7 @@ export default function (properties, context, position) {
                         ...context.environment.local,
                     },
                     false,
+                    position,
                 )
 
                 usedIdentifiers.concat(bindUsedIdentifiers)
@@ -48,10 +50,14 @@ export default function (properties, context, position) {
                 newValue = value
                     .map(value => {
                         const [result, usedIdentifiersInAttribute] =
-                            compileExpressions(value, {
-                                ...context.environment.global,
-                                ...context.environment.local,
-                            })
+                            compileExpressions(
+                                value,
+                                {
+                                    ...context.environment.global,
+                                    ...context.environment.local,
+                                },
+                                position,
+                            )
                         usedIdentifiers = [
                             ...usedIdentifiers,
                             ...usedIdentifiersInAttribute,
@@ -67,6 +73,7 @@ export default function (properties, context, position) {
                         ...context.environment.global,
                         ...context.environment.local,
                     },
+                    position,
                 )
                 usedIdentifiers = [
                     ...usedIdentifiers,

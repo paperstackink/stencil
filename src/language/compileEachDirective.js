@@ -3,7 +3,6 @@ import Parser from '@/expressions/Parser'
 import Tokenizer from '@/expressions/Tokenizer'
 import Interpreter from '@/expressions/Interpreter'
 import LoopingNonRecord from '@/errors/LoopingNonRecord'
-import compileExpression from '@/language/compileExpression'
 
 export default function (node, context) {
     let children = []
