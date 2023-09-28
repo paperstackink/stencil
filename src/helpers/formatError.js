@@ -23,6 +23,7 @@ import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
+import UnfinishedOperator from '@/expressions/errors/UnfinishedOperator'
 import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
 
 function getArticle(type) {
@@ -111,6 +112,24 @@ function getCodeFromLines(lines) {
 			return `${beginning} |   ${line.content}`
 		})
 		.join('\n')
+}
+
+function getLocationFromPosition(input, path, position) {
+	let location = `The error occured in "${path}".`
+
+	if (position) {
+		const relevantLines = getRelevantLinesFromLineNumbers(
+			input,
+			position.start.line,
+			position.end.line,
+		)
+		const codeContext = getCodeFromLines(relevantLines)
+
+		location = `The error occured in "${path}":
+${codeContext}`
+	}
+
+	return location
 }
 
 export default function (input, error, options, context) {
@@ -563,22 +582,37 @@ A component can only have 1 root node. Try wrapping the nodes in a "<div>" or ne
 
 		return new CompilationError('MultipleRootsInComponent', output)
 	} else if (error instanceof UnexpectedCharacter) {
-		const relevantLines = getRelevantLinesFromLineNumbers(
+		const location = getLocationFromPosition(
 			input,
-			error.position.start.line,
-			error.position.end.line,
+			options.path,
+			error.position,
 		)
-		const codeContext = getCodeFromLines(relevantLines)
 
 		const output = `-----  Error: Unexpected character  ----------------------
 
-There was an unexpected character "${error.character}" in an expression.
+There was an unexpected character "${error.character}" in this expression: "${error.expression}".
 
-The error occured in "${options.path}":
-${codeContext}
+${location}
 `
 
 		return new CompilationError('UnexpectedCharacter', output)
+	} else if (error instanceof UnfinishedOperator) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Unknown operator  ----------------------
+
+There was an unkown operator "${error.operator}" in this expression: "${error.expression}".
+
+${location}
+
+Did you mean ${error.suggestion}?
+`
+
+		return new CompilationError('UnfinishedOperator', output)
 	} else {
 		return error
 	}

@@ -55,6 +55,7 @@ export default function (source, values = {}, print = true, position) {
             throw error
         } else {
             error.position = position
+            error.expression = source
 
             throw error
         }

@@ -3,6 +3,7 @@ import Token from '@/expressions/Token'
 import ParserError from '@/expressions/errors/ParserError'
 import InternalError from '@/expressions/errors/InternalError'
 
+import UnfinishedOperator from '@/expressions/errors/UnfinishedOperator'
 import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
 
 const keywords = {
@@ -207,15 +208,14 @@ class Tokenizer {
                     text === 'less' ? 'LESS_EQUALS' : 'GREATER_EQUALS',
                 )
             } else if (this.matchMany(' than or')) {
-                throw new ParserError(
-                    `Unknown operator. Did you mean '${text} than or equals'?`,
+                throw new UnfinishedOperator(
+                    `${text} than or`,
+                    `'${text} than' or '${text} than or equals'`,
                 )
             } else if (this.matchMany(' than')) {
                 this.addToken(text === 'less' ? 'LESS' : 'GREATER')
             } else {
-                throw new ParserError(
-                    `Unknown operator. Did you mean '${text} than'?`,
-                )
+                throw new UnfinishedOperator(text, `'${text} than'`)
             }
         } else if (text === 'not' && this.matchMany(' equals')) {
             this.addToken('NOT_EQUALS')
