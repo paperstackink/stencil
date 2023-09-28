@@ -23,6 +23,8 @@ import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
+import UppercaseOperator from '@/expressions/errors/UppercaseOperator'
+import UnterminatedString from '@/expressions/errors/UnterminatedString'
 import UnfinishedOperator from '@/expressions/errors/UnfinishedOperator'
 import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
 
@@ -613,6 +615,40 @@ Did you mean ${error.suggestion}?
 `
 
 		return new CompilationError('UnfinishedOperator', output)
+	} else if (error instanceof UppercaseOperator) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Uppercase operator  ----------------------
+
+You tried to use an operator "${
+			error.operator
+		}"" with uppercase letters in this expression: "${error.expression}".
+
+${location}
+
+All keywords should be lowercase. Try "${error.operator.toLowerCase()}" instead!
+`
+
+		return new CompilationError('UppercaseOperator', output)
+	} else if (error instanceof UnterminatedString) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Unterminated string  ----------------------
+
+You added a string in an expression, but it was never terminated: ${error.expression}
+
+${location}
+`
+
+		return new CompilationError('UnterminatedString', output)
 	} else {
 		return error
 	}
