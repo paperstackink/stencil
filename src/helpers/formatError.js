@@ -23,10 +23,17 @@ import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
+import TooManyArguments from '@/expressions/errors/TooManyArguments'
+import MissingExpression from '@/expressions/errors/MissingExpression'
+import MissingThenClause from '@/expressions/errors/MissingThenClause'
+import MissingElseClause from '@/expressions/errors/MissingElseClause'
 import UppercaseOperator from '@/expressions/errors/UppercaseOperator'
 import UnterminatedString from '@/expressions/errors/UnterminatedString'
 import UnfinishedOperator from '@/expressions/errors/UnfinishedOperator'
 import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
+import UnclosedFunctionCall from '@/expressions/errors/UnclosedFunctionCall'
+import UnclosedGroupExpression from '@/expressions/errors/UnclosedGroupExpression'
+import UnfinishedPropertyAccess from '@/expressions/errors/UnfinishedPropertyAccess'
 
 function getArticle(type) {
 	if (type === 'null') {
@@ -649,6 +656,123 @@ ${location}
 `
 
 		return new CompilationError('UnterminatedString', output)
+	} else if (error instanceof TooManyArguments) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Too many arguments  ----------------------
+
+You added too many arguments to a function call in this expression: ${error.expression}
+
+${location}
+
+You can't have more than 255 arguments in a function call.
+`
+
+		return new CompilationError('TooManyArguments', output)
+	} else if (error instanceof UnclosedGroupExpression) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Unclosed parentheses  ----------------------
+
+You forgot to close a pair of parentheses in this expression: ${error.expression}
+
+${location}
+
+Make sure to add ")" to close the group.
+`
+
+		return new CompilationError('UnclosedGroupExpression', output)
+	} else if (error instanceof UnclosedFunctionCall) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Unclosed function call  ----------------------
+
+You forgot to close a call to a function in this expression: ${error.expression}
+
+${location}
+
+Make sure to add ")" after the arguments to close function call.
+`
+
+		return new CompilationError('UnclosedFunctionCall', output)
+	} else if (error instanceof UnfinishedPropertyAccess) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Unfinished property access  ----------------------
+
+You tried to access a property on a record but didn't specify which property: ${error.expression}
+
+${location}
+
+Make sure to add the name of the property you want to access.
+`
+
+		return new CompilationError('UnfinishedPropertyAccess', output)
+	} else if (error instanceof MissingExpression) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Missing expression  ----------------------
+
+It looks like you are missing an expression: ${error.expression}
+
+${location}
+`
+
+		return new CompilationError('MissingExpression', output)
+	} else if (error instanceof MissingThenClause) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Missing "then" path  ----------------------
+
+You tried to create an if expression but it's missing a "then" path: ${error.expression}
+
+${location}
+
+Make sure to add a "then" clause that will evaluate when the if expression is truthy.
+`
+
+		return new CompilationError('MissingThenClause', output)
+	} else if (error instanceof MissingElseClause) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Missing "else" path  ----------------------
+
+You tried to create an if expression but it's missing a "else" path: ${error.expression}
+
+${location}
+
+Make sure to add a "else" clause that will evaluate when the if expression is falsy.
+`
+
+		return new CompilationError('MissingElseClause', output)
 	} else {
 		return error
 	}
