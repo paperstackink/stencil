@@ -40,6 +40,11 @@ import OperatorTypeMismatch from '@/expressions/errors/OperatorTypeMismatch'
 import UnclosedFunctionCall from '@/expressions/errors/UnclosedFunctionCall'
 import UnclosedGroupExpression from '@/expressions/errors/UnclosedGroupExpression'
 import UnfinishedPropertyAccess from '@/expressions/errors/UnfinishedPropertyAccess'
+import NonStringFieldInFilterBy from '@/expressions/errors/NonStringFieldInFilterBy'
+import InvalidOperatorInFilterBy from '@/expressions/errors/InvalidOperatorInFilterBy'
+import NonExistingFieldInFilterBy from '@/expressions/errors/NonExistingFieldInFilterBy'
+import InvalidContainsValueInFilterBy from '@/expressions/errors/InvalidContainsValueInFilterBy'
+import InvalidNumberOperatorInFilterBy from '@/expressions/errors/InvalidNumberOperatorInFilterBy'
 
 function stringifyArray(array, lastSeparator = 'and', separator = ', ') {
 	const last = array.pop()
@@ -900,7 +905,98 @@ ${location}
 
 Make sure you use numbers when using "${error.operator}".
 `
+
 		return new CompilationError('NonNumberOperand', output)
+	} else if (error instanceof InvalidOperatorInFilterBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const operators = error.operators
+			.map(operator => `     -  ${operator}`)
+			.join('\n')
+
+		const output = `-----  Error: Invalid operator  ----------------------
+
+You tried to use "${error.operator}" as an operator in filterBy(): ${error.expression}.
+
+${location}
+
+"${error.operator}" is not a valid operator. Here are all the options:
+${operators}
+`
+
+		return new CompilationError('InvalidOperatorInFilterBy', output)
+	} else if (error instanceof InvalidNumberOperatorInFilterBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Invalid operator  ----------------------
+
+You used "${error.operator}" as an operator on "${error.field}" in filterBy(): ${error.expression}.
+
+${location}
+
+"${error.field}" is a ${error.type} property but "${error.operator}" can only be used on numeric properties.
+`
+
+		return new CompilationError('InvalidNumberOperatorInFilterBy', output)
+	} else if (error instanceof NonExistingFieldInFilterBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Property doesn't exist  ----------------------
+
+You tried to check if "${error.field}" contains "${error.value}" in filterBy(): ${error.expression}.
+
+${location}
+
+"${error.field}" isn't a property on this record.
+`
+
+		return new CompilationError('NonExistingFieldInFilterBy', output)
+	} else if (error instanceof InvalidContainsValueInFilterBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Invalid operator  ----------------------
+
+You used a "contains" operator on a ${error.type} property in filterBy(): ${error.expression}.
+
+${location}
+
+"contains" can only be used on string properties.
+`
+
+		return new CompilationError('InvalidContainsValueInFilterBy', output)
+	} else if (error instanceof NonStringFieldInFilterBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Invalid field  ----------------------
+
+You proved a "${error.type}" as the "field" in filterBy(): ${error.expression}.
+
+${location}
+
+The "field" arugment must be a string with the name of the property.
+`
+
+		return new CompilationError('NonStringFieldInFilterBy', output)
 	} else {
 		return error
 	}

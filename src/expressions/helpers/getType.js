@@ -3,5 +3,9 @@ export function getType(value) {
 		return 'record'
 	}
 
+	if (value instanceof Date) {
+		return 'date'
+	}
+
 	return typeof value
 }
