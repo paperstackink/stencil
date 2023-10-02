@@ -3,10 +3,16 @@ import Expression from '@/expressions/Expression'
 import RuntimeError from '@/expressions/errors/RuntimeError'
 import { cloneDeep } from 'lodash'
 
+import { getType } from '@/expressions/helpers/getType'
+
 export default class FilterBy extends Callable {
 	constructor(record) {
 		super()
 		this.record = record
+	}
+
+	name() {
+		return 'filterBy'
 	}
 
 	arity() {
@@ -156,12 +162,4 @@ export default class FilterBy extends Callable {
 
 		return new Expression.Literal(record)
 	}
-}
-
-function getType(value) {
-	if (value instanceof Map) {
-		return 'record'
-	}
-
-	return typeof value
 }

@@ -138,6 +138,10 @@ function getEntry(value, key) {
 }
 
 export default class Dump extends Callable {
+	name() {
+		return 'dump'
+	}
+
 	arity() {
 		return [Infinity]
 	}

@@ -23,17 +23,29 @@ import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
+import ArityMismatch from '@/expressions/errors/ArityMismatch'
+import NonNumberOperand from '@/expressions/errors/NonNumberOperand'
 import TooManyArguments from '@/expressions/errors/TooManyArguments'
+import NullMethodAccess from '@/expressions/errors/NullMethodAccess'
 import MissingExpression from '@/expressions/errors/MissingExpression'
 import MissingThenClause from '@/expressions/errors/MissingThenClause'
 import MissingElseClause from '@/expressions/errors/MissingElseClause'
 import UppercaseOperator from '@/expressions/errors/UppercaseOperator'
+import CallingNonCallable from '@/expressions/errors/CallingNonCallable'
 import UnterminatedString from '@/expressions/errors/UnterminatedString'
+import NullPropertyAccess from '@/expressions/errors/NullPropertyAccess'
 import UnfinishedOperator from '@/expressions/errors/UnfinishedOperator'
 import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
+import OperatorTypeMismatch from '@/expressions/errors/OperatorTypeMismatch'
 import UnclosedFunctionCall from '@/expressions/errors/UnclosedFunctionCall'
 import UnclosedGroupExpression from '@/expressions/errors/UnclosedGroupExpression'
 import UnfinishedPropertyAccess from '@/expressions/errors/UnfinishedPropertyAccess'
+
+function stringifyArray(array, lastSeparator = 'and', separator = ', ') {
+	const last = array.pop()
+
+	return array.join(separator) + ` ${lastSeparator} ` + last
+}
 
 function getArticle(type) {
 	if (type === 'null') {
@@ -773,6 +785,122 @@ Make sure to add a "else" clause that will evaluate when the if expression is fa
 `
 
 		return new CompilationError('MissingElseClause', output)
+	} else if (error instanceof NullPropertyAccess) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Reading property on "null"  ----------------------
+
+You tried to read the property "${
+			error.property
+		}" on "null" in this expression: ${error.expression}
+
+${location}
+
+It's likely that "${error.expression.replace(
+			`.${error.property}`,
+			'',
+		)}" wasn't mean to be "null".
+`
+
+		return new CompilationError('NullPropertyAccess', output)
+	} else if (error instanceof NullMethodAccess) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Calling method on "null"  ----------------------
+
+You tried to call the method "${error.method}" on "null" in this expression: ${
+			error.expression
+		}
+
+${location}
+
+It's likely that "${error.expression.replace(
+			`.${error.method}`,
+			'',
+		)}" wasn't mean to be "null".
+`
+
+		return new CompilationError('NullMethodAccess', output)
+	} else if (error instanceof CallingNonCallable) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Calling non-function  ----------------------
+
+You tried to call "${error.expression}" which is a "${error.type}".
+
+${location}
+
+It's only possible to call methods and functions.
+`
+
+		return new CompilationError('CallingNonCallable', output)
+	} else if (error instanceof ArityMismatch) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const title =
+			error.expected < error.actual
+				? 'Too many arguments'
+				: 'Too few arguments'
+
+		const expected = stringifyArray(error.expected, 'or')
+
+		const output = `-----  Error: ${title}  ----------------------
+
+You tried to call "${error.method}" with ${error.actual} arguments but it expects ${expected} arguments.
+
+${location}
+`
+
+		return new CompilationError('ArityMismatch', output)
+	} else if (error instanceof OperatorTypeMismatch) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Operating on different types  ----------------------
+
+You tried to add a ${error.leftType} and a ${error.rightType} in this expression: ${error.expression}.
+
+${location}
+
+Make sure to add two numbers or two strings.
+`
+
+		return new CompilationError('OperatorTypeMismatch', output)
+	} else if (error instanceof NonNumberOperand) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Not a number  ----------------------
+
+You tried to use the numeric operator "${error.operator}" on "${error.value}" which is a ${error.type} in this expression: ${error.expression}.
+
+${location}
+
+Make sure you use numbers when using "${error.operator}".
+`
+		return new CompilationError('NonNumberOperand', output)
 	} else {
 		return error
 	}

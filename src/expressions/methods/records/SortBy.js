@@ -2,10 +2,16 @@ import Callable from '@/expressions/functions/Callable'
 import Expression from '@/expressions/Expression'
 import RuntimeError from '@/expressions/errors/RuntimeError'
 
+import { getType } from '@/expressions/helpers/getType'
+
 export default class SortBy extends Callable {
 	constructor(record) {
 		super()
 		this.record = record
+	}
+
+	name() {
+		return 'sortBy'
 	}
 
 	arity() {
@@ -72,12 +78,4 @@ export default class SortBy extends Callable {
 
 		return new Expression.Literal(new Map(entries))
 	}
-}
-
-function getType(value) {
-	if (value instanceof Map) {
-		return 'record'
-	}
-
-	return typeof value
 }
