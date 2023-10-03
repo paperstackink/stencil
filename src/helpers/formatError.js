@@ -1074,6 +1074,21 @@ The sort direction must be either "ascending" or "descending".
 
 		return new CompilationError('InvalidSortDirectionInSortBy', output)
 	} else {
-		return error
+		const output = `-----  Error: Internal error  ----------------------
+
+Whoops! Something went wrong while building your site. 
+
+This isn't supposed to happen and it's most likely a bug in Stencil.
+
+It would be a great help if you could file an issue explaining what triggered the error:
+https://github.com/paperstackink/stencil/issues/new
+
+Below you'll see the error that occured:
+
+---
+${error.stack}
+---
+`
+		return new CompilationError('InternalError', output)
 	}
 }
