@@ -1,8 +1,12 @@
 import Callable from '@/expressions/functions/Callable'
 import Expression from '@/expressions/Expression'
-import RuntimeError from '@/expressions/errors/RuntimeError'
 
 import { getType } from '@/expressions/helpers/getType'
+
+import NonStringSortKeyInSortBy from '@/expressions/errors/NonStringSortKeyInSortBy'
+import SortingNonRecordsInSortBy from '@/expressions/errors/SortingNonRecordsInSortBy'
+import InvalidSortDirectionInSortBy from '@/expressions/errors/InvalidSortDirectionInSortBy'
+import SortingMismatchedTypesInSortBy from '@/expressions/errors/SortingMismatchedTypesInSortBy'
 
 export default class SortBy extends Callable {
 	constructor(record) {
@@ -24,13 +28,11 @@ export default class SortBy extends Callable {
 			args.length === 2 ? args[1].value : 'ascending'
 
 		if (typeof sortKey !== 'string') {
-			throw new RuntimeError('The sort key must be a string.')
+			throw new NonStringSortKeyInSortBy(getType(sortKey))
 		}
 
 		if (typeof providedDirection !== 'string') {
-			throw new RuntimeError(
-				"The direction must be either 'ascending' or 'descending'.",
-			)
+			throw new InvalidSortDirectionInSortBy(providedDirection)
 		}
 
 		let direction
@@ -41,9 +43,7 @@ export default class SortBy extends Callable {
 		) {
 			direction = 'descending'
 		} else {
-			throw new RuntimeError(
-				"The direction must be either 'ascending' or 'descending'.",
-			)
+			throw new InvalidSortDirectionInSortBy(providedDirection)
 		}
 
 		const entries = Array.from(this.record.value).sort((a, b) => {
@@ -52,16 +52,29 @@ export default class SortBy extends Callable {
 			const keyB = b[0]
 			const valueB = b[1]
 
-			if (!(valueA instanceof Map) || !(valueB instanceof Map)) {
-				throw new RuntimeError(`You must sort a record of records.`)
+			if (!(valueA instanceof Map)) {
+				throw new SortingNonRecordsInSortBy(
+					getType(valueA),
+					valueA,
+					keyA,
+				)
+			}
+
+			if (!(valueB instanceof Map)) {
+				throw new SortingNonRecordsInSortBy(
+					getType(valueB),
+					valueB,
+					keyB,
+				)
 			}
 
 			if (typeof valueA.get(sortKey) !== typeof valueB.get(sortKey)) {
-				const first = getType(valueB.get(sortKey))
-				const last = getType(valueA.get(sortKey))
-
-				throw new RuntimeError(
-					`You must sort items by the same data type. Sorted '${first}' and '${last}'.`,
+				throw new SortingMismatchedTypesInSortBy(
+					sortKey,
+					valueB.get(sortKey),
+					getType(valueB.get(sortKey)),
+					valueA.get(sortKey),
+					getType(valueA.get(sortKey)),
 				)
 			}
 

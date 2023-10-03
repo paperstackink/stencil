@@ -40,10 +40,14 @@ import OperatorTypeMismatch from '@/expressions/errors/OperatorTypeMismatch'
 import UnclosedFunctionCall from '@/expressions/errors/UnclosedFunctionCall'
 import UnclosedGroupExpression from '@/expressions/errors/UnclosedGroupExpression'
 import UnfinishedPropertyAccess from '@/expressions/errors/UnfinishedPropertyAccess'
+import NonStringSortKeyInSortBy from '@/expressions/errors/NonStringSortKeyInSortBy'
 import NonStringFieldInFilterBy from '@/expressions/errors/NonStringFieldInFilterBy'
 import InvalidOperatorInFilterBy from '@/expressions/errors/InvalidOperatorInFilterBy'
+import SortingNonRecordsInSortBy from '@/expressions/errors/SortingNonRecordsInSortBy'
 import NonExistingFieldInFilterBy from '@/expressions/errors/NonExistingFieldInFilterBy'
+import InvalidSortDirectionInSortBy from '@/expressions/errors/InvalidSortDirectionInSortBy'
 import InvalidContainsValueInFilterBy from '@/expressions/errors/InvalidContainsValueInFilterBy'
+import SortingMismatchedTypesInSortBy from '@/expressions/errors/SortingMismatchedTypesInSortBy'
 import InvalidNumberOperatorInFilterBy from '@/expressions/errors/InvalidNumberOperatorInFilterBy'
 
 function stringifyArray(array, lastSeparator = 'and', separator = ', ') {
@@ -989,14 +993,86 @@ ${location}
 
 		const output = `-----  Error: Invalid field  ----------------------
 
-You proved a "${error.type}" as the "field" in filterBy(): ${error.expression}.
+You provided a ${error.type} as the "field" in filterBy(): ${error.expression}.
 
 ${location}
 
-The "field" arugment must be a string with the name of the property.
+The "field" argument must be a string with the name of the property.
 `
 
 		return new CompilationError('NonStringFieldInFilterBy', output)
+	} else if (error instanceof SortingNonRecordsInSortBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Sorting ${error.type}  ----------------------
+
+You tried to sort a record containing a ${error.type} property in sortBy(): ${error.expression}
+
+${location}
+
+The field "${error.property}" has the value "${error.value}"" which is a ${error.type}. 
+
+It's only possible to sort a record of records. If the record contains non-record properties you must filter them out using filterBy().
+`
+
+		return new CompilationError('SortingNonRecordsInSortBy', output)
+	} else if (error instanceof SortingMismatchedTypesInSortBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Sorting different data types  ----------------------
+
+You tried to sort properties with different types in sortBy(): ${error.expression}
+
+${location}
+
+The property "${error.property}" is "${error.firstValue}" (${error.firstType}) in one record and "${error.secondValue}" (${error.secondType}) in another record. 
+
+It's only possible to sort properties with similar types.
+`
+
+		return new CompilationError('SortingMismatchedTypesInSortBy', output)
+	} else if (error instanceof NonStringSortKeyInSortBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Invalid sort key  ----------------------
+
+You provided a ${error.type} as the sort key in sortBy(): ${error.expression}.
+
+${location}
+
+The "sort key" argument must be a string with the name of a property.
+`
+
+		return new CompilationError('NonStringSortKeyInSortBy', output)
+	} else if (error instanceof InvalidSortDirectionInSortBy) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Invalid sort direction  ----------------------
+
+You specified "${error.direction}" as the sort direction in sortBy(): ${error.expression}.
+
+${location}
+
+The sort direction must be either "ascending" or "descending".
+`
+
+		return new CompilationError('InvalidSortDirectionInSortBy', output)
 	} else {
 		return error
 	}
