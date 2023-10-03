@@ -1,5 +1,5 @@
 import normaliseExpressionsInAttributes from '@/helpers/normaliseExpressionsInAttributes'
-import CompilationError from '@/errors/CompilationError'
+
 import NestedExpression from '@/errors/NestedExpression'
 import UnclosedExpression from '@/errors/UnclosedExpression'
 
@@ -80,9 +80,7 @@ test('it errors if there are nested expressions in array attributes', () => {
     }
     const runner = () => normaliseExpressionsInAttributes(attributes)
 
-    expect(runner).toThrow(
-        new CompilationError('Nested expressions are not supported.'),
-    )
+    expect(runner).toThrow(NestedExpression)
 })
 
 test('it errors if there are nested expressions in non-array attributes', () => {
@@ -91,7 +89,7 @@ test('it errors if there are nested expressions in non-array attributes', () => 
     }
     const runner = () => normaliseExpressionsInAttributes(attributes)
 
-    expect(runner).toThrow(new NestedExpression())
+    expect(runner).toThrow(NestedExpression)
 })
 
 test('it ignores multiple expressions in a non-array attributes', () => {
@@ -109,7 +107,7 @@ test('it errors if an expression is not closed in array attributes', () => {
     }
     const runner = () => normaliseExpressionsInAttributes(attributes)
 
-    expect(runner).toThrow(new CompilationError('Unclosed expression.'))
+    expect(runner).toThrow(UnclosedExpression)
 })
 
 test('it errors if an expression is not closed on non-array attributes', () => {
@@ -118,7 +116,7 @@ test('it errors if an expression is not closed on non-array attributes', () => {
     }
     const runner = () => normaliseExpressionsInAttributes(attributes)
 
-    expect(runner).toThrow(new UnclosedExpression())
+    expect(runner).toThrow(UnclosedExpression)
 })
 
 test('it errors if there are multiple expressions and the last one is not closed', () => {
@@ -127,5 +125,5 @@ test('it errors if there are multiple expressions and the last one is not closed
     }
     const runner = () => normaliseExpressionsInAttributes(attributes)
 
-    expect(runner).toThrow(new CompilationError('Unclosed expression.'))
+    expect(runner).toThrow(UnclosedExpression)
 })

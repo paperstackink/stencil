@@ -126,7 +126,7 @@ test('it errors if no component name is provided', async () => {
 		compile(input, {
 			components: { Card: componentDefiniton },
 		}),
-	).rejects.toThrow(ComponentNameNotProvided)
+	).rejects.toThrowCompilationError(ComponentNameNotProvided)
 })
 
 test("it errors if the dynamic component name doesn't exist", async () => {
@@ -140,5 +140,5 @@ test("it errors if the dynamic component name doesn't exist", async () => {
 		compile(input, {
 			components: {},
 		}),
-	).rejects.toThrow(UnknownDynamicComponentName)
+	).rejects.toThrowCompilationError(UnknownDynamicComponentName)
 })

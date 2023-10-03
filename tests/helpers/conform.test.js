@@ -1,5 +1,11 @@
 import conform from '@/helpers/conform'
-import CompilationError from '@/errors/CompilationError'
+
+import NoEachDirectiveRecord from '@/errors/NoEachDirectiveRecord'
+import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
+import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
+import NoIfDirectiveExpression from '@/errors/NoIfDirectiveExpression'
+import UnevenEachDirectiveCount from '@/errors/UnevenEachDirectiveCount'
+import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 
 describe('@if directives', () => {
     test('it can convert @if to <if>', async () => {
@@ -91,9 +97,7 @@ describe('@if directives', () => {
 
         const runner = () => conform(input)
 
-        expect(runner).toThrow(
-            new CompilationError('No expressions provided to @if directive.'),
-        )
+        expect(runner).toThrow(NoIfDirectiveExpression)
     })
 
     test('it fails if there is not the same number of opening and closing statements', async () => {
@@ -104,11 +108,7 @@ describe('@if directives', () => {
 
         const runner = () => conform(input)
 
-        expect(runner).toThrow(
-            new CompilationError(
-                'There is an uneven number of opening and closing @if directives.',
-            ),
-        )
+        expect(runner).toThrow(UnevenIfDirectiveCount)
     })
 
     test('it can handle expressions with quotes', async () => {
@@ -255,9 +255,7 @@ describe('@each directives', () => {
 
         const runner = () => conform(input)
 
-        expect(runner).toThrow(
-            new CompilationError('No expressions provided to @each directive.'),
-        )
+        expect(runner).toThrow(MissingEachDirectiveExpression)
     })
 
     test('it fails if loop info is no variable', () => {
@@ -269,9 +267,7 @@ describe('@each directives', () => {
 
         const runner = () => conform(input)
 
-        expect(runner).toThrow(
-            new CompilationError('No variable defined in @each directive.'),
-        )
+        expect(runner).toThrow(NoEachDirectiveVariable)
     })
 
     test('it fails if there is no record', () => {
@@ -283,9 +279,7 @@ describe('@each directives', () => {
 
         const runner = () => conform(input)
 
-        expect(runner).toThrow(
-            new CompilationError('No record defined in @each directive.'),
-        )
+        expect(runner).toThrow(NoEachDirectiveRecord)
     })
 
     test('it fails if there is not the same number of opening and closing statements', () => {
@@ -297,11 +291,7 @@ describe('@each directives', () => {
 </div>`
         const runner = () => conform(input)
 
-        expect(runner).toThrow(
-            new CompilationError(
-                'There is an uneven number of opening and closing @each directives.',
-            ),
-        )
+        expect(runner).toThrow(UnevenEachDirectiveCount)
     })
 })
 

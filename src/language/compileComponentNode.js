@@ -43,7 +43,7 @@ export default function (node, context) {
                 ...context.environment.global,
                 ...context.environment.local,
             },
-            position,
+            node.position,
         )
 
         name = resolvedName

@@ -555,7 +555,7 @@ describe('Binding records a attributes', () => {
             compile(input, {
                 environment: {},
             }),
-        ).rejects.toThrow(SpreadNonRecordAsAttributes)
+        ).rejects.toThrowCompilationError(SpreadNonRecordAsAttributes)
     })
 })
 

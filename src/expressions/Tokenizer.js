@@ -1,6 +1,5 @@
 import Token from '@/expressions/Token'
 
-import ParserError from '@/expressions/errors/ParserError'
 import InternalError from '@/expressions/errors/InternalError'
 
 import UppercaseOperator from '@/expressions/errors/UppercaseOperator'

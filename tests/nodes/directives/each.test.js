@@ -1,5 +1,6 @@
 import { compile } from '@/index'
-import CompilationError from '@/errors/CompilationError'
+
+import LoopingNonRecord from '@/errors/LoopingNonRecord'
 
 test('it renders each item in the loop', async () => {
     const input = `
@@ -409,5 +410,5 @@ test("it fails if looping over something that's not a record", async () => {
                 },
             },
         }),
-    ).rejects.toThrow(CompilationError)
+    ).rejects.toThrowCompilationError(LoopingNonRecord)
 })

@@ -112,7 +112,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoFrontMatter())
+    ).rejects.toThrowCompilationError(NoFrontMatter)
 })
 
 test('it fails if there is an empty front matter block', async () => {
@@ -142,7 +142,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new EmptyFrontmatter())
+    ).rejects.toThrowCompilationError(EmptyFrontmatter)
 })
 
 test('it fails if template is not defined', async () => {
@@ -172,7 +172,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoTemplateInFrontmatter())
+    ).rejects.toThrowCompilationError(NoTemplateInFrontmatter)
 })
 
 test('it fails if template does not exist', async () => {
@@ -202,7 +202,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new UnknownTemplateInMarkdown())
+    ).rejects.toThrowCompilationError(UnknownTemplateInMarkdown)
 })
 
 test('it fails if the templates does not have a default slot', async () => {
@@ -233,5 +233,5 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoDefaultSlotInMarkdownTemplate())
+    ).rejects.toThrowCompilationError(NoDefaultSlotInMarkdownTemplate)
 })

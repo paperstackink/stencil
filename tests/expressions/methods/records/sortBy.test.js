@@ -2,6 +2,11 @@ import SortBy from '@/expressions/methods/records/SortBy'
 import Expression from '@/expressions/Expression'
 import RuntimeError from '@/expressions/errors/RuntimeError'
 
+import NonStringSortKeyInSortBy from '@/expressions/errors/NonStringSortKeyInSortBy'
+import SortingNonRecordsInSortBy from '@/expressions/errors/SortingNonRecordsInSortBy'
+import InvalidSortDirectionInSortBy from '@/expressions/errors/InvalidSortDirectionInSortBy'
+import SortingMismatchedTypesInSortBy from '@/expressions/errors/SortingMismatchedTypesInSortBy'
+
 describe('Strings', () => {
 	test('it can sort strings in ascending order', () => {
 		const record = new Expression.Literal(
@@ -178,9 +183,7 @@ describe('Errors', () => {
 				new Expression.Literal('desc'),
 			])
 
-		expect(runner).toThrow(
-			new RuntimeError('The sort key must be a string.'),
-		)
+		expect(runner).toThrow(NonStringSortKeyInSortBy)
 	})
 
 	test('it errors if the direction is not a string', () => {
@@ -198,11 +201,7 @@ describe('Errors', () => {
 				new Expression.Literal(2),
 			])
 
-		expect(runner).toThrow(
-			new RuntimeError(
-				"The direction must be either 'ascending' or 'descending'.",
-			),
-		)
+		expect(runner).toThrow(InvalidSortDirectionInSortBy)
 	})
 
 	test('it errors if the direction is a random string', () => {
@@ -220,11 +219,7 @@ describe('Errors', () => {
 				new Expression.Literal('yo'),
 			])
 
-		expect(runner).toThrow(
-			new RuntimeError(
-				"The direction must be either 'ascending' or 'descending'.",
-			),
-		)
+		expect(runner).toThrow(InvalidSortDirectionInSortBy)
 	})
 
 	test('it errors if its sorting values of different data types', () => {
@@ -242,11 +237,7 @@ describe('Errors', () => {
 				new Expression.Literal('asc'),
 			])
 
-		expect(runner).toThrow(
-			new RuntimeError(
-				"You must sort items by the same data type. Sorted 'number' and 'record'.",
-			),
-		)
+		expect(runner).toThrow(SortingMismatchedTypesInSortBy)
 	})
 
 	test('it errors if not sorting a record of records', () => {
@@ -264,8 +255,6 @@ describe('Errors', () => {
 				new Expression.Literal('asc'),
 			])
 
-		expect(runner).toThrow(
-			new RuntimeError('You must sort a record of records.'),
-		)
+		expect(runner).toThrow(SortingNonRecordsInSortBy)
 	})
 })

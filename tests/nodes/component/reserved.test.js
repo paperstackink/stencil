@@ -15,7 +15,7 @@ test("it errors if providing a component called 'Component'", async () => {
 		compile(input, {
 			components: { Component: componentDefiniton },
 		}),
-	).rejects.toThrow(ReservedComponentName)
+	).rejects.toThrowCompilationError(ReservedComponentName)
 })
 
 test("it errors if providing a component called 'Data'", async () => {
@@ -32,5 +32,5 @@ test("it errors if providing a component called 'Data'", async () => {
 		compile(input, {
 			components: { Data: componentDefiniton },
 		}),
-	).rejects.toThrow(ReservedComponentName)
+	).rejects.toThrowCompilationError(ReservedComponentName)
 })
