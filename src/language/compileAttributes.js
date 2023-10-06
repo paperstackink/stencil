@@ -1,8 +1,8 @@
 import compileExpression from '@/language/compileExpression'
 import compileExpressions from '@/language/compileExpressions'
-import SpreadNonRecordAsAttributesError from '@/errors/SpreadNonRecordAsAttributesError'
+import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 
-export default function (properties, context) {
+export default function (properties, context, position) {
     let usedIdentifiers = []
 
     const attributes = Object.fromEntries(
@@ -17,10 +17,15 @@ export default function (properties, context) {
                         ...context.environment.local,
                     },
                     false,
+                    position,
                 )
 
                 if (!(resolved.value instanceof Map)) {
-                    throw new SpreadNonRecordAsAttributesError()
+                    throw new SpreadNonRecordAsAttributes(
+                        position,
+                        value,
+                        resolved.value,
+                    )
                 }
 
                 usedIdentifiers.concat(bindUsedIdentifiers)
@@ -35,6 +40,7 @@ export default function (properties, context) {
                         ...context.environment.local,
                     },
                     false,
+                    position,
                 )
 
                 usedIdentifiers.concat(bindUsedIdentifiers)
@@ -44,10 +50,14 @@ export default function (properties, context) {
                 newValue = value
                     .map(value => {
                         const [result, usedIdentifiersInAttribute] =
-                            compileExpressions(value, {
-                                ...context.environment.global,
-                                ...context.environment.local,
-                            })
+                            compileExpressions(
+                                value,
+                                {
+                                    ...context.environment.global,
+                                    ...context.environment.local,
+                                },
+                                position,
+                            )
                         usedIdentifiers = [
                             ...usedIdentifiers,
                             ...usedIdentifiersInAttribute,
@@ -63,6 +73,7 @@ export default function (properties, context) {
                         ...context.environment.global,
                         ...context.environment.local,
                     },
+                    position,
                 )
                 usedIdentifiers = [
                     ...usedIdentifiers,

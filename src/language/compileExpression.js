@@ -5,7 +5,7 @@ import Interpreter from '@/expressions/Interpreter'
 import CompilationError from '@/errors/CompilationError'
 import DumpSignal from '@/dumping/DumpSignal'
 
-export default function (source, values = {}, print = true) {
+export default function (source, values = {}, print = true, position) {
     try {
         const tokenizer = new Tokenizer(source)
         const tokens = tokenizer.scanTokens()
@@ -54,7 +54,10 @@ export default function (source, values = {}, print = true) {
         if (error instanceof DumpSignal) {
             throw error
         } else {
-            throw new CompilationError(error.message)
+            error.position = position
+            error.expression = source
+
+            throw error
         }
     }
 }

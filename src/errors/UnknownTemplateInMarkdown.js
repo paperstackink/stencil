@@ -1,7 +1,8 @@
 export default class UnknownTemplateInMarkdown extends Error {
-    constructor(message) {
-        super(message)
+    constructor(component) {
+        super(component)
 
         this.name = 'UnknownTemplateInMarkdown'
+        this.component = component
     }
 }

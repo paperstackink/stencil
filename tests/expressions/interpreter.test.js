@@ -1,10 +1,12 @@
-import Token from '@/expressions/Token'
 import Parser from '@/expressions/Parser'
 import Tokenizer from '@/expressions/Tokenizer'
 import Expression from '@/expressions/Expression'
 import Interpreter from '@/expressions/Interpreter'
-import RuntimeError from '@/expressions/errors/RuntimeError'
-import InternalError from '@/expressions/errors/InternalError'
+
+import ArityMismatch from '@/expressions/errors/ArityMismatch'
+import NullMethodAccess from '@/expressions/errors/NullMethodAccess'
+import NullPropertyAccess from '@/expressions/errors/NullPropertyAccess'
+import CallingNonCallable from '@/expressions/errors/CallingNonCallable'
 
 import Dummy from '../stubs/Dummy'
 import DummyInfinite from '../stubs/DummyInfinite'
@@ -156,9 +158,7 @@ describe('Properties', () => {
                     record: 'string',
                 })
 
-            expect(runner).toThrow(
-                new RuntimeError("Cannot read properties on 'null'"),
-            )
+            expect(runner).toThrow(NullPropertyAccess)
         })
 
         test("it returns null if the property doesn't exist on non-records", () => {
@@ -318,16 +318,14 @@ describe('Call Expressions', () => {
             const input = `"a string"()`
             const runner = () => evaluate(input)
 
-            expect(runner).toThrow(new RuntimeError('Can only call functions.'))
+            expect(runner).toThrow(CallingNonCallable)
         })
 
         test('it fails if you call a non-existing function', () => {
             const input = `random()`
             const runner = () => evaluate(input, {})
 
-            expect(runner).toThrow(
-                new RuntimeError("Can not call functions on 'null'."),
-            )
+            expect(runner).toThrow(NullMethodAccess)
         })
 
         test('it fails if you provide the wrong number of arguments', () => {
@@ -337,9 +335,7 @@ describe('Call Expressions', () => {
                     dummy: new Dummy(),
                 })
 
-            expect(runner).toThrow(
-                new RuntimeError('Expected 1 arguments but got 2.'),
-            )
+            expect(runner).toThrow(ArityMismatch)
         })
 
         test('it does not fail if the function takes any number of arguments', () => {

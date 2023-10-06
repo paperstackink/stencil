@@ -1,9 +1,35 @@
-import CompilationError from '@/errors/CompilationError'
+import NestedExpression from '@/errors/NestedExpression'
+import UnclosedExpression from '@/errors/UnclosedExpression'
 
-const normaliseExpressionsInAttributes = attributes => {
+const normaliseExpressionsInAttributes = (attributes, position) => {
     return Object.fromEntries(
         Object.entries(attributes).map(([name, value]) => {
             if (!Array.isArray(value)) {
+                if (typeof value !== 'string') {
+                    return [name, value]
+                }
+
+                const expressionDelimiters = [...value.matchAll(/{{|}}/g)] // All '{{'s and '}}'s
+
+                // Fail with unclosed expression
+                if (expressionDelimiters.length % 2 !== 0) {
+                    throw new UnclosedExpression(position)
+                }
+
+                // Check for nested expressions
+                expressionDelimiters.forEach(([delimiter], index) => {
+                    const even = index % 2 === 0
+
+                    if (!even && delimiter === '}}') {
+                        return
+                    }
+                    if (even && delimiter === '{{') {
+                        return
+                    }
+
+                    throw new NestedExpression(position)
+                })
+
                 return [name, value]
             }
 
@@ -28,16 +54,14 @@ const normaliseExpressionsInAttributes = attributes => {
                 )
 
                 if (expressionCloserIndex === -1) {
-                    throw new CompilationError('Unclosed expression.')
+                    throw new UnclosedExpression(position)
                 }
 
                 if (
                     nextExpressionOpenerIndex !== -1 &&
                     nextExpressionOpenerIndex < expressionCloserIndex
                 ) {
-                    throw new CompilationError(
-                        'Nested expressions are not supported.',
-                    )
+                    throw new NestedExpression(position)
                 }
 
                 if (

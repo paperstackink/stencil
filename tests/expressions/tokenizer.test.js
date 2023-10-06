@@ -1,7 +1,10 @@
 import Tokenizer from '@/expressions/Tokenizer'
 import Token from '@/expressions/Token'
 
-import ParserError from '@/expressions/errors/ParserError'
+import UppercaseOperator from '@/expressions/errors/UppercaseOperator'
+import UnterminatedString from '@/expressions/errors/UnterminatedString'
+import UnfinishedOperator from '@/expressions/errors/UnfinishedOperator'
+import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
 
 test('it can tokenize "null"', () => {
     const input = `null`
@@ -304,7 +307,7 @@ test('a string must be terminated', () => {
 
     const runner = () => tokenizer.scanTokens(input)
 
-    expect(runner).toThrow(new ParserError('Unterminated string.'))
+    expect(runner).toThrow(UnterminatedString)
 })
 
 test('it fails un unknown characters', () => {
@@ -313,7 +316,7 @@ test('it fails un unknown characters', () => {
 
     const runner = () => tokenizer.scanTokens(input)
 
-    expect(runner).toThrow(new ParserError('Unexpected character.'))
+    expect(runner).toThrow(UnexpectedCharacter)
 })
 
 test('it fails on an incomplete "less than" statement', () => {
@@ -322,9 +325,7 @@ test('it fails on an incomplete "less than" statement', () => {
 
     const runner = () => tokenizer.scanTokens(input)
 
-    expect(runner).toThrow(
-        new ParserError("Unknown operator. Did you mean 'less than'?"),
-    )
+    expect(runner).toThrow(UnfinishedOperator)
 })
 
 test('it fails on an incomplete "less than or equals" statement', () => {
@@ -333,11 +334,7 @@ test('it fails on an incomplete "less than or equals" statement', () => {
 
     const runner = () => tokenizer.scanTokens(input)
 
-    expect(runner).toThrow(
-        new ParserError(
-            "Unknown operator. Did you mean 'less than or equals'?",
-        ),
-    )
+    expect(runner).toThrow(UnfinishedOperator)
 })
 
 test('it fails on an incomplete "greater than" statement', () => {
@@ -346,9 +343,7 @@ test('it fails on an incomplete "greater than" statement', () => {
 
     const runner = () => tokenizer.scanTokens(input)
 
-    expect(runner).toThrow(
-        new ParserError("Unknown operator. Did you mean 'greater than'?"),
-    )
+    expect(runner).toThrow(UnfinishedOperator)
 })
 
 test('it fails on an incomplete "greater than or equals" statement', () => {
@@ -357,11 +352,7 @@ test('it fails on an incomplete "greater than or equals" statement', () => {
 
     const runner = () => tokenizer.scanTokens(input)
 
-    expect(runner).toThrow(
-        new ParserError(
-            "Unknown operator. Did you mean 'greater than or equals'?",
-        ),
-    )
+    expect(runner).toThrow(UnfinishedOperator)
 })
 
 test('keywords are case sensitive', () => {
@@ -370,9 +361,7 @@ test('keywords are case sensitive', () => {
 
     const runner = () => tokenizer.scanTokens(input)
 
-    expect(runner).toThrow(
-        new ParserError("Keywords are case sensitive. Try 'true' instead."),
-    )
+    expect(runner).toThrow(UppercaseOperator)
 })
 
 test('it can tokenize multiple things', () => {

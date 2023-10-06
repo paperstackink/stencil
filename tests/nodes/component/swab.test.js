@@ -1,5 +1,7 @@
 import { compile } from '@/index'
-import CompilationError from '@/errors/CompilationError'
+
+import UnknownComponentName from '@/errors/UnknownComponentName'
+import MultipleRootsInComponent from '@/errors/MultipleRootsInComponent'
 
 test('it can inject a normal component', async () => {
     const input = `
@@ -64,7 +66,7 @@ test('it fails if the component is not defined', async () => {
         compile(input, {
             components: {},
         }),
-    ).rejects.toThrow(CompilationError)
+    ).rejects.toThrowCompilationError(UnknownComponentName)
 })
 
 test('it does not compile an html element with the same name as a component', async () => {
@@ -166,7 +168,7 @@ test('it fails if there are more than 1 root element in a component definition',
                 Card: componentDefiniton,
             },
         }),
-    ).rejects.toThrow(CompilationError)
+    ).rejects.toThrowCompilationError(MultipleRootsInComponent)
 })
 
 test('it can inject a full html document', async () => {

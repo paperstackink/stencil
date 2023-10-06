@@ -1,5 +1,5 @@
 import { compile } from '@/index'
-import SpreadNonRecordAsAttributesError from '@/errors/SpreadNonRecordAsAttributesError'
+import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 
 describe('Using components', () => {
     test('it can compile expressions in attributes', async () => {
@@ -555,7 +555,7 @@ describe('Binding records a attributes', () => {
             compile(input, {
                 environment: {},
             }),
-        ).rejects.toThrow(SpreadNonRecordAsAttributesError)
+        ).rejects.toThrowCompilationError(SpreadNonRecordAsAttributes)
     })
 })
 

@@ -1,12 +1,22 @@
 import Callable from '@/expressions/functions/Callable'
 import Expression from '@/expressions/Expression'
-import RuntimeError from '@/expressions/errors/RuntimeError'
 import { cloneDeep } from 'lodash'
+import { getType } from '@/expressions/helpers/getType'
+
+import NonStringFieldInFilterBy from '@/expressions/errors/NonStringFieldInFilterBy'
+import InvalidOperatorInFilterBy from '@/expressions/errors/InvalidOperatorInFilterBy'
+import NonExistingFieldInFilterBy from '@/expressions/errors/NonExistingFieldInFilterBy'
+import InvalidContainsValueInFilterBy from '@/expressions/errors/InvalidContainsValueInFilterBy'
+import InvalidNumberOperatorInFilterBy from '@/expressions/errors/InvalidNumberOperatorInFilterBy'
 
 export default class FilterBy extends Callable {
 	constructor(record) {
 		super()
 		this.record = record
+	}
+
+	name() {
+		return 'filterBy'
 	}
 
 	arity() {
@@ -40,25 +50,25 @@ export default class FilterBy extends Callable {
 		}
 
 		if (typeof field !== 'string') {
-			throw new RuntimeError('The field must be a string.')
+			throw new NonStringFieldInFilterBy(getType(field))
 		}
 
-		if (
-			![
-				'equals',
-				'not equals',
-				'greater than',
-				'greater than or equals',
-				'less than',
-				'less than or equals',
-				'contains',
-				'truthy',
-				'not truthy',
-				'exists',
-				'not exists',
-			].includes(operator)
-		) {
-			throw new RuntimeError('Invalid operator.')
+		const operators = [
+			'equals',
+			'not equals',
+			'greater than',
+			'greater than or equals',
+			'less than',
+			'less than or equals',
+			'contains',
+			'truthy',
+			'not truthy',
+			'exists',
+			'not exists',
+		]
+
+		if (!operators.includes(operator)) {
+			throw new InvalidOperatorInFilterBy(operator, operators)
 		}
 
 		const record = cloneDeep(this.record.value)
@@ -73,10 +83,10 @@ export default class FilterBy extends Callable {
 				].includes(operator) &&
 				typeof map.get(field) !== 'number'
 			) {
-				throw new RuntimeError(
-					`Cannot filter by "${operator}" on type "${getType(
-						map.get(field),
-					)}"`,
+				throw new InvalidNumberOperatorInFilterBy(
+					operator,
+					getType(map.get(field)),
+					field,
 				)
 			}
 
@@ -117,11 +127,12 @@ export default class FilterBy extends Callable {
 			}
 
 			if (operator === 'contains') {
+				if (!map.has(field)) {
+					throw new NonExistingFieldInFilterBy(field, value)
+				}
 				if (typeof map.get(field) !== 'string') {
-					throw new RuntimeError(
-						`Cannot filter by "contains" on type "${getType(
-							map.get(field),
-						)}"`,
+					throw new InvalidContainsValueInFilterBy(
+						getType(map.get(field)),
 					)
 				}
 				if (!map.get(field).includes(value)) {
@@ -156,12 +167,4 @@ export default class FilterBy extends Callable {
 
 		return new Expression.Literal(record)
 	}
-}
-
-function getType(value) {
-	if (value instanceof Map) {
-		return 'record'
-	}
-
-	return typeof value
 }

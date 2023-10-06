@@ -1,6 +1,8 @@
 import extractData from '@/secondary/extractData'
-import CompilationError from '@/errors/CompilationError'
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
+
+import NoFrontMatter from '@/errors/NoFrontMatter'
+import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
+import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 
 describe('Stencil', () => {
 	test('it extracts data from a top-level Data component', async () => {
@@ -121,9 +123,9 @@ describe('Stencil', () => {
 </Data>
 `
 
-		await expect(extractData(input, { type: 'stencil' })).rejects.toThrow(
-			CompilationError,
-		)
+		await expect(
+			extractData(input, { type: 'stencil' }),
+		).rejects.toThrowCompilationError(NodeNestedInsideDataNode)
 	})
 })
 
@@ -137,18 +139,31 @@ featured: true
 `
 		const expected = new Map([['featured', true]])
 
-		const result = await extractData(input, { type: 'markdown' })
+		const result = await extractData(input, { language: 'markdown' })
 
 		expect(result).toEqual(expected)
 	})
 
-	test('it fails if there is no frontmatter', async () => {
+	test('it fails if there is no front matter block', async () => {
 		const input = `
 # Headline 1
 `
 
-		await expect(extractData(input, { type: 'markdown' })).rejects.toThrow(
-			NoFrontMatterError,
-		)
+		await expect(
+			extractData(input, { language: 'markdown' }),
+		).rejects.toThrowCompilationError(NoFrontMatter)
+	})
+
+	test('it fails if there is an empty front matter block', async () => {
+		const input = `---
+
+---
+
+# Headline 1
+`
+
+		await expect(
+			extractData(input, { language: 'markdown' }),
+		).rejects.toThrowCompilationError(EmptyFrontmatter)
 	})
 })

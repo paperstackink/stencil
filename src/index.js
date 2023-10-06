@@ -14,21 +14,23 @@ import '@/setup'
 import conform from '@/helpers/conform'
 import hasNode from '@/helpers/hasNode'
 import isDocument from '@/helpers/isDocument'
+import formatError from '@/helpers/formatError'
 
 import templates from '@/language/templates'
 import extractData from '@/secondary/extractData'
 
 import DumpSignal from '@/dumping/DumpSignal'
 
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
-import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoTemplateInMarkdownPageError from '@/errors/NoTemplateInMarkdownPageError'
-import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
-
 import Dump from '@/expressions/functions/Dump'
 import compileDumpPage from '@/language/compileDumpPage'
 
-import ReservedComponentNameError from '@/errors/ReservedComponentNameError'
+import NoFrontMatter from '@/errors/NoFrontMatter'
+import CompilationError from '@/errors/CompilationError'
+import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
+import ReservedComponentName from '@/errors/ReservedComponentName'
+import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
+import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
+import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 const defaultContext = {
     components: {},
@@ -42,6 +44,7 @@ const defaultContext = {
 
 const defaultOptions = {
     language: 'stencil',
+    path: '',
 }
 
 export const compile = async (
@@ -50,61 +53,76 @@ export const compile = async (
     options = defaultOptions,
 ) => {
     let context = merge({}, defaultContext, providedContext)
-
-    if (
-        ['Component', 'Data'].some(name =>
-            context.components.hasOwnProperty(name),
-        )
-    ) {
-        throw new ReservedComponentNameError()
-    }
-
     let input = providedInput.trim()
 
-    if (options.language === 'markdown') {
-        let yamlContent
-        const parsed = await unified()
-            .use(remarkParse)
-            .use(remarkFrontmatter, ['yaml'])
-            .use(() => tree => {
-                const node = find(tree, { type: 'yaml' })
+    const reservedComponentName = ['Component', 'Data'].find(name =>
+        context.components.hasOwnProperty(name),
+    )
 
-                if (node) {
-                    yamlContent = node.value
-                }
-            })
-            .use(remarkRehype, { allowDangerousHtml: true })
-            .use(stringify, { allowDangerousHtml: true })
-            .process(input)
-
-        if (!yamlContent) {
-            throw new NoFrontMatterError()
-        }
-
-        const frontMatter = yaml.parse(yamlContent, {
-            customTags: ['timestamp'],
-        })
-
-        if (!frontMatter.hasOwnProperty('template')) {
-            throw new NoTemplateInMarkdownPageError()
-        }
-
-        if (!context.components.hasOwnProperty(frontMatter.template)) {
-            throw new UnknownTemplateInMarkdown()
-        }
-
-        const hasDefaultSlot = await hasNode(
-            context.components[frontMatter.template],
-            'slot',
+    if (reservedComponentName) {
+        throw formatError(
+            input,
+            new ReservedComponentName(reservedComponentName),
+            options,
+            context,
         )
+    }
 
-        if (!hasDefaultSlot) {
-            throw new NoDefaultSlotInMarkdownTemplate()
+    if (options.language === 'markdown') {
+        try {
+            let hasYamlSection = false
+            let yamlContent
+
+            const parsed = await unified()
+                .use(remarkParse)
+                .use(remarkFrontmatter, ['yaml'])
+                .use(() => tree => {
+                    const node = find(tree, { type: 'yaml' })
+
+                    if (node) {
+                        hasYamlSection = true
+                        yamlContent = node.value
+                    }
+                })
+                .use(remarkRehype, { allowDangerousHtml: true })
+                .use(stringify, { allowDangerousHtml: true })
+                .process(input)
+
+            if (!hasYamlSection) {
+                throw new NoFrontMatter()
+            }
+
+            if (!yamlContent) {
+                throw new EmptyFrontmatter()
+            }
+
+            const frontMatter = yaml.parse(yamlContent, {
+                customTags: ['timestamp'],
+            })
+
+            if (!frontMatter.hasOwnProperty('template')) {
+                throw new NoTemplateInFrontmatter()
+            }
+
+            if (!context.components.hasOwnProperty(frontMatter.template)) {
+                throw new UnknownTemplateInMarkdown(frontMatter.template)
+            }
+
+            const hasDefaultSlot = await hasNode(
+                context.components[frontMatter.template],
+                'slot',
+            )
+
+            if (!hasDefaultSlot) {
+                throw new NoDefaultSlotInMarkdownTemplate()
+            }
+
+            const content = String(parsed)
+
+            input = `<${frontMatter.template}>${content}</${frontMatter.template}>`
+        } catch (error) {
+            throw formatError(input, error, options, context)
         }
-
-        const content = String(parsed)
-
-        input = `<${frontMatter.template}>${content}</${frontMatter.template}>`
     }
 
     try {
@@ -128,9 +146,9 @@ export const compile = async (
 
             return page
         } else {
-            throw error
+            throw formatError(input, error, options, context)
         }
     }
 }
 
-export { extractData }
+export { extractData, CompilationError }

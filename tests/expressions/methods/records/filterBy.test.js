@@ -1,6 +1,10 @@
 import FilterBy from '@/expressions/methods/records/FilterBy'
 import Expression from '@/expressions/Expression'
-import RuntimeError from '@/expressions/errors/RuntimeError'
+
+import NonStringFieldInFilterBy from '@/expressions/errors/NonStringFieldInFilterBy'
+import InvalidOperatorInFilterBy from '@/expressions/errors/InvalidOperatorInFilterBy'
+import InvalidContainsValueInFilterBy from '@/expressions/errors/InvalidContainsValueInFilterBy'
+import InvalidNumberOperatorInFilterBy from '@/expressions/errors/InvalidNumberOperatorInFilterBy'
 
 describe('Functionality', () => {
 	test("it filters out anything that doesn't match the condition", () => {
@@ -317,7 +321,7 @@ describe('Errors', () => {
 				new Expression.Literal(true),
 			])
 
-		expect(runner).toThrow(new RuntimeError('The field must be a string.'))
+		expect(runner).toThrow(NonStringFieldInFilterBy)
 	})
 
 	test('it errors if the operator is invalid', () => {
@@ -336,7 +340,7 @@ describe('Errors', () => {
 				new Expression.Literal(3),
 			])
 
-		expect(runner).toThrow(new RuntimeError('Invalid operator.'))
+		expect(runner).toThrow(InvalidOperatorInFilterBy)
 	})
 
 	test('it errors if using numeric operator on non-numbers', () => {
@@ -355,9 +359,7 @@ describe('Errors', () => {
 				new Expression.Literal(3),
 			])
 
-		expect(runner).toThrow(
-			new RuntimeError('Cannot filter by "less than" on type "string"'),
-		)
+		expect(runner).toThrow(InvalidNumberOperatorInFilterBy)
 	})
 
 	test('it errors if using "contains" on non-strings', () => {
@@ -376,8 +378,6 @@ describe('Errors', () => {
 				new Expression.Literal('articles'),
 			])
 
-		expect(runner).toThrow(
-			new RuntimeError('Cannot filter by "contains" on type "number"'),
-		)
+		expect(runner).toThrow(InvalidContainsValueInFilterBy)
 	})
 })

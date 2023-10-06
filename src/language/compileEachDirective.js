@@ -2,83 +2,88 @@ import compileNode from '@/language/compileNode'
 import Parser from '@/expressions/Parser'
 import Tokenizer from '@/expressions/Tokenizer'
 import Interpreter from '@/expressions/Interpreter'
-import CompilationError from '@/errors/CompilationError'
-import compileExpression from '@/language/compileExpression'
+
+import LoopingNonRecord from '@/errors/LoopingNonRecord'
 
 export default function (node, context) {
-    let children = []
+    try {
+        let children = []
 
-    const tokenizer = new Tokenizer(node.properties.record)
-    const tokens = tokenizer.scanTokens()
-    const normalisedTokens = tokens.map(token => {
-        if (token.type !== 'IDENTIFIER') {
-            return token
-        }
+        const tokenizer = new Tokenizer(node.properties.record)
+        const tokens = tokenizer.scanTokens()
+        const normalisedTokens = tokens.map(token => {
+            if (token.type !== 'IDENTIFIER') {
+                return token
+            }
 
-        if (token.lexeme !== 'class') {
-            return token
-        }
+            if (token.lexeme !== 'class') {
+                return token
+            }
 
-        return {
-            ...token,
-            lexeme: 'className',
-        }
-    })
-
-    let values = {
-        ...context.environment.global,
-        ...context.environment.local,
-    }
-
-    if (values.hasOwnProperty('class')) {
-        values.className = values.class
-        delete values.class
-    }
-
-    const parser = new Parser(normalisedTokens)
-    const ast = parser.parse()
-
-    const interpreter = new Interpreter(ast, values)
-    const literal = interpreter.interpret()
-
-    if (!(literal.value instanceof Map)) {
-        throw new CompilationError(
-            "Cannot loop over something that's not a record.",
-        )
-    }
-
-    const usedIdentifiers = normalisedTokens
-        .filter(token => token.type === 'IDENTIFIER')
-        .map(token => token.lexeme)
-
-    literal.value.forEach((value, key) => {
-        const compiled = node.children.flatMap(child => {
-            return compileNode(child, {
-                ...context,
-                environment: {
-                    ...context.environment,
-                    local: {
-                        ...context.environment.local,
-                        [node.properties.variable]: value,
-                        ...(node.properties.key
-                            ? { [node.properties.key]: key }
-                            : {}),
-                    },
-                },
-            })
+            return {
+                ...token,
+                lexeme: 'className',
+            }
         })
 
-        if (compiled.length > 0) {
-            compiled[0].meta = {
-                usedIdentifiers: [
-                    ...(compiled[0].meta.usedIdentifiers || []),
-                    ...usedIdentifiers,
-                ],
-            }
+        let values = {
+            ...context.environment.global,
+            ...context.environment.local,
         }
 
-        children.push(...compiled)
-    })
+        if (values.hasOwnProperty('class')) {
+            values.className = values.class
+            delete values.class
+        }
 
-    return children
+        const parser = new Parser(normalisedTokens)
+        const ast = parser.parse()
+
+        const interpreter = new Interpreter(ast, values)
+        const literal = interpreter.interpret()
+
+        if (!(literal.value instanceof Map)) {
+            throw new LoopingNonRecord(literal.value, node.position)
+        }
+
+        const usedIdentifiers = normalisedTokens
+            .filter(token => token.type === 'IDENTIFIER')
+            .map(token => token.lexeme)
+
+        literal.value.forEach((value, key) => {
+            const compiled = node.children.flatMap(child => {
+                return compileNode(child, {
+                    ...context,
+                    environment: {
+                        ...context.environment,
+                        local: {
+                            ...context.environment.local,
+                            [node.properties.variable]: value,
+                            ...(node.properties.key
+                                ? { [node.properties.key]: key }
+                                : {}),
+                        },
+                    },
+                })
+            })
+
+            if (compiled.length > 0) {
+                compiled[0].meta = {
+                    usedIdentifiers: [
+                        ...(compiled[0].meta.usedIdentifiers || []),
+                        ...usedIdentifiers,
+                    ],
+                }
+            }
+
+            children.push(...compiled)
+        })
+
+        return children
+    } catch (error) {
+        error.position = node.position
+        error.expression = node.properties.record
+
+        throw error
+    }
 }

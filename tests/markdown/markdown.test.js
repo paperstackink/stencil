@@ -1,7 +1,8 @@
 import { compile } from '@/index'
-import NoFrontMatterError from '@/errors/NoFrontMatterError'
+import NoFrontMatter from '@/errors/NoFrontMatter'
+import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
+import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoTemplateInMarkdownPageError from '@/errors/NoTemplateInMarkdownPageError'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 
 test('it can compile markdown', async () => {
@@ -87,7 +88,7 @@ This is a paragraph
     expect(result).toEqualIgnoringWhitespace(expected)
 })
 
-test('it fails if there is no frontmatter', async () => {
+test('it fails if there is no front matter block', async () => {
     const input = `
 # Heading 1
 
@@ -111,7 +112,37 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoFrontMatterError())
+    ).rejects.toThrowCompilationError(NoFrontMatter)
+})
+
+test('it fails if there is an empty front matter block', async () => {
+    const input = `---
+
+---
+
+# Heading 1
+
+This is a paragraph
+`
+    const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+
+    await expect(
+        compile(
+            input,
+            {
+                components: {
+                    Template: templateDefinition,
+                },
+            },
+            {
+                language: 'markdown',
+            },
+        ),
+    ).rejects.toThrowCompilationError(EmptyFrontmatter)
 })
 
 test('it fails if template is not defined', async () => {
@@ -141,7 +172,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoTemplateInMarkdownPageError())
+    ).rejects.toThrowCompilationError(NoTemplateInFrontmatter)
 })
 
 test('it fails if template does not exist', async () => {
@@ -171,7 +202,7 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new UnknownTemplateInMarkdown())
+    ).rejects.toThrowCompilationError(UnknownTemplateInMarkdown)
 })
 
 test('it fails if the templates does not have a default slot', async () => {
@@ -202,5 +233,5 @@ This is a paragraph
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrow(new NoDefaultSlotInMarkdownTemplate())
+    ).rejects.toThrowCompilationError(NoDefaultSlotInMarkdownTemplate)
 })

@@ -7,6 +7,10 @@ export default class LowerCase extends Callable {
 		this.item = item
 	}
 
+	name() {
+		return 'lowerCase'
+	}
+
 	arity() {
 		return [0]
 	}
