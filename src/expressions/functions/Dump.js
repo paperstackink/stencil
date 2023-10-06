@@ -104,6 +104,26 @@ function getEntry(value, key) {
 						level: getKey(),
 						length: value.size,
 						children,
+						more: {
+							[getKey()]: {
+								type: 'EntryFunction',
+								attributes: {
+									key: 'sortBy()',
+									value: '(field: string, direction: "asc" | "desc" = "asc") -> Record',
+									description:
+										'Sorts all items in the record',
+								},
+							},
+							[getKey()]: {
+								type: 'EntryFunction',
+								attributes: {
+									key: 'filterBy()',
+									value: '(field: string, operator: Operator = "equals", value: any) -> Record',
+									description:
+										'Filter items based on the operator and value',
+								},
+							},
+						},
 					},
 				},
 			})
