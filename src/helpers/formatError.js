@@ -823,6 +823,9 @@ It's likely that "${error.expression.replace(
 			error.position,
 		)
 
+		const indexOfMethod = error.expression.indexOf(`.${error.method}`)
+		console.log('!!!!!!!!!!!!!!!!', indexOfMethod)
+
 		const output = `-----  Error: Calling method on "null"  ----------------------
 
 You tried to call the method "${error.method}" on "null" in this expression: ${
@@ -831,9 +834,9 @@ You tried to call the method "${error.method}" on "null" in this expression: ${
 
 ${location}
 
-It's likely that "${error.expression.replace(
-			`.${error.method}`,
-			'',
+It's likely that "${error.expression.slice(
+			0,
+			indexOfMethod,
 		)}" wasn't mean to be "null".
 `
 

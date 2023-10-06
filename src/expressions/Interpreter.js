@@ -108,7 +108,7 @@ class Interpreter {
         const callable = callee.value
 
         if (callable === null) {
-            throw new NullMethodAccess()
+            throw new NullMethodAccess(expression.callee.name.lexeme)
         }
 
         if (!(callable instanceof Callable)) {

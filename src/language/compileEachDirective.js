@@ -81,8 +81,13 @@ export default function (node, context) {
 
         return children
     } catch (error) {
-        error.position = node.position
-        error.expression = node.properties.record
+        if (!error.position) {
+            error.position = node.position
+        }
+
+        if (!error.expression) {
+            error.expression = node.properties.record
+        }
 
         throw error
     }
