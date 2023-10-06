@@ -50,6 +50,8 @@ class Interpreter {
             if (!literal.value.has(key)) {
                 if (key === 'type') {
                     return new Expression.Literal('record')
+                } else if (key === 'size') {
+                    return new Expression.Literal(literal.value.size)
                 } else if (key === 'sortBy') {
                     return new Expression.Literal(new SortBy(literal))
                 } else if (key === 'filterBy') {
