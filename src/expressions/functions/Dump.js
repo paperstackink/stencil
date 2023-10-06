@@ -123,6 +123,15 @@ function getEntry(value, key) {
 										'Filter items based on the operator and value',
 								},
 							},
+							[getKey()]: {
+								type: 'EntryFunction',
+								attributes: {
+									key: 'findBy()',
+									value: '(field: string, operator: Operator = "equals", value: any) -> Record',
+									description:
+										'Find the first item in the record that matches the condition',
+								},
+							},
 						},
 					},
 				},
@@ -157,6 +166,15 @@ function getEntry(value, key) {
 								value: '(field: string, operator: Operator = "equals", value: any) -> Record',
 								description:
 									'Filter items based on the operator and value',
+							},
+						},
+						[getKey()]: {
+							type: 'EntryFunction',
+							attributes: {
+								key: 'findBy()',
+								value: '(field: string, operator: Operator = "equals", value: any) -> Record',
+								description:
+									'Find the first item in the record that matches the condition',
 							},
 						},
 					},

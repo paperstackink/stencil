@@ -1,6 +1,5 @@
 import Callable from '@/expressions/functions/Callable'
 import Expression from '@/expressions/Expression'
-import { cloneDeep } from 'lodash'
 import { getType } from '@/expressions/helpers/getType'
 
 import NonStringFieldInFilterFunction from '@/expressions/errors/NonStringFieldInFilterFunction'
@@ -9,14 +8,14 @@ import NonExistingFieldInFilterFunction from '@/expressions/errors/NonExistingFi
 import InvalidContainsValueInFilterFunction from '@/expressions/errors/InvalidContainsValueInFilterFunction'
 import InvalidNumberOperatorInFilterFunction from '@/expressions/errors/InvalidNumberOperatorInFilterFunction'
 
-export default class FilterBy extends Callable {
+export default class FindBy extends Callable {
 	constructor(record) {
 		super()
 		this.record = record
 	}
 
 	name() {
-		return 'filterBy'
+		return 'findBy'
 	}
 
 	arity() {
@@ -50,7 +49,7 @@ export default class FilterBy extends Callable {
 		}
 
 		if (typeof field !== 'string') {
-			throw new NonStringFieldInFilterFunction('filterBy', getType(field))
+			throw new NonStringFieldInFilterFunction('findBy', getType(field))
 		}
 
 		const operators = [
@@ -69,15 +68,24 @@ export default class FilterBy extends Callable {
 
 		if (!operators.includes(operator)) {
 			throw new InvalidOperatorInFilterFunction(
-				'filterBy',
+				'findBy',
 				operator,
 				operators,
 			)
 		}
 
-		const record = cloneDeep(this.record.value)
+		let returnValue = null
+		let hasResolved = false
 
-		record.forEach((map, key) => {
+		this.record.value.forEach((map, key) => {
+			if (hasResolved) {
+				return
+			}
+
+			if (!(map instanceof Map)) {
+				return
+			}
+
 			if (
 				[
 					'less than',
@@ -88,7 +96,7 @@ export default class FilterBy extends Callable {
 				typeof map.get(field) !== 'number'
 			) {
 				throw new InvalidNumberOperatorInFilterFunction(
-					'filterBy',
+					'findBy',
 					operator,
 					getType(map.get(field)),
 					field,
@@ -96,85 +104,97 @@ export default class FilterBy extends Callable {
 			}
 
 			if (operator === 'equals') {
-				if (map.get(field) !== value) {
-					record.delete(key)
+				if (map.get(field) === value) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'not equals') {
-				if (map.get(field) === value) {
-					record.delete(key)
+				if (map.get(field) !== value) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'greater than') {
-				if (map.get(field) <= value) {
-					record.delete(key)
+				if (map.get(field) > value) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'greater than or equals') {
-				if (map.get(field) < value) {
-					record.delete(key)
+				if (map.get(field) >= value) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'less than') {
-				if (map.get(field) >= value) {
-					record.delete(key)
+				if (map.get(field) < value) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'less than or equals') {
-				if (map.get(field) > value) {
-					record.delete(key)
+				if (map.get(field) <= value) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'contains') {
+				console.log('!!!!!!!!!!!!!!!!', field, map.get(field))
 				if (!map.has(field)) {
 					throw new NonExistingFieldInFilterFunction(
-						'filterBy',
+						'findBy',
 						field,
 						value,
 					)
 				}
 				if (typeof map.get(field) !== 'string') {
 					throw new InvalidContainsValueInFilterFunction(
-						'filterBy',
+						'findBy',
 						getType(map.get(field)),
 					)
 				}
-				if (!map.get(field).includes(value)) {
-					record.delete(key)
+				if (map.get(field).includes(value)) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'truthy') {
-				if (!map.get(field)) {
-					record.delete(key)
+				if (map.get(field)) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'not truthy') {
-				if (map.get(field)) {
-					record.delete(key)
+				if (!map.get(field)) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'exists') {
-				if (!map.has(field)) {
-					record.delete(key)
+				if (map.has(field)) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 
 			if (operator === 'not exists') {
-				if (map.has(field)) {
-					record.delete(key)
+				if (!map.has(field)) {
+					hasResolved = true
+					returnValue = map
 				}
 			}
 		})
 
-		return new Expression.Literal(record)
+		return new Expression.Literal(returnValue)
 	}
 }

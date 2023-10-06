@@ -41,14 +41,14 @@ import UnclosedFunctionCall from '@/expressions/errors/UnclosedFunctionCall'
 import UnclosedGroupExpression from '@/expressions/errors/UnclosedGroupExpression'
 import UnfinishedPropertyAccess from '@/expressions/errors/UnfinishedPropertyAccess'
 import NonStringSortKeyInSortBy from '@/expressions/errors/NonStringSortKeyInSortBy'
-import NonStringFieldInFilterBy from '@/expressions/errors/NonStringFieldInFilterBy'
-import InvalidOperatorInFilterBy from '@/expressions/errors/InvalidOperatorInFilterBy'
 import SortingNonRecordsInSortBy from '@/expressions/errors/SortingNonRecordsInSortBy'
-import NonExistingFieldInFilterBy from '@/expressions/errors/NonExistingFieldInFilterBy'
 import InvalidSortDirectionInSortBy from '@/expressions/errors/InvalidSortDirectionInSortBy'
-import InvalidContainsValueInFilterBy from '@/expressions/errors/InvalidContainsValueInFilterBy'
 import SortingMismatchedTypesInSortBy from '@/expressions/errors/SortingMismatchedTypesInSortBy'
-import InvalidNumberOperatorInFilterBy from '@/expressions/errors/InvalidNumberOperatorInFilterBy'
+import NonStringFieldInFilterFunction from '@/expressions/errors/NonStringFieldInFilterFunction'
+import InvalidOperatorInFilterFunction from '@/expressions/errors/InvalidOperatorInFilterFunction'
+import NonExistingFieldInFilterFunction from '@/expressions/errors/NonExistingFieldInFilterFunction'
+import InvalidContainsValueInFilterFunction from '@/expressions/errors/InvalidContainsValueInFilterFunction'
+import InvalidNumberOperatorInFilterFunction from '@/expressions/errors/InvalidNumberOperatorInFilterFunction'
 
 function stringifyArray(array, lastSeparator = 'and', separator = ', ') {
 	const last = array.pop()
@@ -824,7 +824,6 @@ It's likely that "${error.expression.replace(
 		)
 
 		const indexOfMethod = error.expression.indexOf(`.${error.method}`)
-		console.log('!!!!!!!!!!!!!!!!', indexOfMethod)
 
 		const output = `-----  Error: Calling method on "null"  ----------------------
 
@@ -914,7 +913,7 @@ Make sure you use numbers when using "${error.operator}".
 `
 
 		return new CompilationError('NonNumberOperand', output)
-	} else if (error instanceof InvalidOperatorInFilterBy) {
+	} else if (error instanceof InvalidOperatorInFilterFunction) {
 		const location = getLocationFromPosition(
 			input,
 			options.path,
@@ -927,7 +926,7 @@ Make sure you use numbers when using "${error.operator}".
 
 		const output = `-----  Error: Invalid operator  ----------------------
 
-You tried to use "${error.operator}" as an operator in filterBy(): ${error.expression}.
+You tried to use "${error.operator}" as an operator in ${error.method}(): ${error.expression}.
 
 ${location}
 
@@ -935,8 +934,8 @@ ${location}
 ${operators}
 `
 
-		return new CompilationError('InvalidOperatorInFilterBy', output)
-	} else if (error instanceof InvalidNumberOperatorInFilterBy) {
+		return new CompilationError('InvalidOperatorInFilterFunction', output)
+	} else if (error instanceof InvalidNumberOperatorInFilterFunction) {
 		const location = getLocationFromPosition(
 			input,
 			options.path,
@@ -945,15 +944,18 @@ ${operators}
 
 		const output = `-----  Error: Invalid operator  ----------------------
 
-You used "${error.operator}" as an operator on "${error.field}" in filterBy(): ${error.expression}.
+You used "${error.operator}" as an operator on "${error.field}" in ${error.method}(): ${error.expression}.
 
 ${location}
 
 "${error.field}" is a ${error.type} property but "${error.operator}" can only be used on numeric properties.
 `
 
-		return new CompilationError('InvalidNumberOperatorInFilterBy', output)
-	} else if (error instanceof NonExistingFieldInFilterBy) {
+		return new CompilationError(
+			'InvalidNumberOperatorInFilterFunction',
+			output,
+		)
+	} else if (error instanceof NonExistingFieldInFilterFunction) {
 		const location = getLocationFromPosition(
 			input,
 			options.path,
@@ -962,15 +964,15 @@ ${location}
 
 		const output = `-----  Error: Property doesn't exist  ----------------------
 
-You tried to check if "${error.field}" contains "${error.value}" in filterBy(): ${error.expression}.
+You tried to check if "${error.field}" contains "${error.value}" in ${error.method}(): ${error.expression}.
 
 ${location}
 
 "${error.field}" isn't a property on this record.
 `
 
-		return new CompilationError('NonExistingFieldInFilterBy', output)
-	} else if (error instanceof InvalidContainsValueInFilterBy) {
+		return new CompilationError('NonExistingFieldInFilterFunction', output)
+	} else if (error instanceof InvalidContainsValueInFilterFunction) {
 		const location = getLocationFromPosition(
 			input,
 			options.path,
@@ -979,15 +981,18 @@ ${location}
 
 		const output = `-----  Error: Invalid operator  ----------------------
 
-You used a "contains" operator on a ${error.type} property in filterBy(): ${error.expression}.
+You used a "contains" operator on a ${error.type} property in ${error.method}(): ${error.expression}.
 
 ${location}
 
 "contains" can only be used on string properties.
 `
 
-		return new CompilationError('InvalidContainsValueInFilterBy', output)
-	} else if (error instanceof NonStringFieldInFilterBy) {
+		return new CompilationError(
+			'InvalidContainsValueInFilterFunction',
+			output,
+		)
+	} else if (error instanceof NonStringFieldInFilterFunction) {
 		const location = getLocationFromPosition(
 			input,
 			options.path,
@@ -996,14 +1001,14 @@ ${location}
 
 		const output = `-----  Error: Invalid field  ----------------------
 
-You provided a ${error.type} as the "field" in filterBy(): ${error.expression}.
+You provided a ${error.type} as the "field" in ${error.method}(): ${error.expression}.
 
 ${location}
 
 The "field" argument must be a string with the name of the property.
 `
 
-		return new CompilationError('NonStringFieldInFilterBy', output)
+		return new CompilationError('NonStringFieldInFilterFunction', output)
 	} else if (error instanceof SortingNonRecordsInSortBy) {
 		const location = getLocationFromPosition(
 			input,
@@ -1019,7 +1024,7 @@ ${location}
 
 The field "${error.property}" has the value "${error.value}"" which is a ${error.type}. 
 
-It's only possible to sort a record of records. If the record contains non-record properties you must filter them out using filterBy().
+It's only possible to sort a record of records. If the record contains non-record properties you must filter them out using ${error.method}().
 `
 
 		return new CompilationError('SortingNonRecordsInSortBy', output)

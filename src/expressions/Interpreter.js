@@ -1,4 +1,3 @@
-import match from '@/helpers/match'
 import Expression from '@/expressions/Expression'
 import { getType } from '@/expressions/helpers/getType'
 
@@ -11,6 +10,7 @@ import CallingNonCallable from '@/expressions/errors/CallingNonCallable'
 import OperatorTypeMismatch from '@/expressions/errors/OperatorTypeMismatch'
 
 import SortBy from '@/expressions/methods/records/SortBy'
+import FindBy from '@/expressions/methods/records/FindBy'
 import FilterBy from '@/expressions/methods/records/FilterBy'
 import Callable from '@/expressions/functions/Callable'
 import LowerCase from '@/expressions/methods/strings/LowerCase'
@@ -54,6 +54,8 @@ class Interpreter {
                     return new Expression.Literal(new SortBy(literal))
                 } else if (key === 'filterBy') {
                     return new Expression.Literal(new FilterBy(literal))
+                } else if (key === 'findBy') {
+                    return new Expression.Literal(new FindBy(literal))
                 } else {
                     return new Expression.Literal(null)
                 }
