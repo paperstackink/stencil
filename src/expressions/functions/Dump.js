@@ -53,6 +53,17 @@ function getEntry(value, key) {
 		}
 	}
 
+	if (value === null && !key) {
+		return Map.fromObject({
+			[getKey()]: {
+				type: 'Literal',
+				attributes: {
+					value: 'null',
+				},
+			},
+		})
+	}
+
 	if (
 		typeof value === 'number' ||
 		typeof value === 'boolean' ||
