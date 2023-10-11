@@ -269,7 +269,7 @@ test('it can dump a record', async () => {
 	const recordChildAttributesMore = recordChildAttributes.get('more')
 
 	expect(recordChildAttributesMore).toBeInstanceOf(Map)
-	expect(recordChildAttributesMore.size).toEqual(2)
+	expect(recordChildAttributesMore.size).toEqual(3)
 
 	const recordChildAttributesMoreIterator =
 		recordChildAttributesMore.entries()
