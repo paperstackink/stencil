@@ -162,6 +162,61 @@ template: Template
     expect(result).toEqualIgnoringWhitespace(expected)
 })
 
+test('it compiles markdown tables', async () => {
+    const input = `
+---
+template: Template
+---
+
+# Heading 1
+
+| Column 1         | Column 2         |
+| ---------------- | ---------------- |
+| Row 1 / Column 1 | Row 1 / Column 2 |
+| Row 2 / Column 1 | Row 2 / Column 2 |
+`
+    const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+    const expected = `
+<article>
+    <h1>Heading 1</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Column 1</th>
+                <th>Column 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Row 1 / Column 1</td>
+                <td>Row 1 / Column 2</td>
+            </tr>
+            <tr>
+                <td>Row 2 / Column 1</td>
+                <td>Row 2 / Column 2</td>
+            </tr>
+        </tbody>
+    </table>
+</article>
+`
+
+    const result = await compile(
+        input,
+        {
+            components: { Template: templateDefinition },
+        },
+        {
+            language: 'markdown',
+        },
+    )
+
+    expect(result).toEqualIgnoringWhitespace(expected)
+})
+
 test('it fails if there is no front matter block', async () => {
     const input = `
 # Heading 1

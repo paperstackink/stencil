@@ -4,6 +4,7 @@ import stringify from 'rehype-stringify'
 import format from 'rehype-format'
 import { merge } from 'lodash'
 import remarkParse from 'remark-parse'
+import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkExternalLinks from 'remark-external-links'
@@ -78,6 +79,7 @@ export const compile = async (
                 .use(remarkParse)
                 .use(remarkExternalLinks)
                 .use(remarkFrontmatter, ['yaml'])
+                .use(remarkGfm)
                 .use(() => tree => {
                     const node = find(tree, { type: 'yaml' })
 
