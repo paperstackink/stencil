@@ -6,6 +6,7 @@ import { merge } from 'lodash'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import remarkFrontmatter from 'remark-frontmatter'
+import remarkExternalLinks from 'remark-external-links'
 import { find } from 'unist-util-find'
 import yaml from 'yaml'
 
@@ -75,6 +76,7 @@ export const compile = async (
 
             const parsed = await unified()
                 .use(remarkParse)
+                .use(remarkExternalLinks)
                 .use(remarkFrontmatter, ['yaml'])
                 .use(() => tree => {
                     const node = find(tree, { type: 'yaml' })

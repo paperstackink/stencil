@@ -88,6 +88,80 @@ This is a paragraph
     expect(result).toEqualIgnoringWhitespace(expected)
 })
 
+test('it adds attributes to absolute links', async () => {
+    const input = `
+---
+template: Template
+---
+
+# Heading 1
+
+[This is an external link](https://example.com)
+`
+    const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+    const expected = `
+<article>
+    <h1>Heading 1</h1>
+    <p>
+        <a href="https://example.com" target="_blank" rel="nofollow noopener noreferrer">This is an external link</a>
+    </p>
+</article>
+`
+
+    const result = await compile(
+        input,
+        {
+            components: { Template: templateDefinition },
+        },
+        {
+            language: 'markdown',
+        },
+    )
+
+    expect(result).toEqualIgnoringWhitespace(expected)
+})
+
+test("it doesn't add attributes to relative links", async () => {
+    const input = `
+---
+template: Template
+---
+
+# Heading 1
+
+[This is an external link](/documentation)
+`
+    const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+    const expected = `
+<article>
+    <h1>Heading 1</h1>
+    <p>
+        <a href="/documentation">This is an external link</a>
+    </p>
+</article>
+`
+
+    const result = await compile(
+        input,
+        {
+            components: { Template: templateDefinition },
+        },
+        {
+            language: 'markdown',
+        },
+    )
+
+    expect(result).toEqualIgnoringWhitespace(expected)
+})
+
 test('it fails if there is no front matter block', async () => {
     const input = `
 # Heading 1
