@@ -45,9 +45,7 @@ const defaultContext = {
     },
     components: {},
     environment: {
-        global: {
-            dump: new Dump(),
-        },
+        global: {},
         local: {},
     },
 }
@@ -63,6 +61,18 @@ export const compile = async (
     options = defaultOptions,
 ) => {
     let context = merge({}, defaultContext, providedContext)
+
+    if (providedContext.config) {
+        context = merge({}, context, {
+            environment: {
+                global: {
+                    dump: new Dump(),
+                    $config: Map.fromObject(providedContext.config),
+                },
+            },
+        })
+    }
+
     let input = providedInput.trim()
 
     const reservedComponentName = ['Component', 'Data'].find(name =>
