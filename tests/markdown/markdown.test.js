@@ -4,6 +4,7 @@ import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
+import InvalidLinkHeadlinesInMarkdownConfig from '@/errors/InvalidLinkHeadlinesInMarkdownConfig'
 
 test('it can compile markdown', async () => {
     const input = `
@@ -363,4 +364,132 @@ This is a paragraph
             },
         ),
     ).rejects.toThrowCompilationError(NoDefaultSlotInMarkdownTemplate)
+})
+
+describe('Config options', () => {
+    describe('linkHeadlines', () => {
+        test('it can autolink headlines', async () => {
+            const input = `
+---
+template: Template
+---
+
+# Headline 1
+
+## Headline 2
+`
+            const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+            const expected = `
+<article>
+    <h1 id="headline-1"><a href="#headline-1">Headline 1</a></h1>
+    <h2 id="headline-2"><a href="#headline-2">Headline 2</a></h2>
+</article>
+`
+
+            const result = await compile(
+                input,
+                {
+                    config: {
+                        markdown: {
+                            linkHeadlines: 'wrap',
+                        },
+                    },
+                    components: { Template: templateDefinition },
+                },
+                {
+                    language: 'markdown',
+                },
+            )
+
+            expect(result).toEqualIgnoringWhitespace(expected)
+        })
+
+        test('it can not autolink headlines', async () => {
+            const input = `
+---
+template: Template
+---
+
+# Headline 1
+
+## Headline 2
+`
+            const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+            const expected = `
+<article>
+    <h1>Headline 1</h1>
+    <h2>Headline 2</h2>
+</article>
+`
+
+            const result = await compile(
+                input,
+                {
+                    config: {
+                        markdown: {
+                            linkHeadlines: null,
+                        },
+                    },
+                    components: { Template: templateDefinition },
+                },
+                {
+                    language: 'markdown',
+                },
+            )
+
+            expect(result).toEqualIgnoringWhitespace(expected)
+        })
+
+        test('it fails if the config value is invalid', async () => {
+            const input = `
+---
+template: Template
+---
+
+# Headline 1
+
+## Headline 2
+`
+            const templateDefinition = `
+<article>
+    <slot />
+</article>
+`
+            const expected = `
+<article>
+    <h1>Headline 1</h1>
+    <h2>Headline 2</h2>
+</article>
+`
+
+            await expect(
+                compile(
+                    input,
+                    {
+                        config: {
+                            markdown: {
+                                linkHeadlines: 'invalid',
+                            },
+                        },
+                        components: {
+                            Template: templateDefinition,
+                        },
+                    },
+                    {
+                        language: 'markdown',
+                    },
+                ),
+            ).rejects.toThrowCompilationError(
+                InvalidLinkHeadlinesInMarkdownConfig,
+            )
+        })
+    })
 })

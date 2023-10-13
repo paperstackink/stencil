@@ -22,6 +22,7 @@ import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
+import InvalidLinkHeadlinesInMarkdownConfig from '@/errors/InvalidLinkHeadlinesInMarkdownConfig'
 
 import ArityMismatch from '@/expressions/errors/ArityMismatch'
 import NonNumberOperand from '@/expressions/errors/NonNumberOperand'
@@ -1081,6 +1082,23 @@ The sort direction must be either "ascending" or "descending".
 `
 
 		return new CompilationError('InvalidSortDirectionInSortBy', output)
+	} else if (error instanceof InvalidLinkHeadlinesInMarkdownConfig) {
+		const options = error.options
+			.map(option => `     -  "${option}"`)
+			.join('\n')
+
+		const output = `-----  Error: Invalid config value  ----------------------
+
+You configured "linkHeadlines: '${error.value}'" in "Config/Markdown.js".
+
+"${error.value}" is not a valid value. The valid options are:
+${options}
+`
+
+		return new CompilationError(
+			'InvalidLinkHeadlinesInMarkdownConfig',
+			output,
+		)
 	} else {
 		const output = `-----  Error: Internal error  ----------------------
 

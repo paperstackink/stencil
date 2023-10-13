@@ -8,6 +8,8 @@ import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkExternalLinks from 'remark-external-links'
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import { find } from 'unist-util-find'
 import yaml from 'yaml'
 
@@ -33,8 +35,14 @@ import ReservedComponentName from '@/errors/ReservedComponentName'
 import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
+import InvalidLinkHeadlinesInMarkdownConfig from '@/errors/InvalidLinkHeadlinesInMarkdownConfig'
 
 const defaultContext = {
+    config: {
+        markdown: {
+            linkHeadlines: null,
+        },
+    },
     components: {},
     environment: {
         global: {
@@ -75,7 +83,7 @@ export const compile = async (
             let hasYamlSection = false
             let yamlContent
 
-            const parsed = await unified()
+            let parser = unified()
                 .use(remarkParse)
                 .use(remarkExternalLinks)
                 .use(remarkFrontmatter, ['yaml'])
@@ -89,6 +97,28 @@ export const compile = async (
                     }
                 })
                 .use(remarkRehype, { allowDangerousHtml: true })
+
+            if (context.config.markdown.linkHeadlines) {
+                const options = [
+                    null,
+                    'wrap',
+                    'after',
+                    'append',
+                    'before',
+                    'prepend',
+                ]
+                if (!options.includes(context.config.markdown.linkHeadlines)) {
+                    throw new InvalidLinkHeadlinesInMarkdownConfig(
+                        context.config.markdown.linkHeadlines,
+                        options,
+                    )
+                }
+                parser = parser.use(rehypeSlug).use(rehypeAutolinkHeadings, {
+                    behavior: context.config.markdown.linkHeadlines,
+                })
+            }
+
+            const parsed = await parser
                 .use(stringify, { allowDangerousHtml: true })
                 .process(input)
 
