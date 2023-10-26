@@ -32,9 +32,9 @@ import NoFrontMatter from '@/errors/NoFrontMatter'
 import CompilationError from '@/errors/CompilationError'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
 import ReservedComponentName from '@/errors/ReservedComponentName'
-import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
-import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
+import NoLayoutInFrontmatter from '@/errors/NoLayoutInFrontmatter'
+import UnknownLayoutInMarkdown from '@/errors/UnknownLayoutInMarkdown'
+import NoDefaultSlotInMarkdownLayout from '@/errors/NoDefaultSlotInMarkdownLayout'
 import InvalidLinkHeadlinesInMarkdownConfig from '@/errors/InvalidLinkHeadlinesInMarkdownConfig'
 
 const defaultContext = {
@@ -144,26 +144,26 @@ export const compile = async (
                 customTags: ['timestamp'],
             })
 
-            if (!frontMatter.hasOwnProperty('template')) {
-                throw new NoTemplateInFrontmatter()
+            if (!frontMatter.hasOwnProperty('layout')) {
+                throw new NoLayoutInFrontmatter()
             }
 
-            if (!context.components.hasOwnProperty(frontMatter.template)) {
-                throw new UnknownTemplateInMarkdown(frontMatter.template)
+            if (!context.components.hasOwnProperty(frontMatter.layout)) {
+                throw new UnknownLayoutInMarkdown(frontMatter.layout)
             }
 
             const hasDefaultSlot = await hasNode(
-                context.components[frontMatter.template],
+                context.components[frontMatter.layout],
                 'slot',
             )
 
             if (!hasDefaultSlot) {
-                throw new NoDefaultSlotInMarkdownTemplate()
+                throw new NoDefaultSlotInMarkdownLayout()
             }
 
             const content = String(parsed)
 
-            input = `<${frontMatter.template}>${content}</${frontMatter.template}>`
+            input = `<${frontMatter.layout}>${content}</${frontMatter.layout}>`
         } catch (error) {
             throw formatError(input, error, options, context)
         }

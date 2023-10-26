@@ -1,22 +1,22 @@
 import { compile } from '@/index'
 import NoFrontMatter from '@/errors/NoFrontMatter'
 import EmptyFrontmatter from '@/errors/EmptyFrontmatter'
-import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
-import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
-import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
+import NoLayoutInFrontmatter from '@/errors/NoLayoutInFrontmatter'
+import UnknownLayoutInMarkdown from '@/errors/UnknownLayoutInMarkdown'
+import NoDefaultSlotInMarkdownLayout from '@/errors/NoDefaultSlotInMarkdownLayout'
 import InvalidLinkHeadlinesInMarkdownConfig from '@/errors/InvalidLinkHeadlinesInMarkdownConfig'
 
 test('it can compile markdown', async () => {
     const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Heading 1
 
 This is a paragraph
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -31,7 +31,7 @@ This is a paragraph
     const result = await compile(
         input,
         {
-            components: { Template: templateDefinition },
+            components: { Layout: layoutDefinition },
         },
         {
             language: 'markdown',
@@ -46,7 +46,7 @@ test.todo('it can print content via a variable')
 test('it can compile markdown with Stencil components', async () => {
     const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Heading 1
@@ -55,7 +55,7 @@ template: Template
 
 This is a paragraph
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <Thing />
     <slot />
@@ -77,7 +77,7 @@ This is a paragraph
         input,
         {
             components: {
-                Template: templateDefinition,
+                Layout: layoutDefinition,
                 Thing: componentDefinition,
             },
         },
@@ -92,14 +92,14 @@ This is a paragraph
 test('it adds attributes to absolute links', async () => {
     const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Heading 1
 
 [This is an external link](https://example.com)
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -116,7 +116,7 @@ template: Template
     const result = await compile(
         input,
         {
-            components: { Template: templateDefinition },
+            components: { Layout: layoutDefinition },
         },
         {
             language: 'markdown',
@@ -129,14 +129,14 @@ template: Template
 test("it doesn't add attributes to relative links", async () => {
     const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Heading 1
 
 [This is an external link](/documentation)
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -153,7 +153,7 @@ template: Template
     const result = await compile(
         input,
         {
-            components: { Template: templateDefinition },
+            components: { Layout: layoutDefinition },
         },
         {
             language: 'markdown',
@@ -166,7 +166,7 @@ template: Template
 test('it compiles markdown tables', async () => {
     const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Heading 1
@@ -176,7 +176,7 @@ template: Template
 | Row 1 / Column 1 | Row 1 / Column 2 |
 | Row 2 / Column 1 | Row 2 / Column 2 |
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -208,7 +208,7 @@ template: Template
     const result = await compile(
         input,
         {
-            components: { Template: templateDefinition },
+            components: { Layout: layoutDefinition },
         },
         {
             language: 'markdown',
@@ -224,7 +224,7 @@ test('it fails if there is no front matter block', async () => {
 
 This is a paragraph
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -235,7 +235,7 @@ This is a paragraph
             input,
             {
                 components: {
-                    Template: templateDefinition,
+                    Layout: layoutDefinition,
                 },
             },
             {
@@ -254,7 +254,7 @@ test('it fails if there is an empty front matter block', async () => {
 
 This is a paragraph
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -265,7 +265,7 @@ This is a paragraph
             input,
             {
                 components: {
-                    Template: templateDefinition,
+                    Layout: layoutDefinition,
                 },
             },
             {
@@ -275,7 +275,7 @@ This is a paragraph
     ).rejects.toThrowCompilationError(EmptyFrontmatter)
 })
 
-test('it fails if template is not defined', async () => {
+test('it fails if layout is not defined', async () => {
     const input = `
 ---
 unrelated: true
@@ -284,7 +284,7 @@ unrelated: true
 
 This is a paragraph
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -295,26 +295,26 @@ This is a paragraph
             input,
             {
                 components: {
-                    Template: templateDefinition,
+                    Layout: layoutDefinition,
                 },
             },
             {
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrowCompilationError(NoTemplateInFrontmatter)
+    ).rejects.toThrowCompilationError(NoLayoutInFrontmatter)
 })
 
-test('it fails if template does not exist', async () => {
+test('it fails if layout does not exist', async () => {
     const input = `
 ---
-template: DoesNotExist
+layout: DoesNotExist
 ---
 # Heading 1
 
 This is a paragraph
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -325,27 +325,27 @@ This is a paragraph
             input,
             {
                 components: {
-                    Template: templateDefinition,
+                    Layout: layoutDefinition,
                 },
             },
             {
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrowCompilationError(UnknownTemplateInMarkdown)
+    ).rejects.toThrowCompilationError(UnknownLayoutInMarkdown)
 })
 
-test('it fails if the templates does not have a default slot', async () => {
+test('it fails if the layout does not have a default slot', async () => {
     const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Heading 1
 
 This is a paragraph
 `
-    const templateDefinition = `
+    const layoutDefinition = `
 <article>
     <div></div>
 </article>
@@ -356,14 +356,14 @@ This is a paragraph
             input,
             {
                 components: {
-                    Template: templateDefinition,
+                    Layout: layoutDefinition,
                 },
             },
             {
                 language: 'markdown',
             },
         ),
-    ).rejects.toThrowCompilationError(NoDefaultSlotInMarkdownTemplate)
+    ).rejects.toThrowCompilationError(NoDefaultSlotInMarkdownLayout)
 })
 
 describe('Config options', () => {
@@ -371,14 +371,14 @@ describe('Config options', () => {
         test('it can autolink headlines', async () => {
             const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Headline 1
 
 ## Headline 2
 `
-            const templateDefinition = `
+            const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -398,7 +398,7 @@ template: Template
                             linkHeadlines: 'wrap',
                         },
                     },
-                    components: { Template: templateDefinition },
+                    components: { Layout: layoutDefinition },
                 },
                 {
                     language: 'markdown',
@@ -411,14 +411,14 @@ template: Template
         test('it can not autolink headlines', async () => {
             const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Headline 1
 
 ## Headline 2
 `
-            const templateDefinition = `
+            const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -438,7 +438,7 @@ template: Template
                             linkHeadlines: null,
                         },
                     },
-                    components: { Template: templateDefinition },
+                    components: { Layout: layoutDefinition },
                 },
                 {
                     language: 'markdown',
@@ -451,14 +451,14 @@ template: Template
         test('it fails if the config value is invalid', async () => {
             const input = `
 ---
-template: Template
+layout: Layout
 ---
 
 # Headline 1
 
 ## Headline 2
 `
-            const templateDefinition = `
+            const layoutDefinition = `
 <article>
     <slot />
 </article>
@@ -480,7 +480,7 @@ template: Template
                             },
                         },
                         components: {
-                            Template: templateDefinition,
+                            Layout: layoutDefinition,
                         },
                     },
                     {

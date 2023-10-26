@@ -8,20 +8,20 @@ import NestedExpression from '@/errors/NestedExpression'
 import UnclosedExpression from '@/errors/UnclosedExpression'
 import UnknownComponentName from '@/errors/UnknownComponentName'
 import NoEachDirectiveRecord from '@/errors/NoEachDirectiveRecord'
+import NoLayoutInFrontmatter from '@/errors/NoLayoutInFrontmatter'
 import ReservedComponentName from '@/errors/ReservedComponentName'
 import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
 import NoIfDirectiveExpression from '@/errors/NoIfDirectiveExpression'
-import NoTemplateInFrontmatter from '@/errors/NoTemplateInFrontmatter'
 import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
+import UnknownLayoutInMarkdown from '@/errors/UnknownLayoutInMarkdown'
 import MultipleRootsInComponent from '@/errors/MultipleRootsInComponent'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
 import UnevenEachDirectiveCount from '@/errors/UnevenEachDirectiveCount'
-import UnknownTemplateInMarkdown from '@/errors/UnknownTemplateInMarkdown'
 import SpreadNonRecordAsAttributes from '@/errors/SpreadNonRecordAsAttributes'
 import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
+import NoDefaultSlotInMarkdownLayout from '@/errors/NoDefaultSlotInMarkdownLayout'
 import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpression'
-import NoDefaultSlotInMarkdownTemplate from '@/errors/NoDefaultSlotInMarkdownTemplate'
 import InvalidLinkHeadlinesInMarkdownConfig from '@/errors/InvalidLinkHeadlinesInMarkdownConfig'
 
 import ArityMismatch from '@/expressions/errors/ArityMismatch'
@@ -223,7 +223,7 @@ When creating a markdown page it's required to specify a 'template':
 `
 
 		return new CompilationError('EmptyFrontmatter', output)
-	} else if (error instanceof NoTemplateInFrontmatter) {
+	} else if (error instanceof NoLayoutInFrontmatter) {
 		const openingFrontMatterLineIndex = 0
 		const closingFrontMatterLineIndex =
 			input
@@ -273,8 +273,8 @@ It's required to configure a 'template' in markdown pages:
 ${suggestion}
 `
 
-		return new CompilationError('NoTemplateInFrontmatter', output)
-	} else if (error instanceof UnknownTemplateInMarkdown) {
+		return new CompilationError('NoLayoutInFrontmatter', output)
+	} else if (error instanceof UnknownLayoutInMarkdown) {
 		const openingFrontMatterLineIndex = 0
 		const closingFrontMatterLineIndex =
 			input
@@ -314,8 +314,8 @@ ${codeContext}
 ${suggestions}
 `
 
-		return new CompilationError('UnknownTemplateInMarkdown', output)
-	} else if (error instanceof NoDefaultSlotInMarkdownTemplate) {
+		return new CompilationError('UnknownLayoutInMarkdown', output)
+	} else if (error instanceof NoDefaultSlotInMarkdownLayout) {
 		const relevantLines = getLinesFromSnippet(input)
 		const codeContext = getCodeFromLines(relevantLines)
 
@@ -329,7 +329,7 @@ ${codeContext}
 Try adding a "<slot />" component somewhere in "${options.path}"
 `
 
-		return new CompilationError('NoDefaultSlotInMarkdownTemplate', output)
+		return new CompilationError('NoDefaultSlotInMarkdownLayout', output)
 	} else if (error instanceof ReservedComponentName) {
 		const explanation = match(error.component, {
 			Data: `"<Data>" is used to add extra data to a page with Yaml:`,

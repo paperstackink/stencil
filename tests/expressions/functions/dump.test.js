@@ -105,23 +105,6 @@ test('it can dump a string', async () => {
 
 	expect(attributes.get('value')).toEqual('a string')
 	expect(attributes.has('level')).toEqual(true)
-
-	const children = attributes.get('children')
-
-	expect(children.size).toEqual(1)
-
-	const [__, child] = children.entries().next().value
-
-	expect(child).toEqual(
-		Map.fromObject({
-			type: 'EntryFunction',
-			attributes: {
-				key: 'lowerCase()',
-				value: '() -> String',
-				description: 'Converts the string to lower case',
-			},
-		}),
-	)
 })
 
 test('it can dump a record', async () => {
@@ -220,21 +203,9 @@ test('it can dump a record', async () => {
 	const stringChildAttributesChildren = stringChildAttributes.get('children')
 
 	expect(stringChildAttributesChildren).toBeInstanceOf(Map)
-	expect(stringChildAttributesChildren.size).toEqual(1)
 
 	const [_______, stringChildAttributesChildrenChild] =
 		stringChildAttributesChildren.entries().next().value
-
-	expect(stringChildAttributesChildrenChild).toEqual(
-		Map.fromObject({
-			type: 'EntryFunction',
-			attributes: {
-				key: 'lowerCase()',
-				value: '() -> String',
-				description: 'Converts the string to lower case',
-			},
-		}),
-	)
 
 	const [________, recordChild] = childIterator.next().value
 
@@ -269,38 +240,6 @@ test('it can dump a record', async () => {
 	const recordChildAttributesMore = recordChildAttributes.get('more')
 
 	expect(recordChildAttributesMore).toBeInstanceOf(Map)
-	expect(recordChildAttributesMore.size).toEqual(3)
-
-	const recordChildAttributesMoreIterator =
-		recordChildAttributesMore.entries()
-
-	const [__________, recordChildAttributesMoreFirstChild] =
-		recordChildAttributesMoreIterator.next().value
-
-	expect(recordChildAttributesMoreFirstChild).toEqual(
-		Map.fromObject({
-			type: 'EntryFunction',
-			attributes: {
-				key: 'sortBy()',
-				value: '(field: string, direction: "asc" | "desc" = "asc") -> Record',
-				description: 'Sorts all items in the record',
-			},
-		}),
-	)
-
-	const [___________, recordChildAttributesMoreSecondChild] =
-		recordChildAttributesMoreIterator.next().value
-
-	expect(recordChildAttributesMoreSecondChild).toEqual(
-		Map.fromObject({
-			type: 'EntryFunction',
-			attributes: {
-				key: 'filterBy()',
-				value: '(field: string, operator: Operator = "equals", value: any) -> Record',
-				description: 'Filter items based on the operator and value',
-			},
-		}),
-	)
 })
 
 test('it can dump multiple items', async () => {

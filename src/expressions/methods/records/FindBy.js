@@ -146,7 +146,6 @@ export default class FindBy extends Callable {
 			}
 
 			if (operator === 'contains') {
-				console.log('!!!!!!!!!!!!!!!!', field, map.get(field))
 				if (!map.has(field)) {
 					throw new NonExistingFieldInFilterFunction(
 						'findBy',
