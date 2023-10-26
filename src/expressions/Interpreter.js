@@ -13,7 +13,15 @@ import SortBy from '@/expressions/methods/records/SortBy'
 import FindBy from '@/expressions/methods/records/FindBy'
 import FilterBy from '@/expressions/methods/records/FilterBy'
 import Callable from '@/expressions/functions/Callable'
+
+import CamelCase from '@/expressions/methods/strings/CamelCase'
+import KebabCase from '@/expressions/methods/strings/KebabCase'
 import LowerCase from '@/expressions/methods/strings/LowerCase'
+import UpperCase from '@/expressions/methods/strings/UpperCase'
+import SnakeCase from '@/expressions/methods/strings/SnakeCase'
+import TitleCase from '@/expressions/methods/strings/TitleCase'
+import PascalCase from '@/expressions/methods/strings/PascalCase'
+import SentenceCase from '@/expressions/methods/strings/SentenceCase'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -75,6 +83,54 @@ class Interpreter {
                 if (expression.name.lexeme === 'lowerCase') {
                     return new Expression.Literal(
                         new LowerCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'upperCase') {
+                    return new Expression.Literal(
+                        new Uppercase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'titleCase') {
+                    return new Expression.Literal(
+                        new TitleCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'sentenceCase') {
+                    return new Expression.Literal(
+                        new SentenceCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'camelCase') {
+                    return new Expression.Literal(
+                        new CamelCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'kebabCase') {
+                    return new Expression.Literal(
+                        new KebabCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'slug') {
+                    return new Expression.Literal(
+                        new KebabCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'pascalCase') {
+                    return new Expression.Literal(
+                        new PascalCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'snakeCase') {
+                    return new Expression.Literal(
+                        new SnakeCase(expression.item),
                     )
                 }
             }

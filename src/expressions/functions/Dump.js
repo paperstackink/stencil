@@ -7,6 +7,83 @@ function getKey() {
 	return `key-${uuid()}`
 }
 
+function getStringMethods() {
+	return {
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'slug()',
+				value: '() -> String',
+				description: 'Converts the string to kebab case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'lowerCase()',
+				value: '() -> String',
+				description: 'Converts the string to lower case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'upperCase()',
+				value: '() -> String',
+				description: 'Converts the string to upper case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'titleCase()',
+				value: '() -> String',
+				description: 'Converts the string to title case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'camelCase()',
+				value: '() -> String',
+				description: 'Converts the string to camel case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'snakeCase()',
+				value: '() -> String',
+				description: 'Converts the string to snake case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'kebabCase()',
+				value: '() -> String',
+				description: 'Converts the string to kebab case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'pascalCase()',
+				value: '() -> String',
+				description: 'Converts the string to pascal case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'sentenceCase()',
+				value: '() -> String',
+				description: 'Converts the string to sentence case',
+			},
+		},
+	}
+}
+
 function getEntry(value, key) {
 	if (typeof value === 'string') {
 		if (!key) {
@@ -16,17 +93,7 @@ function getEntry(value, key) {
 					attributes: {
 						value: value,
 						level: getKey(),
-						children: {
-							[getKey()]: {
-								type: 'EntryFunction',
-								attributes: {
-									key: 'lowerCase()',
-									value: '() -> String',
-									description:
-										'Converts the string to lower case',
-								},
-							},
-						},
+						children: getStringMethods(),
 					},
 				},
 			})
@@ -37,17 +104,7 @@ function getEntry(value, key) {
 					key,
 					value,
 					level: getKey(),
-					children: {
-						[getKey()]: {
-							type: 'EntryFunction',
-							attributes: {
-								key: 'lowerCase()',
-								value: '() -> String',
-								description:
-									'Converts the string to lower case',
-							},
-						},
-					},
+					children: getStringMethods(),
 				},
 			})
 		}
