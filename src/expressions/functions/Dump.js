@@ -84,6 +84,44 @@ function getStringMethods() {
 	}
 }
 
+function getRecordMethods() {
+	return {
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'size()',
+				value: '() -> Number',
+				description: 'Get the number of properties in the record',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'sortBy()',
+				value: '(field: string, direction: "asc" | "desc" = "asc") -> Record',
+				description: 'Sorts all items in the record',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'findBy()',
+				value: '(field: string, operator: Operator = "equals", value: any) -> Record',
+				description:
+					'Find the first item in the record that matches the condition',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'filterBy()',
+				value: '(field: string, operator: Operator = "equals", value: any) -> Record',
+				description: 'Filter items based on the operator and value',
+			},
+		},
+	}
+}
+
 function getEntry(value, key) {
 	if (typeof value === 'string') {
 		if (!key) {
@@ -161,35 +199,7 @@ function getEntry(value, key) {
 						level: getKey(),
 						length: value.size,
 						children,
-						more: {
-							[getKey()]: {
-								type: 'EntryFunction',
-								attributes: {
-									key: 'sortBy()',
-									value: '(field: string, direction: "asc" | "desc" = "asc") -> Record',
-									description:
-										'Sorts all items in the record',
-								},
-							},
-							[getKey()]: {
-								type: 'EntryFunction',
-								attributes: {
-									key: 'filterBy()',
-									value: '(field: string, operator: Operator = "equals", value: any) -> Record',
-									description:
-										'Filter items based on the operator and value',
-								},
-							},
-							[getKey()]: {
-								type: 'EntryFunction',
-								attributes: {
-									key: 'findBy()',
-									value: '(field: string, operator: Operator = "equals", value: any) -> Record',
-									description:
-										'Find the first item in the record that matches the condition',
-								},
-							},
-						},
+						more: getRecordMethods(),
 					},
 				},
 			})
@@ -207,34 +217,7 @@ function getEntry(value, key) {
 					length: value.size,
 					level: getKey(),
 					children,
-					more: {
-						[getKey()]: {
-							type: 'EntryFunction',
-							attributes: {
-								key: 'sortBy()',
-								value: '(field: string, direction: "asc" | "desc" = "asc") -> Record',
-								description: 'Sorts all items in the record',
-							},
-						},
-						[getKey()]: {
-							type: 'EntryFunction',
-							attributes: {
-								key: 'filterBy()',
-								value: '(field: string, operator: Operator = "equals", value: any) -> Record',
-								description:
-									'Filter items based on the operator and value',
-							},
-						},
-						[getKey()]: {
-							type: 'EntryFunction',
-							attributes: {
-								key: 'findBy()',
-								value: '(field: string, operator: Operator = "equals", value: any) -> Record',
-								description:
-									'Find the first item in the record that matches the condition',
-							},
-						},
-					},
+					more: getRecordMethods(),
 				},
 			})
 		}
