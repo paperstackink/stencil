@@ -93,9 +93,13 @@ export const compile = async (
             let hasYamlSection = false
             let yamlContent
 
-            let parser = unified()
-                .use(remarkParse)
-                .use(remarkExternalLinks)
+            let parser = unified().use(remarkParse)
+
+            if (context.config.markdown.openExternalLinksInNewTab) {
+                parser = parser.use(remarkExternalLinks)
+            }
+
+            parser = parser
                 .use(remarkFrontmatter, ['yaml'])
                 .use(remarkGfm)
                 .use(() => tree => {

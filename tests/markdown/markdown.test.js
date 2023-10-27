@@ -89,80 +89,6 @@ This is a paragraph
     expect(result).toEqualIgnoringWhitespace(expected)
 })
 
-test('it adds attributes to absolute links', async () => {
-    const input = `
----
-layout: Layout
----
-
-# Heading 1
-
-[This is an external link](https://example.com)
-`
-    const layoutDefinition = `
-<article>
-    <slot />
-</article>
-`
-    const expected = `
-<article>
-    <h1>Heading 1</h1>
-    <p>
-        <a href="https://example.com" target="_blank" rel="nofollow noopener noreferrer">This is an external link</a>
-    </p>
-</article>
-`
-
-    const result = await compile(
-        input,
-        {
-            components: { Layout: layoutDefinition },
-        },
-        {
-            language: 'markdown',
-        },
-    )
-
-    expect(result).toEqualIgnoringWhitespace(expected)
-})
-
-test("it doesn't add attributes to relative links", async () => {
-    const input = `
----
-layout: Layout
----
-
-# Heading 1
-
-[This is an external link](/documentation)
-`
-    const layoutDefinition = `
-<article>
-    <slot />
-</article>
-`
-    const expected = `
-<article>
-    <h1>Heading 1</h1>
-    <p>
-        <a href="/documentation">This is an external link</a>
-    </p>
-</article>
-`
-
-    const result = await compile(
-        input,
-        {
-            components: { Layout: layoutDefinition },
-        },
-        {
-            language: 'markdown',
-        },
-    )
-
-    expect(result).toEqualIgnoringWhitespace(expected)
-})
-
 test('it compiles markdown tables', async () => {
     const input = `
 ---
@@ -490,6 +416,134 @@ layout: Layout
             ).rejects.toThrowCompilationError(
                 InvalidLinkHeadlinesInMarkdownConfig,
             )
+        })
+    })
+
+    describe('externalLinks', () => {
+        test('it adds attributes to absolute links if enabled', async () => {
+            const input = `
+---
+layout: Layout
+---
+
+# Heading 1
+
+[This is an external link](https://example.com)
+`
+            const layoutDefinition = `
+<article>
+    <slot />
+</article>
+`
+            const expected = `
+<article>
+    <h1>Heading 1</h1>
+    <p>
+        <a href="https://example.com" target="_blank" rel="nofollow noopener noreferrer">This is an external link</a>
+    </p>
+</article>
+`
+
+            const result = await compile(
+                input,
+                {
+                    components: { Layout: layoutDefinition },
+                    config: {
+                        markdown: {
+                            openExternalLinksInNewTab: true,
+                        },
+                    },
+                },
+                {
+                    language: 'markdown',
+                },
+            )
+
+            expect(result).toEqualIgnoringWhitespace(expected)
+        })
+
+        test("it doesn't add attributes to absolute links if disabled", async () => {
+            const input = `
+---
+layout: Layout
+---
+
+# Heading 1
+
+[This is an external link](https://example.com)
+`
+            const layoutDefinition = `
+<article>
+    <slot />
+</article>
+`
+            const expected = `
+<article>
+    <h1>Heading 1</h1>
+    <p>
+        <a href="https://example.com">This is an external link</a>
+    </p>
+</article>
+`
+
+            const result = await compile(
+                input,
+                {
+                    components: { Layout: layoutDefinition },
+                    config: {
+                        markdown: {
+                            openExternalLinksInNewTab: false,
+                        },
+                    },
+                },
+                {
+                    language: 'markdown',
+                },
+            )
+
+            expect(result).toEqualIgnoringWhitespace(expected)
+        })
+
+        test("it doesn't add attributes to relative links", async () => {
+            const input = `
+---
+layout: Layout
+---
+
+# Heading 1
+
+[This is an external link](/documentation)
+`
+            const layoutDefinition = `
+<article>
+    <slot />
+</article>
+`
+            const expected = `
+<article>
+    <h1>Heading 1</h1>
+    <p>
+        <a href="/documentation">This is an external link</a>
+    </p>
+</article>
+`
+
+            const result = await compile(
+                input,
+                {
+                    components: { Layout: layoutDefinition },
+                    config: {
+                        markdown: {
+                            openExternalLinksInNewTab: true,
+                        },
+                    },
+                },
+                {
+                    language: 'markdown',
+                },
+            )
+
+            expect(result).toEqualIgnoringWhitespace(expected)
         })
     })
 })
