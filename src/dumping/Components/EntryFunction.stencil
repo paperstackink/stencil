@@ -1,4 +1,4 @@
-<Entry>
+<Entry #extra="extra">
     <String muted value="{{ key }}"></String>
     <Separator></Separator>
     <Literal muted value="{{ value }}"></Literal>

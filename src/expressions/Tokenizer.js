@@ -1,7 +1,11 @@
 import Token from '@/expressions/Token'
 
-import ParserError from '@/expressions/errors/ParserError'
 import InternalError from '@/expressions/errors/InternalError'
+
+import UppercaseOperator from '@/expressions/errors/UppercaseOperator'
+import UnterminatedString from '@/expressions/errors/UnterminatedString'
+import UnfinishedOperator from '@/expressions/errors/UnfinishedOperator'
+import UnexpectedCharacter from '@/expressions/errors/UnexpectedCharacter'
 
 const keywords = {
     true: 'TRUE',
@@ -168,7 +172,7 @@ class Tokenizer {
                 } else if (isAlpha(character) || character === '$') {
                     this.identifier()
                 } else {
-                    throw new ParserError('Unexpected character.')
+                    throw new UnexpectedCharacter(character)
                 }
             }
         }
@@ -205,15 +209,14 @@ class Tokenizer {
                     text === 'less' ? 'LESS_EQUALS' : 'GREATER_EQUALS',
                 )
             } else if (this.matchMany(' than or')) {
-                throw new ParserError(
-                    `Unknown operator. Did you mean '${text} than or equals'?`,
+                throw new UnfinishedOperator(
+                    `${text} than or`,
+                    `'${text} than' or '${text} than or equals'`,
                 )
             } else if (this.matchMany(' than')) {
                 this.addToken(text === 'less' ? 'LESS' : 'GREATER')
             } else {
-                throw new ParserError(
-                    `Unknown operator. Did you mean '${text} than'?`,
-                )
+                throw new UnfinishedOperator(text, `'${text} than'`)
             }
         } else if (text === 'not' && this.matchMany(' equals')) {
             this.addToken('NOT_EQUALS')
@@ -221,9 +224,7 @@ class Tokenizer {
             let type = keywords[text]
 
             if (!type && keywords[text.toLowerCase()]) {
-                throw new ParserError(
-                    `Keywords are case sensitive. Try '${text.toLowerCase()}' instead.`,
-                )
+                throw new UppercaseOperator(text)
             }
 
             if (!type) {
@@ -247,8 +248,7 @@ class Tokenizer {
         }
 
         if (this.isAtEnd()) {
-            throw new ParserError('Unterminated string.')
-            return
+            throw new UnterminatedString()
         }
 
         this.advance() // The closing " or '

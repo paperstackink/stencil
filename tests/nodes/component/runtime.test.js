@@ -1,5 +1,4 @@
 import { compile } from '@/index'
-import CompilationError from '@/errors/CompilationError'
 
 test('it can print values in attributes', async () => {
     const input = `<Text id="{{ id }}">Text</Text>`

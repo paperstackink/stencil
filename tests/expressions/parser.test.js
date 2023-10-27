@@ -4,6 +4,8 @@ import Tokenizer from '@/expressions/Tokenizer'
 import Expression from '@/expressions/Expression'
 import ParserError from '@/expressions/errors/ParserError'
 
+import TooManyArguments from '@/expressions/errors/TooManyArguments'
+
 describe('Literals', () => {
     test('it can parse "false"', () => {
         const input = `false`
@@ -415,9 +417,7 @@ describe('Call expressions', () => {
             const ast = parser.parse()
         }
 
-        expect(runner).toThrow(
-            new ParserError("Can't have more than 255 arguments."),
-        )
+        expect(runner).toThrow(TooManyArguments)
     })
 
     test('it can chain function calls', () => {

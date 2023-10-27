@@ -1,12 +1,28 @@
-import match from '@/helpers/match'
 import Expression from '@/expressions/Expression'
-import RuntimeError from '@/expressions/errors/RuntimeError'
-import InternalError from '@/expressions/errors/InternalError'
+import { getType } from '@/expressions/helpers/getType'
 
-import Callable from '@/expressions/functions/Callable'
-import LowerCase from '@/expressions/methods/strings/LowerCase'
+import InternalError from '@/expressions/errors/InternalError'
+import ArityMismatch from '@/expressions/errors/ArityMismatch'
+import UnknownFunction from '@/expressions/errors/UnknownFunction'
+import NullMethodAccess from '@/expressions/errors/NullMethodAccess'
+import NonNumberOperand from '@/expressions/errors/NonNumberOperand'
+import NullPropertyAccess from '@/expressions/errors/NullPropertyAccess'
+import CallingNonCallable from '@/expressions/errors/CallingNonCallable'
+import OperatorTypeMismatch from '@/expressions/errors/OperatorTypeMismatch'
+
 import SortBy from '@/expressions/methods/records/SortBy'
+import FindBy from '@/expressions/methods/records/FindBy'
 import FilterBy from '@/expressions/methods/records/FilterBy'
+import Callable from '@/expressions/functions/Callable'
+
+import CamelCase from '@/expressions/methods/strings/CamelCase'
+import KebabCase from '@/expressions/methods/strings/KebabCase'
+import LowerCase from '@/expressions/methods/strings/LowerCase'
+import UpperCase from '@/expressions/methods/strings/UpperCase'
+import SnakeCase from '@/expressions/methods/strings/SnakeCase'
+import TitleCase from '@/expressions/methods/strings/TitleCase'
+import PascalCase from '@/expressions/methods/strings/PascalCase'
+import SentenceCase from '@/expressions/methods/strings/SentenceCase'
 
 class Interpreter {
     constructor(ast, scope) {
@@ -43,10 +59,14 @@ class Interpreter {
             if (!literal.value.has(key)) {
                 if (key === 'type') {
                     return new Expression.Literal('record')
+                } else if (key === 'size') {
+                    return new Expression.Literal(literal.value.size)
                 } else if (key === 'sortBy') {
                     return new Expression.Literal(new SortBy(literal))
                 } else if (key === 'filterBy') {
                     return new Expression.Literal(new FilterBy(literal))
+                } else if (key === 'findBy') {
+                    return new Expression.Literal(new FindBy(literal))
                 } else {
                     return new Expression.Literal(null)
                 }
@@ -66,6 +86,54 @@ class Interpreter {
                         new LowerCase(expression.item),
                     )
                 }
+
+                if (expression.name.lexeme === 'upperCase') {
+                    return new Expression.Literal(
+                        new Uppercase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'titleCase') {
+                    return new Expression.Literal(
+                        new TitleCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'sentenceCase') {
+                    return new Expression.Literal(
+                        new SentenceCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'camelCase') {
+                    return new Expression.Literal(
+                        new CamelCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'kebabCase') {
+                    return new Expression.Literal(
+                        new KebabCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'slug') {
+                    return new Expression.Literal(
+                        new KebabCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'pascalCase') {
+                    return new Expression.Literal(
+                        new PascalCase(expression.item),
+                    )
+                }
+
+                if (expression.name.lexeme === 'snakeCase') {
+                    return new Expression.Literal(
+                        new SnakeCase(expression.item),
+                    )
+                }
             }
 
             if (typeof expression.item.value === 'boolean') {
@@ -81,7 +149,7 @@ class Interpreter {
             }
 
             if (expression.item.value === null) {
-                throw new RuntimeError("Cannot read properties on 'null'")
+                throw new NullPropertyAccess(expression.name.lexeme)
             }
         }
 
@@ -101,11 +169,15 @@ class Interpreter {
         const callable = callee.value
 
         if (callable === null) {
-            throw new RuntimeError("Can not call functions on 'null'.")
+            if (expression.callee instanceof Expression.Variable) {
+                throw new UnknownFunction(expression.callee.name)
+            } else {
+                throw new NullMethodAccess(expression.callee.name.lexeme)
+            }
         }
 
         if (!(callable instanceof Callable)) {
-            throw new RuntimeError('Can only call functions.')
+            throw new CallingNonCallable(getType(callable))
         }
 
         const args = expression.args.map(argument => {
@@ -115,14 +187,14 @@ class Interpreter {
         const arity = callable.arity()
 
         if (!arity.includes(args.length) && !arity.includes(Infinity)) {
-            throw new RuntimeError(
-                `Expected ${callable.arity()} arguments but got ${
-                    args.length
-                }.`,
+            throw new ArityMismatch(
+                callable.name(),
+                callable.arity(),
+                args.length,
             )
         }
 
-        return callable.call(args)
+        return callable.call(args, this.scope)
     }
 
     visitVariableExpression(expression) {
@@ -264,8 +336,9 @@ class Interpreter {
                     )
                 }
 
-                throw new RuntimeError(
-                    'Operands must be two numbers or two strings',
+                throw new OperatorTypeMismatch(
+                    getType(left.value),
+                    getType(right.value),
                 )
             }
             case 'SLASH': {
@@ -295,20 +368,24 @@ class Interpreter {
         throw new InternalError('Unexpected end of binary expression.')
     }
 
-    checkNumberOperand(operator, operand) {
-        if (typeof operand === 'number') {
+    checkNumberOperand(operator, value) {
+        if (typeof value === 'number') {
             return
         }
 
-        throw new RuntimeError('Operand must be a number.')
+        throw new NonNumberOperand(operator.lexeme, value, getType(value))
     }
 
     checkNumberOperands(operator, left, right) {
-        if (typeof left === 'number' && typeof right === 'number') {
-            return
+        if (typeof left !== 'number') {
+            throw new NonNumberOperand(operator.lexeme, left, getType(left))
         }
 
-        throw new RuntimeError('Operand must be a number.')
+        if (typeof right !== 'number') {
+            throw new NonNumberOperand(operator.lexeme, right, getType(right))
+        }
+
+        return
     }
 
     isTruthy(object) {

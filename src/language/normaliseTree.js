@@ -4,7 +4,10 @@ const normaliseTree = node => {
     let newNode = { ...node }
 
     if (node.properties) {
-        node.properties = normaliseExpressionsInAttributes(node.properties)
+        node.properties = normaliseExpressionsInAttributes(
+            node.properties,
+            node.position,
+        )
     }
 
     if (node.children) {

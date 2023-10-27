@@ -2,9 +2,10 @@ import { unified } from 'unified'
 import parse from 'rehype-parse-ns'
 import { select } from 'hast-util-select'
 
-import CompilationError from '@/errors/CompilationError'
-import UnknownComponentNameError from '@/errors/UnknownComponentNameError'
-import ComponentNameNotProvidedError from '@/errors/ComponentNameNotProvidedError'
+import UnknownComponentName from '@/errors/UnknownComponentName'
+import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
+import MultipleRootsInComponent from '@/errors/MultipleRootsInComponent'
+import UnknownDynamicComponentName from '@/errors/UnknownDynamicComponentName'
 
 import templates from '@/language/templates'
 import compileSlots from '@/language/compileSlots'
@@ -14,23 +15,22 @@ import compileAttributes from '@/language/compileAttributes'
 import conform from '@/helpers/conform'
 import isDocument from '@/helpers/isDocument'
 import extractUsedIdentifiersFromNode from '@/helpers/extractUsedIdentifiersFromNode'
-import compileExpressions from './compileExpressions'
+import compileExpressions from '@/language/compileExpressions'
 
 export default function (node, context) {
     const isDynamicComponent = node.tagName === 'Component'
     if (!(node.tagName in context.components) && !isDynamicComponent) {
-        throw new CompilationError(
-            `Component '${node.tagName}' is not defined.`,
-        )
+        throw new UnknownComponentName(node.tagName, node.position)
     }
 
     const [attributes, usedIdentifiers] = compileAttributes(
         node.properties,
         context,
+        node.position,
     )
 
     if (isDynamicComponent && !attributes.hasOwnProperty('is')) {
-        throw new ComponentNameNotProvidedError()
+        throw new ComponentNameNotProvided(node.position)
     }
 
     let name = node.tagName
@@ -43,6 +43,7 @@ export default function (node, context) {
                 ...context.environment.global,
                 ...context.environment.local,
             },
+            node.position,
         )
 
         name = resolvedName
@@ -50,7 +51,7 @@ export default function (node, context) {
     }
 
     if (isDynamicComponent && !(name in context.components)) {
-        throw new UnknownComponentNameError(name)
+        throw new UnknownDynamicComponentName(name, node.position)
     }
 
     let definition = context.components[name]
@@ -66,9 +67,7 @@ export default function (node, context) {
     const normalisedTree = normaliseTree(componentTree)
 
     if (normalisedTree.children.length > 1) {
-        throw new CompilationError(
-            `Component '${node.tagName}' has more than 1 root element.`,
-        )
+        throw new MultipleRootsInComponent(definition)
     }
 
     // In order to support component 'extending' other components,

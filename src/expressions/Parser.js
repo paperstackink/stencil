@@ -1,6 +1,12 @@
 import Expression from '@/expressions/Expression'
 
-import ParserError from '@/expressions/errors/ParserError'
+import TooManyArguments from '@/expressions/errors/TooManyArguments'
+import MissingExpression from '@/expressions/errors/MissingExpression'
+import MissingThenClause from '@/expressions/errors/MissingThenClause'
+import MissingElseClause from '@/expressions/errors/MissingElseClause'
+import UnclosedFunctionCall from '@/expressions/errors/UnclosedFunctionCall'
+import UnclosedGroupExpression from '@/expressions/errors/UnclosedGroupExpression'
+import UnfinishedPropertyAccess from '@/expressions/errors/UnfinishedPropertyAccess'
 
 class Parser {
     constructor(tokens = []) {
@@ -20,11 +26,11 @@ class Parser {
         if (this.match('IF')) {
             const condition = this.or()
 
-            this.consume('THEN', "Expect 'then' after expression.")
+            this.consume('THEN', new MissingThenClause())
 
             const left = this.or()
 
-            this.consume('ELSE', "Expect 'else' after expression.")
+            this.consume('ELSE', new MissingElseClause())
 
             const right = this.or()
 
@@ -126,7 +132,7 @@ class Parser {
             } else if (this.match('DOT')) {
                 const name = this.consume(
                     'IDENTIFIER',
-                    "Expect property name after '.'.",
+                    new UnfinishedPropertyAccess(),
                 )
 
                 expression = new Expression.Get(expression, name)
@@ -162,12 +168,12 @@ class Parser {
         if (this.match('LEFT_PARENTHESIS')) {
             const expression = this.expression()
 
-            this.consume('RIGHT_PARENTHESIS', "Expect ')' after expression.")
+            this.consume('RIGHT_PARENTHESIS', new UnclosedGroupExpression())
 
             return new Expression.Grouping(expression)
         }
 
-        throw new ParserError('Expected expression.')
+        throw new MissingExpression()
     }
 
     match(...types) {
@@ -190,12 +196,12 @@ class Parser {
         return this.peek().type === type
     }
 
-    consume(type, message) {
+    consume(type, error) {
         if (this.check(type)) {
             return this.advance()
         }
 
-        throw new ParserError(message)
+        throw error
     }
 
     advance() {
@@ -224,7 +230,7 @@ class Parser {
         if (!this.check('RIGHT_PARENTHESIS')) {
             do {
                 if (args.length >= 255) {
-                    throw new ParserError("Can't have more than 255 arguments.")
+                    throw new TooManyArguments(args.length)
                 }
 
                 args.push(this.expression())
@@ -233,7 +239,7 @@ class Parser {
 
         const parenthesis = this.consume(
             'RIGHT_PARENTHESIS',
-            "Expect ')' after arguments.",
+            new UnclosedFunctionCall(),
         )
 
         return new Expression.Call(callee, parenthesis, args)

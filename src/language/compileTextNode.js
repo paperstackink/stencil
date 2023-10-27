@@ -4,7 +4,7 @@ import parse from 'rehype-parse-ns'
 import isHtml from '@/helpers/isHtml'
 import compileExpressions from '@/language/compileExpressions'
 
-const stringToNodesWithResolvedExpressions = (source, values) => {
+const stringToNodesWithResolvedExpressions = (source, values, position) => {
     let usedIdentifiers = []
     const pattern = /({{\w+}})/g
 
@@ -13,6 +13,7 @@ const stringToNodesWithResolvedExpressions = (source, values) => {
         const [result, usedIdentifiersInExpression] = compileExpressions(
             part,
             values,
+            position,
         )
 
         usedIdentifiers = [...usedIdentifiers, ...usedIdentifiersInExpression]
@@ -44,10 +45,14 @@ const stringToNodesWithResolvedExpressions = (source, values) => {
 }
 
 export default function (node, context) {
-    const newNodes = stringToNodesWithResolvedExpressions(node.value, {
-        ...context.environment.global,
-        ...context.environment.local,
-    })
+    const newNodes = stringToNodesWithResolvedExpressions(
+        node.value,
+        {
+            ...context.environment.global,
+            ...context.environment.local,
+        },
+        node.position,
+    )
 
     return newNodes
 }

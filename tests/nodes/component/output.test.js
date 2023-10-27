@@ -1,5 +1,4 @@
 import { compile } from '@/index'
-import CompilationError from '@/errors/CompilationError'
 
 test('it can compile a global identifier expression', async () => {
     const input = `

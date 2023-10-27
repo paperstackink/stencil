@@ -1,7 +1,7 @@
 import compileExpression from '@/language/compileExpression'
 import extractExpressions from '@/helpers/extractExpressions'
 
-const compileExpressions = (source, values) => {
+const compileExpressions = (source, values, position) => {
     const expressions = extractExpressions(source)
     let output = source
     let usedIdentifiers = []
@@ -10,6 +10,8 @@ const compileExpressions = (source, values) => {
         const [resolved, usedIdentifiersInExpression] = compileExpression(
             expression,
             values,
+            true,
+            position,
         )
         usedIdentifiers = [...usedIdentifiers, ...usedIdentifiersInExpression]
 

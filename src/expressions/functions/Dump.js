@@ -2,9 +2,125 @@ import { v4 as uuid } from 'uuid'
 
 import Callable from '@/expressions/functions/Callable'
 import DumpSignal from '@/dumping/DumpSignal'
+import CallingDumpInProduction from '@/errors/CallingDumpInProduction'
 
 function getKey() {
 	return `key-${uuid()}`
+}
+
+function getStringMethods() {
+	return {
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'slug()',
+				value: '() -> String',
+				description: 'Converts the string to kebab case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'lowerCase()',
+				value: '() -> String',
+				description: 'Converts the string to lower case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'upperCase()',
+				value: '() -> String',
+				description: 'Converts the string to upper case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'titleCase()',
+				value: '() -> String',
+				description: 'Converts the string to title case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'camelCase()',
+				value: '() -> String',
+				description: 'Converts the string to camel case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'snakeCase()',
+				value: '() -> String',
+				description: 'Converts the string to snake case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'kebabCase()',
+				value: '() -> String',
+				description: 'Converts the string to kebab case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'pascalCase()',
+				value: '() -> String',
+				description: 'Converts the string to pascal case',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'sentenceCase()',
+				value: '() -> String',
+				description: 'Converts the string to sentence case',
+			},
+		},
+	}
+}
+
+function getRecordMethods() {
+	return {
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'size()',
+				value: '() -> Number',
+				description: 'Get the number of properties in the record',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'sortBy()',
+				value: '(field: string, direction: "asc" | "desc" = "asc") -> Record',
+				description: 'Sorts all items in the record',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'findBy()',
+				value: '(field: string, operator: Operator = "equals", value: any) -> Record',
+				description:
+					'Find the first item in the record that matches the condition',
+			},
+		},
+		[getKey()]: {
+			type: 'EntryFunction',
+			attributes: {
+				key: 'filterBy()',
+				value: '(field: string, operator: Operator = "equals", value: any) -> Record',
+				description: 'Filter items based on the operator and value',
+			},
+		},
+	}
 }
 
 function getEntry(value, key) {
@@ -16,17 +132,7 @@ function getEntry(value, key) {
 					attributes: {
 						value: value,
 						level: getKey(),
-						children: {
-							[getKey()]: {
-								type: 'EntryFunction',
-								attributes: {
-									key: 'lowerCase()',
-									value: '() -> String',
-									description:
-										'Converts the string to lower case',
-								},
-							},
-						},
+						children: getStringMethods(),
 					},
 				},
 			})
@@ -37,20 +143,21 @@ function getEntry(value, key) {
 					key,
 					value,
 					level: getKey(),
-					children: {
-						[getKey()]: {
-							type: 'EntryFunction',
-							attributes: {
-								key: 'lowerCase()',
-								value: '() -> String',
-								description:
-									'Converts the string to lower case',
-							},
-						},
-					},
+					children: getStringMethods(),
 				},
 			})
 		}
+	}
+
+	if (value === null && !key) {
+		return Map.fromObject({
+			[getKey()]: {
+				type: 'Literal',
+				attributes: {
+					value: 'null',
+				},
+			},
+		})
 	}
 
 	if (
@@ -93,6 +200,7 @@ function getEntry(value, key) {
 						level: getKey(),
 						length: value.size,
 						children,
+						more: getRecordMethods(),
 					},
 				},
 			})
@@ -110,25 +218,7 @@ function getEntry(value, key) {
 					length: value.size,
 					level: getKey(),
 					children,
-					more: {
-						[getKey()]: {
-							type: 'EntryFunction',
-							attributes: {
-								key: 'sortBy()',
-								value: '(field: string, direction: "asc" | "desc" = "asc") -> Record',
-								description: 'Sorts all items in the record',
-							},
-						},
-						[getKey()]: {
-							type: 'EntryFunction',
-							attributes: {
-								key: 'filterBy()',
-								value: '(field: string, operator: Operator = "equals", value: any) -> Record',
-								description:
-									'Filter items based on the operator and value',
-							},
-						},
-					},
+					more: getRecordMethods(),
 				},
 			})
 		}
@@ -138,11 +228,19 @@ function getEntry(value, key) {
 }
 
 export default class Dump extends Callable {
+	name() {
+		return 'dump'
+	}
+
 	arity() {
 		return [Infinity]
 	}
 
-	call(args) {
+	call(args, scope) {
+		if (scope.environment !== 'development') {
+			throw new CallingDumpInProduction()
+		}
+
 		const $record = new Map()
 
 		args.forEach(argument => {

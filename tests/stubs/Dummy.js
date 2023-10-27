@@ -5,6 +5,10 @@ export default class Dummy extends Callable {
 		return [1]
 	}
 
+	name() {
+		return 'dummy'
+	}
+
 	call(args) {
 		return args[0]
 	}
