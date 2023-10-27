@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2023-10-27
+
+### Fixed
+
+-   Properly show `null` in `dump()`
+-   Fix issue with built-in record methods `dump()`
+
+### Added
+
+-   Markdown support
+-   Better error messages
+-   `findBy` method on records
+-   `size` property on records
+-   `$config` record
+-   Various string methods
+
 ## [0.4.0] - 2023-08-30
 
 ### Fixed
