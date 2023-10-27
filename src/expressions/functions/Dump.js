@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid'
 
 import Callable from '@/expressions/functions/Callable'
 import DumpSignal from '@/dumping/DumpSignal'
+import CallingDumpInProduction from '@/errors/CallingDumpInProduction'
 
 function getKey() {
 	return `key-${uuid()}`
@@ -235,7 +236,11 @@ export default class Dump extends Callable {
 		return [Infinity]
 	}
 
-	call(args) {
+	call(args, scope) {
+		if (scope.environment !== 'development') {
+			throw new CallingDumpInProduction()
+		}
+
 		const $record = new Map()
 
 		args.forEach(argument => {

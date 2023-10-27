@@ -189,7 +189,7 @@ class Interpreter {
             )
         }
 
-        return callable.call(args)
+        return callable.call(args, this.scope)
     }
 
     visitVariableExpression(expression) {

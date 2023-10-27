@@ -14,6 +14,7 @@ import UnevenIfDirectiveCount from '@/errors/UnevenIfDirectiveCount'
 import NoIfDirectiveExpression from '@/errors/NoIfDirectiveExpression'
 import NoEachDirectiveVariable from '@/errors/NoEachDirectiveVariable'
 import UnknownLayoutInMarkdown from '@/errors/UnknownLayoutInMarkdown'
+import CallingDumpInProduction from '@/errors/CallingDumpInProduction'
 import MultipleRootsInComponent from '@/errors/MultipleRootsInComponent'
 import ComponentNameNotProvided from '@/errors/ComponentNameNotProvided'
 import NodeNestedInsideDataNode from '@/errors/NodeNestedInsideDataNode'
@@ -1099,6 +1100,27 @@ ${options}
 			'InvalidLinkHeadlinesInMarkdownConfig',
 			output,
 		)
+	} else if (error instanceof CallingDumpInProduction) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Calling dump() in production  ----------------------
+
+You called "${error.expression.trim()}" in "${
+			options.path
+		}" while building the site for production.
+
+${location}
+
+You can only call "dump()" in development mode. Otherwise the dumped output would end up on your live website!
+
+Try running "npm run dev" or remove the "dump()" call.
+`
+
+		return new CompilationError('CallingDumpInProduction', output)
 	} else {
 		const output = `-----  Error: Internal error  ----------------------
 
