@@ -26,6 +26,7 @@ import MissingEachDirectiveExpression from '@/errors/MissingEachDirectiveExpress
 import InvalidLinkHeadlinesInMarkdownConfig from '@/errors/InvalidLinkHeadlinesInMarkdownConfig'
 
 import ArityMismatch from '@/expressions/errors/ArityMismatch'
+import UnknownFunction from '@/expressions/errors/UnknownFunction'
 import NonNumberOperand from '@/expressions/errors/NonNumberOperand'
 import TooManyArguments from '@/expressions/errors/TooManyArguments'
 import NullMethodAccess from '@/expressions/errors/NullMethodAccess'
@@ -829,19 +830,35 @@ It's likely that "${error.expression.replace(
 
 		const output = `-----  Error: Calling method on "null"  ----------------------
 
-You tried to call the method "${error.method}" on "null" in this expression: ${
-			error.expression
-		}
+You tried to call the method "${
+			error.method
+		}" on "null" in this expression: ${error.expression.trim()}
 
 ${location}
 
-It's likely that "${error.expression.slice(
-			0,
-			indexOfMethod,
-		)}" wasn't mean to be "null".
+It's likely that "${error.expression
+			.slice(0, indexOfMethod)
+			.trim()}" wasn't mean to be "null".
 `
 
 		return new CompilationError('NullMethodAccess', output)
+	} else if (error instanceof UnknownFunction) {
+		const location = getLocationFromPosition(
+			input,
+			options.path,
+			error.position,
+		)
+
+		const output = `-----  Error: Calling unknown function  ----------------------
+
+You tried to call the function "${error.method}" which doesn't exist.
+
+${location}
+
+"${error.method}" is not a function.
+`
+
+		return new CompilationError('UnknownFunction', output)
 	} else if (error instanceof CallingNonCallable) {
 		const location = getLocationFromPosition(
 			input,

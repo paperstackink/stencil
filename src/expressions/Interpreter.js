@@ -3,6 +3,7 @@ import { getType } from '@/expressions/helpers/getType'
 
 import InternalError from '@/expressions/errors/InternalError'
 import ArityMismatch from '@/expressions/errors/ArityMismatch'
+import UnknownFunction from '@/expressions/errors/UnknownFunction'
 import NullMethodAccess from '@/expressions/errors/NullMethodAccess'
 import NonNumberOperand from '@/expressions/errors/NonNumberOperand'
 import NullPropertyAccess from '@/expressions/errors/NullPropertyAccess'
@@ -168,7 +169,11 @@ class Interpreter {
         const callable = callee.value
 
         if (callable === null) {
-            throw new NullMethodAccess(expression.callee.name.lexeme)
+            if (expression.callee instanceof Expression.Variable) {
+                throw new UnknownFunction(expression.callee.name)
+            } else {
+                throw new NullMethodAccess(expression.callee.name.lexeme)
+            }
         }
 
         if (!(callable instanceof Callable)) {
