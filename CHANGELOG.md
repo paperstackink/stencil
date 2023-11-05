@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2023-11-05
+
+### Added
+
+-   Add support for table captions in markdown
+-   Allow '-' in identifiers
+
 ## [0.5.0] - 2023-10-27
 
 ### Fixed
