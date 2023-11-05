@@ -261,6 +261,31 @@ test('it can tokenize identifiers starting with "$"', () => {
     expect(result).toEqual(expected)
 })
 
+test("it can tokenize identifiers with a '-'", () => {
+    const input = `yo-yo`
+    const expected = new Token('IDENTIFIER', 'yo-yo', '', 0)
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)[0]
+
+    expect(result).toEqual(expected)
+})
+
+test("it can distinguish 'minus' and identifiers", () => {
+    const input = `yo-yo - something`
+    const expected = [
+        new Token('IDENTIFIER', 'yo-yo', '', 0),
+        new Token('MINUS', '-', '', 6),
+        new Token('IDENTIFIER', 'something', '', 8),
+        new Token('EOF', '', null, 17),
+    ]
+    const tokenizer = new Tokenizer(input)
+
+    const result = tokenizer.scanTokens(input)
+
+    expect(result).toEqual(expected)
+})
+
 test('it can tokenize double quoted strings', () => {
     const input = `"yo"`
     const expected = new Token('STRING', '"yo"', 'yo', 0)

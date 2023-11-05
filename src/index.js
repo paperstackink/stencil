@@ -23,6 +23,8 @@ import formatError from '@/helpers/formatError'
 import templates from '@/language/templates'
 import extractData from '@/secondary/extractData'
 
+import { table } from '@/markdown/handlers/table'
+
 import DumpSignal from '@/dumping/DumpSignal'
 
 import Dump from '@/expressions/functions/Dump'
@@ -41,6 +43,7 @@ const defaultContext = {
     config: {
         markdown: {
             linkHeadlines: null,
+            openExternalLinksInNewTab: true,
         },
     },
     components: {},
@@ -110,7 +113,12 @@ export const compile = async (
                         yamlContent = node.value
                     }
                 })
-                .use(remarkRehype, { allowDangerousHtml: true })
+                .use(remarkRehype, {
+                    allowDangerousHtml: true,
+                    handlers: {
+                        table,
+                    },
+                })
 
             if (context.config.markdown.linkHeadlines) {
                 const options = [

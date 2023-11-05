@@ -1107,7 +1107,7 @@ The sort direction must be either "ascending" or "descending".
 
 		const output = `-----  Error: Invalid config value  ----------------------
 
-You configured "linkHeadlines: '${error.value}'" in "Config/Markdown.js".
+You configured "linkHeadlines: '${error.value}'" in "config/markdown.js".
 
 "${error.value}" is not a valid value. The valid options are:
 ${options}
