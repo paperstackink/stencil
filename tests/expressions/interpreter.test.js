@@ -4,6 +4,7 @@ import Expression from '@/expressions/Expression'
 import Interpreter from '@/expressions/Interpreter'
 
 import ArityMismatch from '@/expressions/errors/ArityMismatch'
+import UnknownFunction from '@/expressions/errors/UnknownFunction'
 import NullMethodAccess from '@/expressions/errors/NullMethodAccess'
 import NullPropertyAccess from '@/expressions/errors/NullPropertyAccess'
 import CallingNonCallable from '@/expressions/errors/CallingNonCallable'
@@ -324,6 +325,13 @@ describe('Call Expressions', () => {
         test('it fails if you call a non-existing function', () => {
             const input = `random()`
             const runner = () => evaluate(input, {})
+
+            expect(runner).toThrow(UnknownFunction)
+        })
+
+        test('it fails if you call a non-existing method', () => {
+            const input = `$record.random()`
+            const runner = () => evaluate(input, { $record: new Map() })
 
             expect(runner).toThrow(NullMethodAccess)
         })
