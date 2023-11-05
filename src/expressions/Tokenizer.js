@@ -100,6 +100,10 @@ function isAlphaNumeric(character) {
     return isDigit(character) || isAlpha(character)
 }
 
+function isValidIdentifierCharacer(character) {
+    return isAlphaNumeric(character) || character === '-'
+}
+
 class Tokenizer {
     constructor(source) {
         this.source = source
@@ -169,7 +173,11 @@ class Tokenizer {
             default: {
                 if (isDigit(character)) {
                     this.number()
-                } else if (isAlpha(character) || character === '$') {
+                } else if (
+                    isAlpha(character) ||
+                    character === '$' ||
+                    character === '-'
+                ) {
                     this.identifier()
                 } else {
                     throw new UnexpectedCharacter(character)
@@ -197,7 +205,7 @@ class Tokenizer {
     }
 
     identifier() {
-        while (isAlphaNumeric(this.peek())) {
+        while (isValidIdentifierCharacer(this.peek())) {
             this.advance()
         }
 
